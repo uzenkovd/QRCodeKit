@@ -1,0 +1,34 @@
+//
+//  QRCode.swift
+//  QRCodeKit
+//
+//  Created by Dmytro Uzenkov on 10.08.2026.
+//
+
+public struct QRCode {
+    public let message: String
+    public let version: QRVersion
+    public let encodingMode: EncodingMode
+    public let errorCorrectionLevel: ErrorCorrectionLevel
+    public private(set) var mask: QRMask
+        
+    public init(
+        _ message: String,
+        options: QROptions = QROptions()
+    ) throws {
+        if message.isEmpty {
+            throw QRCodeError.emptyMessage
+        }
+        
+        let encodingMode = options.encodingMode ?? .byte
+        let errorCorrectionLevel = options.errorCorrectionLevel ?? .M
+        let version = options.version ?? .v1
+        let mask = options.mask ?? .pattern0
+        
+        self.message = message
+        self.version = version
+        self.encodingMode = encodingMode
+        self.errorCorrectionLevel = errorCorrectionLevel
+        self.mask = mask
+    }
+}
