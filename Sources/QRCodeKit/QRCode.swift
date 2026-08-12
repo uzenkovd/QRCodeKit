@@ -10,8 +10,13 @@ public struct QRCode {
     public let version: QRVersion
     public let encodingMode: EncodingMode
     public let errorCorrectionLevel: ErrorCorrectionLevel
+    
     public private(set) var mask: QRMask
-        
+    
+    public var size: Int {
+        21 + 4 * (version.rawValue - 1)
+    }
+    
     public init(
         _ message: String,
         options: QROptions = QROptions()
