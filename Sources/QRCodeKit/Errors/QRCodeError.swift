@@ -7,4 +7,5 @@
 
 public enum QRCodeError: Error {
     case emptyMessage
+    case unsupportedMessage
 }

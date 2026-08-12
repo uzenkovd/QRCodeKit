@@ -6,5 +6,13 @@
 //
 
 struct DataAnalyzer {
-    
+    func canEncode(_ message: String) -> Bool {
+        for mode in EncodingMode.allCases {
+            if mode.canEncode(message) {
+                return true
+            }
+        }
+        
+        return false
+    }
 }

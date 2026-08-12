@@ -25,6 +25,12 @@ public struct QRCode {
             throw QRCodeError.emptyMessage
         }
         
+        let analyzer = DataAnalyzer()
+        
+        guard analyzer.canEncode(message) else {
+            throw QRCodeError.unsupportedMessage
+        }
+        
         let encodingMode = options.encodingMode ?? .byte
         let errorCorrectionLevel = options.errorCorrectionLevel ?? .M
         let version = options.version ?? .v1
