@@ -13,11 +13,19 @@ public enum EncodingMode: CaseIterable, Sendable {
     case kanji
     case byte
     
+    private static let recommendedOrder: [EncodingMode] = [
+        .numeric,
+        .alphanumeric,
+        .kanji,
+        .byte
+    ]
+    
     public static func recommended(for message: String) -> EncodingMode? {
-        if numeric.canEncode(message)      { return .numeric }
-        if alphanumeric.canEncode(message) { return .alphanumeric }
-        if kanji.canEncode(message)        { return .kanji }
-        if byte.canEncode(message)         { return .byte }
+        for mode in recommendedOrder {
+            if mode.canEncode(message) {
+                return mode
+            }
+        }
         
         return nil
     }
