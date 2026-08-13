@@ -7,7 +7,7 @@
 
 import Foundation
 
-public enum EncodingMode: CaseIterable {
+public enum EncodingMode: CaseIterable, Sendable {
     case numeric
     case alphanumeric
     case kanji

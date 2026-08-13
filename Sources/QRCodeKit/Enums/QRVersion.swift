@@ -5,7 +5,7 @@
 //  Created by Dmytro Uzenkov on 11.08.2026.
 //
 
-public enum QRVersion: Int {
+public enum QRVersion: Int, Sendable {
     case v1 = 1
     case v2
     case v3
@@ -46,4 +46,7 @@ public enum QRVersion: Int {
     case v38
     case v39
     case v40
+    
+    public static let min: QRVersion = .v1
+    public static let max: QRVersion = .v40
 }

@@ -5,7 +5,7 @@
 //  Created by Dmytro Uzenkov on 11.08.2026.
 //
 
-public enum QRMask: Int {
+public enum QRMask: Int, Sendable {
     case pattern0 = 0
     case pattern1
     case pattern2
