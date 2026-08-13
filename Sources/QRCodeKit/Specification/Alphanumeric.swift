@@ -1,11 +1,11 @@
 //
-//  AlphanumericTable.swift
+//  Alphanumeric.swift
 //  QRCodeKit
 //
 //  Created by Dmytro Uzenkov on 12.08.2026.
 //
 
-enum AlphanumericTable {
+enum Alphanumeric {
     static let values: [Character: Int] = [
         "0": 0,
         "1": 1,

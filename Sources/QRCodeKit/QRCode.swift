@@ -25,17 +25,37 @@ public struct QRCode {
             throw QRCodeError.emptyMessage
         }
         
-        let analyzer = DataAnalyzer()
-        guard analyzer.canEncode(message) else {
-            throw QRCodeError.unsupportedMessage
+        guard EncodingMode.recommended(for: message) != nil else {
+            throw QRCodeError.noAppropriateEncodingMode
         }
         
         let errorCorrectionLevel = options.errorCorrectionLevel ?? .default
+                
+        let encodingMode: EncodingMode
+        if let option = options.encodingMode {
+            encodingMode = option
+        } else {
+            guard let recommended = EncodingMode.recommended(for: message) else {
+                throw QRCodeError.noAppropriateEncodingMode
+            }
+            
+            encodingMode = recommended
+        }
         
-        //let recommendedEncodingMode =
-        //if let encodingMode = options.encodingMode ??
+//        let dataAnalyzer = DataAnalyzer()
         
-        let encodingMode = options.encodingMode ?? .byte
+//        let version: QRVersion
+//        if let option = options.version {
+//            //guard let
+//        } else {
+//            guard let recommended = dataAnalyzer.recommendedVersion(
+//                for: message,
+//                with: encodingMode,
+//                and: errorCorrectionLevel) else {
+//                throw QRCodeError.emptyMessage
+//            }
+//        }
+            
         let version = options.version ?? .v1
         let mask = options.mask ?? .pattern0
         

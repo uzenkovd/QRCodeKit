@@ -15,4 +15,10 @@ struct DataAnalyzer {
         
         return false
     }
+    
+//    func recommendedVersion(for message: String, with encodingMode: EncodingMode, and errorCorrectionLevel: ErrorCorrectionLevel) -> QRVersion? {
+//        
+//        
+//        return nil
+//    }
 }

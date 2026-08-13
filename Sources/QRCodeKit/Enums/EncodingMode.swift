@@ -36,7 +36,7 @@ public enum EncodingMode: CaseIterable, Sendable {
             return message.allSatisfy { $0 >= "0" && $0 <= "9" }
         case .alphanumeric:
             return message.allSatisfy {
-                AlphanumericTable.values[$0] != nil
+                Alphanumeric.values[$0] != nil
             }
         case .kanji:
             return canEncodeKanji(message)

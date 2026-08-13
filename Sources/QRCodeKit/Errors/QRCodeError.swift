@@ -8,4 +8,5 @@
 public enum QRCodeError: Error, Sendable {
     case emptyMessage
     case unsupportedMessage
+    case noAppropriateEncodingMode
 }
