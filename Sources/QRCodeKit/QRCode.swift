@@ -21,18 +21,21 @@ public struct QRCode {
         _ message: String,
         options: QROptions = QROptions()
     ) throws {
-        if message.isEmpty {
+        guard !message.isEmpty else {
             throw QRCodeError.emptyMessage
         }
         
         let analyzer = DataAnalyzer()
-        
         guard analyzer.canEncode(message) else {
             throw QRCodeError.unsupportedMessage
         }
         
+        let errorCorrectionLevel = options.errorCorrectionLevel ?? .default
+        
+        //let recommendedEncodingMode =
+        //if let encodingMode = options.encodingMode ??
+        
         let encodingMode = options.encodingMode ?? .byte
-        let errorCorrectionLevel = options.errorCorrectionLevel ?? .M
         let version = options.version ?? .v1
         let mask = options.mask ?? .pattern0
         
