@@ -20,6 +20,33 @@ struct CharacterCapacity {
 }
 
 enum CharacterCapacities {
+    static func capacity(
+        version: QRVersion,
+        errorCorrectionLevel: ErrorCorrectionLevel,
+        encodingMode: EncodingMode
+    ) -> Int {
+        guard let capacities = values[version]?[errorCorrectionLevel] else {
+            preconditionFailure(
+                "Character capacity is missing for \(version) and \(errorCorrectionLevel)"
+            )
+        }
+        
+        switch encodingMode {
+        case .numeric:      return capacities.numeric
+        case .alphanumeric: return capacities.alphanumeric
+        case .kanji:        return capacities.kanji
+        case .byte:         return capacities.byte
+        }
+    }
+    
+    static func maxCapacity(for encodingMode: EncodingMode) -> Int {
+        capacity(
+            version: .max,
+            errorCorrectionLevel: .min,
+            encodingMode: encodingMode
+        )
+    }
+    
     private static let values: [QRVersion: [ErrorCorrectionLevel: CharacterCapacity]] = [
         .v1: [
             .L: CharacterCapacity(41, 25, 17, 10),
@@ -262,23 +289,4 @@ enum CharacterCapacities {
             .H: CharacterCapacity(3057, 1852, 1273, 784)
         ]
     ]
-    
-    static func capacity(
-        version: QRVersion,
-        errorCorrectionLevel: ErrorCorrectionLevel,
-        encodingMode: EncodingMode
-    ) -> Int {
-        guard let capacities = values[version]?[errorCorrectionLevel] else {
-            preconditionFailure(
-                "Character capacity is missing for \(version) and \(errorCorrectionLevel)"
-            )
-        }
-        
-        switch encodingMode {
-        case .numeric:      return capacities.numeric
-        case .alphanumeric: return capacities.alphanumeric
-        case .kanji:        return capacities.kanji
-        case .byte:         return capacities.byte
-        }
-    }
 }
