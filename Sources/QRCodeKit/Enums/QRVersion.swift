@@ -5,7 +5,7 @@
 //  Created by Dmytro Uzenkov on 11.08.2026.
 //
 
-public enum QRVersion: Int, Sendable {
+public enum QRVersion: Int, Sendable, CaseIterable {
     case v1 = 1
     case v2
     case v3

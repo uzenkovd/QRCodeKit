@@ -22,9 +22,21 @@ struct DataAnalyzer {
         return message.count <= maxCapacity
     }
     
-//    func recommendedVersion(for message: String, with encodingMode: EncodingMode, and errorCorrectionLevel: ErrorCorrectionLevel) -> QRVersion? {
-//        let characterCount = message.count
-//        
-//        return nil
-//    }
+    func recommendedVersion(message: String, encodingMode: EncodingMode, errorCorrectionLevel: ErrorCorrectionLevel) -> QRVersion? {
+        let characterCount = message.count
+        
+        for version in QRVersion.allCases {
+            let capacity = CharacterCapacities.capacity(
+                version: version,
+                errorCorrectionLevel: errorCorrectionLevel,
+                encodingMode: encodingMode
+            )
+            
+            if characterCount <= capacity {
+                return version
+            }
+        }
+        
+        return nil
+    }
 }

@@ -51,11 +51,12 @@ public struct QRCode {
 //        if let option = options.version {
 //            //guard let
 //        } else {
-//            guard let recommended = dataAnalyzer.recommendedVersion(
-//                for: message,
-//                with: encodingMode,
-//                and: errorCorrectionLevel) else {
-//                throw QRCodeError.emptyMessage
+//            if let recommended = dataAnalyzer.recommendedVersion(
+//                message: message,
+//                encodingMode: encodingMode,
+//                errorCorrectionLevel: errorCorrectionLevel
+//            ) {
+//                version = recommended
 //            }
 //        }
             
