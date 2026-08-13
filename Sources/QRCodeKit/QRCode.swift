@@ -42,7 +42,10 @@ public struct QRCode {
             encodingMode = recommended
         }
         
-//        let dataAnalyzer = DataAnalyzer()
+        let dataAnalyzer = DataAnalyzer()
+        guard dataAnalyzer.canFit(message: message, encodingMode: encodingMode) else {
+            throw QRCodeError.messageIsTooLong
+        }
         
 //        let version: QRVersion
 //        if let option = options.version {

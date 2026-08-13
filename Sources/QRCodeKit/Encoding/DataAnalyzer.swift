@@ -16,8 +16,18 @@ struct DataAnalyzer {
         return false
     }
     
+    func canFit(message: String, encodingMode: EncodingMode) -> Bool {
+        let maxCapacity = CharacterCapacities.capacity(
+            version: QRVersion.max,
+            errorCorrectionLevel: ErrorCorrectionLevel.min,
+            encodingMode: encodingMode
+        )
+        
+        return message.count <= maxCapacity
+    }
+    
 //    func recommendedVersion(for message: String, with encodingMode: EncodingMode, and errorCorrectionLevel: ErrorCorrectionLevel) -> QRVersion? {
-//        
+//        let characterCount = message.count
 //        
 //        return nil
 //    }
