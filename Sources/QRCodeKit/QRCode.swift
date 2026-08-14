@@ -25,43 +25,61 @@ public struct QRCode {
             throw QRCodeError.emptyMessage
         }
         
-        guard EncodingMode.recommended(for: message) != nil else {
-            throw QRCodeError.noAppropriateEncodingMode
+        let dataAnalyzer = DataAnalyzer()
+        
+        guard dataAnalyzer.canEncode(message) else {
+            throw QRCodeError.unsupportedMessage
         }
         
         let errorCorrectionLevel = options.errorCorrectionLevel ?? .default
-                
+        
         let encodingMode: EncodingMode
         if let option = options.encodingMode {
+            guard option.canEncode(message) else {
+                throw QRCodeError.wrongEncodingModeForMessage
+            }
+            
             encodingMode = option
         } else {
-            guard let recommended = EncodingMode.recommended(for: message) else {
+            guard let recommended = dataAnalyzer.recommendedEncodingMode(for: message) else {
                 throw QRCodeError.noAppropriateEncodingMode
             }
             
             encodingMode = recommended
         }
         
-        let dataAnalyzer = DataAnalyzer()
-        guard dataAnalyzer.canFit(message: message, encodingMode: encodingMode) else {
+        guard dataAnalyzer.canFit(
+            message: message,
+            encodingMode: encodingMode
+        ) else {
             throw QRCodeError.messageIsTooLong
         }
         
-//        let version: QRVersion
-//        if let option = options.version {
-//            //guard let
-//        } else {
-//            if let recommended = dataAnalyzer.recommendedVersion(
-//                message: message,
-//                encodingMode: encodingMode,
-//                errorCorrectionLevel: errorCorrectionLevel
-//            ) {
-//                version = recommended
-//            }
-//        }
+        let version: QRVersion
+        if let option = options.version {
+            guard dataAnalyzer.canFit(
+                message: message,
+                encodingMode: encodingMode,
+                errorCorrectionLevel: errorCorrectionLevel,
+                version: option
+            ) else {
+                throw QRCodeError.wrongVersionForQRConfiguration
+            }
             
-        let version = options.version ?? .v1
-        let mask = options.mask ?? .pattern0
+            version = option
+        } else {
+            guard let recommended = dataAnalyzer.recommendedVersion(
+                message: message,
+                encodingMode: encodingMode,
+                errorCorrectionLevel: errorCorrectionLevel
+            ) else {
+                throw QRCodeError.messageIsTooLong
+            }
+            
+            version = recommended
+        }
+        
+        let mask = options.mask ?? .default
         
         self.message = message
         self.version = version

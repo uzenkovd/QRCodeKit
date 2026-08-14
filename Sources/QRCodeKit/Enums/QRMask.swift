@@ -14,4 +14,6 @@ public enum QRMask: Int, Sendable {
     case pattern5
     case pattern6
     case pattern7
+    
+    public static let `default`: QRMask = .pattern0
 }

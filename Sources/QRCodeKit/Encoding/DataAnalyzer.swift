@@ -7,13 +7,7 @@
 
 struct DataAnalyzer {
     func canEncode(_ message: String) -> Bool {
-        for mode in EncodingMode.allCases {
-            if mode.canEncode(message) {
-                return true
-            }
-        }
-        
-        return false
+        EncodingMode.allCases.contains { $0.canEncode(message) }
     }
     
     func canFit(
@@ -40,7 +34,21 @@ struct DataAnalyzer {
         return message.count <= capacity
     }
     
-    func recommendedVersion(message: String, encodingMode: EncodingMode, errorCorrectionLevel: ErrorCorrectionLevel) -> QRVersion? {
+    func recommendedEncodingMode(for message: String) -> EncodingMode? {
+        for mode in EncodingMode.recommendedOrder {
+            if mode.canEncode(message) {
+                return mode
+            }
+        }
+        
+        return nil
+    }
+    
+    func recommendedVersion(
+        message: String,
+        encodingMode: EncodingMode,
+        errorCorrectionLevel: ErrorCorrectionLevel
+    ) -> QRVersion? {
         let characterCount = message.count
         
         for version in QRVersion.allCases {
