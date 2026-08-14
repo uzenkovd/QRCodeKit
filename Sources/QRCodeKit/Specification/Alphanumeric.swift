@@ -6,6 +6,12 @@
 //
 
 enum Alphanumeric {
+    static func contains(_ character: Character) -> Bool {
+        values[character] != nil
+    }
+}
+
+private extension Alphanumeric {
     static let values: [Character: Int] = [
         "0": 0,
         "1": 1,
