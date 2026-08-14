@@ -16,10 +16,28 @@ struct DataAnalyzer {
         return false
     }
     
-    func canFit(message: String, encodingMode: EncodingMode) -> Bool {
+    func canFit(
+        message: String,
+        encodingMode: EncodingMode
+    ) -> Bool {
         let maxCapacity = CharacterCapacities.maxCapacity(for: encodingMode)
         
         return message.count <= maxCapacity
+    }
+    
+    func canFit(
+        message: String,
+        encodingMode: EncodingMode,
+        errorCorrectionLevel: ErrorCorrectionLevel,
+        version: QRVersion
+    ) -> Bool {
+        let capacity = CharacterCapacities.capacity(
+            version: version,
+            errorCorrectionLevel: errorCorrectionLevel,
+            encodingMode: encodingMode
+        )
+        
+        return message.count <= capacity
     }
     
     func recommendedVersion(message: String, encodingMode: EncodingMode, errorCorrectionLevel: ErrorCorrectionLevel) -> QRVersion? {
