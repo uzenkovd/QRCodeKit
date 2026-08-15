@@ -31,7 +31,7 @@ public struct QRCode {
             throw QRCodeError.unsupportedMessage
         }
         
-        let errorCorrectionLevel = options.errorCorrectionLevel ?? .default
+        var errorCorrectionLevel = options.errorCorrectionLevel ?? .default
         
         let encodingMode: EncodingMode
         if let option = options.encodingMode {
@@ -48,8 +48,10 @@ public struct QRCode {
             encodingMode = recommended
         }
         
+        let characterCount = message.count
+        
         guard dataAnalyzer.canFit(
-            message: message,
+            characterCount: characterCount,
             encodingMode: encodingMode
         ) else {
             throw QRCodeError.messageIsTooLong
@@ -58,7 +60,7 @@ public struct QRCode {
         let version: QRVersion
         if let option = options.version {
             guard dataAnalyzer.canFit(
-                message: message,
+                characterCount: characterCount,
                 encodingMode: encodingMode,
                 errorCorrectionLevel: errorCorrectionLevel,
                 version: option
@@ -69,7 +71,7 @@ public struct QRCode {
             version = option
         } else {
             guard let recommended = dataAnalyzer.recommendedVersion(
-                message: message,
+                characterCount: characterCount,
                 encodingMode: encodingMode,
                 errorCorrectionLevel: errorCorrectionLevel
             ) else {
@@ -77,6 +79,16 @@ public struct QRCode {
             }
             
             version = recommended
+        }
+        
+        if options.errorCorrectionLevel == nil {
+            if let maximized = dataAnalyzer.maximizeErrorCorrectionLevel(
+                characterCount: characterCount,
+                encodingMode: encodingMode,
+                version: version
+            ) {
+                errorCorrectionLevel = maximized
+            }
         }
         
         let mask = options.mask ?? .default

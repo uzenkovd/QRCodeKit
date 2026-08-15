@@ -7,12 +7,12 @@
 
 enum Alphanumeric {
     static func contains(_ character: Character) -> Bool {
-        values[character] != nil
+        table[character] != nil
     }
 }
 
 private extension Alphanumeric {
-    static let values: [Character: Int] = [
+    static let table: [Character: Int] = [
         "0": 0,
         "1": 1,
         "2": 2,

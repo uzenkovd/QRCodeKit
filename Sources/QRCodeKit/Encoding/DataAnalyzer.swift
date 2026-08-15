@@ -11,16 +11,16 @@ struct DataAnalyzer {
     }
     
     func canFit(
-        message: String,
+        characterCount: Int,
         encodingMode: EncodingMode
     ) -> Bool {
         let maxCapacity = CharacterCapacities.maxCapacity(for: encodingMode)
         
-        return message.count <= maxCapacity
+        return characterCount <= maxCapacity
     }
     
     func canFit(
-        message: String,
+        characterCount: Int,
         encodingMode: EncodingMode,
         errorCorrectionLevel: ErrorCorrectionLevel,
         version: QRVersion
@@ -31,7 +31,7 @@ struct DataAnalyzer {
             encodingMode: encodingMode
         )
         
-        return message.count <= capacity
+        return characterCount <= capacity
     }
     
     func recommendedEncodingMode(for message: String) -> EncodingMode? {
@@ -45,12 +45,10 @@ struct DataAnalyzer {
     }
     
     func recommendedVersion(
-        message: String,
+        characterCount: Int,
         encodingMode: EncodingMode,
         errorCorrectionLevel: ErrorCorrectionLevel
     ) -> QRVersion? {
-        let characterCount = message.count
-        
         for version in QRVersion.allCases {
             let capacity = CharacterCapacities.capacity(
                 version: version,
@@ -60,6 +58,25 @@ struct DataAnalyzer {
             
             if characterCount <= capacity {
                 return version
+            }
+        }
+        
+        return nil
+    }
+    
+    func maximizeErrorCorrectionLevel(
+        characterCount: Int,
+        encodingMode: EncodingMode,
+        version: QRVersion
+    ) -> ErrorCorrectionLevel? {
+        for level in ErrorCorrectionLevel.descendingOrder {
+            if canFit(
+                characterCount: characterCount,
+                encodingMode: encodingMode,
+                errorCorrectionLevel: level,
+                version: version
+            ) {
+                return level
             }
         }
         
