@@ -7,10 +7,14 @@
 
 struct BitBuffer {
     private var storage: [UInt8]
-    private var count: Int
+    private(set) var count: Int
     
     var isAligned: Bool {
         count.isMultiple(of: 8)
+    }
+    
+    var bytes: [UInt8] {
+        storage
     }
     
     var byteCount: Int {
@@ -51,10 +55,15 @@ struct BitBuffer {
                 let newByte: UInt8
                 
                 if remainingBits < 8 {
-                    let expandShift = freeBits - bitsToAppend
-                    let shiftedValue = value << expandShift
+                    let extractionShift = bitCount - processedBits - bitsToAppend
+                    let shiftedValue = value >> extractionShift
                     
-                    newByte = UInt8(shiftedValue)
+                    let mask: UInt32 = (1 << bitsToAppend) - 1
+                    let bits = shiftedValue & mask
+                    
+                    let placementShift = freeBits - bitsToAppend
+                    let shiftedBits = bits << placementShift
+                    newByte = UInt8(shiftedBits)
                     
                     storage.append(newByte)
                 } else {
