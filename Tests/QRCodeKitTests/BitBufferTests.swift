@@ -67,6 +67,18 @@ func appendEightBits() {
 }
 
 @Test
+func appendTenBits() {
+    var buffer = BitBuffer()
+    
+    buffer.append(0b1011011010, bitCount: 10)
+    
+    #expect(buffer.bytes == [0b10110110, 0b10000000])
+    #expect(buffer.count == 10)
+    #expect(buffer.byteCount == 2)
+    #expect(buffer.isAligned == false)
+}
+
+@Test
 func appendThirtyTwoBits() {
     var buffer = BitBuffer()
     
@@ -75,6 +87,19 @@ func appendThirtyTwoBits() {
     #expect(buffer.bytes == [0xDE, 0xAD, 0xBE, 0xEF])
     #expect(buffer.count == 32)
     #expect(buffer.byteCount == 4)
+    #expect(buffer.isAligned)
+}
+
+@Test
+func appendExactlyFillsPartialByte() {
+    var buffer = BitBuffer()
+    
+    buffer.append(0b101, bitCount: 3)
+    buffer.append(0b11001, bitCount: 5)
+    
+    #expect(buffer.bytes == [0b10111001])
+    #expect(buffer.count == 8)
+    #expect(buffer.byteCount == 1)
     #expect(buffer.isAligned)
 }
 
@@ -92,13 +117,14 @@ func appendAcrossByteBoundary() {
 }
 
 @Test
-func appendTenBits() {
+func appendAfterAlignedBuffer() {
     var buffer = BitBuffer()
     
-    buffer.append(0b1011011010, bitCount: 10)
+    buffer.append(0b10110110, bitCount: 8)
+    buffer.append(0b101, bitCount: 3)
     
-    #expect(buffer.bytes == [0b10110110, 0b10000000])
-    #expect(buffer.count == 10)
+    #expect(buffer.bytes == [0b10110110, 0b10100000])
+    #expect(buffer.count == 11)
     #expect(buffer.byteCount == 2)
     #expect(buffer.isAligned == false)
 }

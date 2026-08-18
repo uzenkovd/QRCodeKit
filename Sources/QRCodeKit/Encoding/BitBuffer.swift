@@ -49,56 +49,75 @@ struct BitBuffer {
         var processedBits = 0
         
         while remainingBits > 0 {
+            let newByte: UInt8
             let bitsToAppend = min(freeBits, remainingBits)
+            let bits = extractBits(
+                from: value,
+                bitCount: bitCount,
+                processedBits: processedBits,
+                bitsToExtract: bitsToAppend
+            )
             
             if isAligned {
-                let newByte: UInt8
-                
                 if remainingBits < 8 {
-                    let extractionShift = bitCount - processedBits - bitsToAppend
-                    let shiftedValue = value >> extractionShift
-                    
-                    let mask: UInt32 = (1 << bitsToAppend) - 1
-                    let bits = shiftedValue & mask
-                    
-                    let placementShift = freeBits - bitsToAppend
-                    let shiftedBits = bits << placementShift
-                    newByte = UInt8(shiftedBits)
-                    
-                    storage.append(newByte)
+                    newByte = insertBits(
+                        bits,
+                        into: 0,
+                        freeBits: freeBits,
+                        bitsToInsert: bitsToAppend
+                    )
                 } else {
-                    let extractionShift = bitCount - processedBits - bitsToAppend
-                    let shiftedValue = value >> extractionShift
-                    
-                    let mask: UInt32 = (1 << bitsToAppend) - 1
-                    let bits = shiftedValue & mask
                     newByte = UInt8(bits)
-                    
-                    storage.append(newByte)
                 }
+                
+                storage.append(newByte)
             } else {
-                guard let lastByte = self.lastByte else {
+                guard let lastByte else {
                     preconditionFailure("BitBuffer is in an invalid state")
                 }
                 
-                let extractionShift = bitCount - processedBits - bitsToAppend
-                let shiftedValue = value >> extractionShift
+                newByte = insertBits(
+                    bits,
+                    into: lastByte,
+                    freeBits: freeBits,
+                    bitsToInsert: bitsToAppend
+                )
                 
-                let mask: UInt32 = (1 << bitsToAppend) - 1
-                let bits = shiftedValue & mask
-                
-                let placementShift = freeBits - bitsToAppend
-                let shiftedBits = bits << placementShift
-                let fullLastByte = lastByte | UInt8(shiftedBits)
-                
-                storage[byteCount - 1] = fullLastByte
+                storage[byteCount - 1] = newByte
             }
             
             processedBits += bitsToAppend
             remainingBits -= bitsToAppend
             count += bitsToAppend
         }
+        
+    }
+    
+    private func extractBits(
+        from value: UInt32,
+        bitCount: Int,
+        processedBits: Int,
+        bitsToExtract: Int
+    ) -> UInt32 {
+        let extractionShift = bitCount - processedBits - bitsToExtract
+        let shiftedValue = value >> extractionShift
+        
+        let mask: UInt32 = (1 << bitsToExtract) - 1
+        let bits = shiftedValue & mask
+        
+        return bits
+    }
+    
+    private func insertBits(
+        _ bits: UInt32,
+        into byte: UInt8,
+        freeBits: Int,
+        bitsToInsert: Int
+    ) -> UInt8 {
+        let insertShift = freeBits - bitsToInsert
+        let shiftedBits = bits << insertShift
+        let newByte = byte | UInt8(shiftedBits)
+        
+        return newByte
     }
 }
-
-// TODO: Extract bit extraction logic into a helper.
