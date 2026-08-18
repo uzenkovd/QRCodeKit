@@ -5,7 +5,7 @@
 //  Created by Dmytro Uzenkov on 11.08.2026.
 //
 
-public enum QRVersion: Int, Sendable, CaseIterable {
+public enum QRVersion: Int, Sendable, CaseIterable, Hashable {
     case v1 = 1
     case v2
     case v3
@@ -49,4 +49,18 @@ public enum QRVersion: Int, Sendable, CaseIterable {
     
     public static let min: QRVersion = .v1
     public static let max: QRVersion = .v40
+    
+    func characterCountIndicatorLength(
+        for mode: EncodingMode
+    ) -> Int {
+        0
+    }
+}
+
+//MARK: - Comparable
+
+extension QRVersion: Comparable {
+    public static func < (lhs: QRVersion, rhs: QRVersion) -> Bool {
+        lhs.rawValue < rhs.rawValue
+    }
 }

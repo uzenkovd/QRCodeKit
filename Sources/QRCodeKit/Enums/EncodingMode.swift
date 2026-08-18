@@ -20,6 +20,16 @@ public enum EncodingMode: CaseIterable, Sendable {
         .byte
     ]
     
+    var indicator: UInt32 {
+        switch self {
+        case .numeric:      0b0001
+        case .alphanumeric: 0b0010
+        case .kanji:        0b1000
+        case .byte:         0b0100
+            
+        }
+    }
+    
     func canEncode(_ message: String) -> Bool {
         switch self {
         case .numeric:
