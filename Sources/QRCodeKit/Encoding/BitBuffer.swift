@@ -38,6 +38,19 @@ struct BitBuffer {
         count = 0
     }
     
+    mutating func append(contentsOf other: BitBuffer) {
+        var remainingBits = other.count
+        
+        for byte in other.bytes {
+            let bitsToAppend = min(remainingBits, 8)
+            let value = UInt32(byte) >> (8 - bitsToAppend)
+            
+            self.append(value, bitCount: bitsToAppend)
+            
+            remainingBits -= bitsToAppend
+        }
+    }
+    
     mutating func append(_ value: UInt32, bitCount: Int) {
         precondition(bitCount > 0 && bitCount <= 32)
         
