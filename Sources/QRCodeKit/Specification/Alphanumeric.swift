@@ -9,10 +9,14 @@ enum Alphanumeric {
     static func contains(_ character: Character) -> Bool {
         table[character] != nil
     }
+    
+    static func value(for character: Character) -> UInt32? {
+        table[character]
+    }
 }
 
 private extension Alphanumeric {
-    static let table: [Character: Int] = [
+    static let table: [Character: UInt32] = [
         "0": 0,
         "1": 1,
         "2": 2,
