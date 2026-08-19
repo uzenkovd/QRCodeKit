@@ -49,18 +49,16 @@ public enum QRVersion: Int, Sendable, CaseIterable, Hashable {
     
     public static let min: QRVersion = .v1
     public static let max: QRVersion = .v40
-    
-    func characterCountIndicatorLength(
-        for mode: EncodingMode
-    ) -> Int {
-        0
-    }
 }
 
-//MARK: - Comparable
+//MARK: - Strideable
 
-extension QRVersion: Comparable {
-    public static func < (lhs: QRVersion, rhs: QRVersion) -> Bool {
-        lhs.rawValue < rhs.rawValue
+extension QRVersion: Strideable {
+    public func advanced(by n: Int) -> QRVersion {
+        QRVersion(rawValue: rawValue + n)!
+    }
+    
+    public func distance(to other: QRVersion) -> Int {
+        other.rawValue - rawValue
     }
 }
