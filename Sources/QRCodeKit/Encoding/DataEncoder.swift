@@ -22,8 +22,6 @@ struct DataEncoder {
         
         let encodedData = encodeData(message, mode: mode)
         
-        
-        
         var buffer = BitBuffer()
         
         buffer.append(modeIndicator, bitCount: 4)
@@ -41,15 +39,13 @@ struct DataEncoder {
         
         switch mode {
         case .numeric:      return encodeNumeric(message)
-        case .alphanumeric: return BitBuffer()
+        case .alphanumeric: return encodeAlphanumeric(message)
         case .kanji:        return BitBuffer()
         case .byte:         return BitBuffer()
         }
     }
     
-    private func encodeNumeric(
-        _ message: String
-    ) -> BitBuffer {
+    private func encodeNumeric(_ message: String) -> BitBuffer {
         var buffer = BitBuffer()
         var groupValue: UInt32 = 0
         var digitCount = 0
@@ -72,6 +68,32 @@ struct DataEncoder {
             buffer.append(groupValue, bitCount: 4)
         } else if digitCount == 2 {
             buffer.append(groupValue, bitCount: 7)
+        }
+        
+        return buffer
+    }
+    
+    private func encodeAlphanumeric(_ message: String) -> BitBuffer {
+        var buffer = BitBuffer()
+        var groupValue: UInt32 = 0
+        var characterCount = 0
+        
+        for character in message {
+            let value = Alphanumeric.value(for: character)!
+            
+            groupValue = groupValue * 45 + value
+            characterCount += 1
+            
+            if characterCount == 2 {
+                buffer.append(groupValue, bitCount: 11)
+                
+                groupValue = 0
+                characterCount = 0
+            }
+        }
+        
+        if characterCount == 1 {
+            buffer.append(groupValue, bitCount: 6)
         }
         
         return buffer
