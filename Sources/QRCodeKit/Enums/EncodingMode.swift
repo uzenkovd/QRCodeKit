@@ -31,18 +31,34 @@ public enum EncodingMode: CaseIterable, Sendable {
     }
     
     func canEncode(_ message: String) -> Bool {
+        precondition(!message.isEmpty)
+        
         switch self {
-        case .numeric:
-            return message.allSatisfy { $0 >= "0" && $0 <= "9" }
-        case .alphanumeric:
-            return message.allSatisfy {
-                Alphanumeric.contains($0)
-            }
-        case .kanji:
-            return canEncodeKanji(message)
-        case .byte:
-            return message.canBeConverted(to: .isoLatin1)
+        case .numeric:      return canEncodeNumeric(message)
+        case .alphanumeric: return canEncodeAlphanumeric(message)
+        case .kanji:        return canEncodeKanji(message)
+        case .byte:         return canEncodeByte(message)
         }
+    }
+    
+    private func canEncodeNumeric(_ message: String) -> Bool {
+        message.allSatisfy { character in
+            guard let asciiValue = character.asciiValue else {
+                return false
+            }
+            
+            return asciiValue >= 48 && asciiValue <= 57
+        }
+    }
+    
+    private func canEncodeAlphanumeric(_ message: String) -> Bool {
+        message.allSatisfy {
+            Alphanumeric.contains($0)
+        }
+    }
+    
+    private func canEncodeByte(_ message: String) -> Bool {
+        message.canBeConverted(to: .isoLatin1)
     }
     
     private func canEncodeKanji(_ message: String) -> Bool {

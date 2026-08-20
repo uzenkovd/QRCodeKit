@@ -5,7 +5,7 @@
 //  Created by Dmytro Uzenkov on 13.08.2026.
 //
 
-struct CharacterCapacity {
+private struct CharacterCapacity {
     let numeric: Int
     let alphanumeric: Int
     let byte: Int
