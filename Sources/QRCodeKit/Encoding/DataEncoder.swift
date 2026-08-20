@@ -20,14 +20,64 @@ struct DataEncoder {
             mode: mode
         )
         
-        var bitBuffer = BitBuffer()
+        let encodedData = encodeData(message, mode: mode)
         
-        bitBuffer.append(modeIndicator, bitCount: 4)
-        bitBuffer.append(
+        
+        
+        var buffer = BitBuffer()
+        
+        buffer.append(modeIndicator, bitCount: 4)
+        buffer.append(
             characterCountIndicator,
             bitCount: characterCountIndicatorLength
         )
+        //buffer.append(contentsOf: encodedData)
         
-        return bitBuffer.bytes
+        return buffer.bytes
+    }
+    
+    func encodeData(_ message: String, mode: EncodingMode) -> BitBuffer {
+        precondition(mode.canEncode(message))
+        
+        switch mode {
+        case .numeric:      return encodeNumeric(message)
+        case .alphanumeric: return BitBuffer()
+        case .kanji:        return BitBuffer()
+        case .byte:         return BitBuffer()
+        }
+    }
+    
+    private func encodeNumeric(
+        _ message: String
+    ) -> BitBuffer {
+        var buffer = BitBuffer()
+        var groupValue: UInt32 = 0
+        var digitCount = 0
+        
+        for character in message {
+            let digit = numericValue(of: character)
+            
+            groupValue = groupValue * 10 + digit
+            digitCount += 1
+            
+            if digitCount == 3 {
+                buffer.append(groupValue, bitCount: 10)
+                
+                groupValue = 0
+                digitCount = 0
+            }
+        }
+        
+        if digitCount == 1 {
+            buffer.append(groupValue, bitCount: 4)
+        } else if digitCount == 2 {
+            buffer.append(groupValue, bitCount: 7)
+        }
+        
+        return buffer
+    }
+    
+    private func numericValue(of character: Character) -> UInt32 {
+        UInt32(character.asciiValue! - 48)
     }
 }
