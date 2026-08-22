@@ -57,36 +57,13 @@ public enum EncodingMode: CaseIterable, Sendable {
         }
     }
     
+    private func canEncodeKanji(_ message: String) -> Bool {
+        message.allSatisfy {
+            Kanji.value(for: $0) != nil
+        }
+    }
+    
     private func canEncodeByte(_ message: String) -> Bool {
         message.data(using: .isoLatin1) != nil
-    }
-    
-    private func canEncodeKanji(_ message: String) -> Bool {
-        for character in message {
-            let string = String(character)
-            guard let data = string.data(using: .shiftJIS) else {
-                return false
-            }
-            
-            let bytes = [UInt8](data)
-            guard bytes.count == 2 else {
-                return false
-            }
-            
-            let shiftJISCode = (UInt16(bytes[0]) << 8) | UInt16(bytes[1])
-            guard isInFirstRange(shiftJISCode) || isInSecondRange(shiftJISCode) else {
-                return false
-            }
-        }
-        
-        return true
-    }
-    
-    private func isInFirstRange(_ shiftJISCode: UInt16) -> Bool {
-        shiftJISCode >= 0x8140 && shiftJISCode <= 0x9FFC
-    }
-    
-    private func isInSecondRange(_ shiftJISCode: UInt16) -> Bool {
-        shiftJISCode >= 0xE040 && shiftJISCode <= 0xEBBF
     }
 }
