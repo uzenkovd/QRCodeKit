@@ -41,7 +41,7 @@ struct DataEncoder {
         case .numeric:      return encodeNumeric(message)
         case .alphanumeric: return encodeAlphanumeric(message)
         case .kanji:        return BitBuffer()
-        case .byte:         return BitBuffer()
+        case .byte:         return encodeByte(message)
         }
     }
     
@@ -94,6 +94,18 @@ struct DataEncoder {
         
         if characterCount == 1 {
             buffer.append(groupValue, bitCount: 6)
+        }
+        
+        return buffer
+    }
+    
+    private func encodeByte(_ message: String) -> BitBuffer {
+        var buffer = BitBuffer()
+        
+        let data = message.data(using: .isoLatin1)!
+        
+        for byte in data {
+            buffer.append(UInt32(byte), bitCount: 8)
         }
         
         return buffer
