@@ -58,7 +58,7 @@ public enum EncodingMode: CaseIterable, Sendable {
     }
     
     private func canEncodeByte(_ message: String) -> Bool {
-        message.canBeConverted(to: .isoLatin1)
+        message.data(using: .isoLatin1) != nil
     }
     
     private func canEncodeKanji(_ message: String) -> Bool {

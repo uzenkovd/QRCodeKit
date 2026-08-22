@@ -200,4 +200,92 @@ struct DataEncoderTests {
         #expect(result.count == 11)
         #expect(result.bytes == [0b11111101, 0b00000000])
     }
+    
+    //MARK: - encodeData(_:mode:) - Byte
+    
+    @Test
+    func encodeByteSingleCharacter() {
+        let encoder = DataEncoder()
+        
+        let result = encoder.encodeData("a", mode: .byte)
+        
+        #expect(result.count == 8)
+        #expect(result.bytes == [0b01100001])
+    }
+    
+    @Test
+    func encodeByteNonASCIICharacter() {
+        let encoder = DataEncoder()
+        
+        let result = encoder.encodeData("é", mode: .byte)
+        
+        #expect(result.count == 8)
+        #expect(result.bytes == [0b11101001])
+    }
+    
+    @Test
+    func encodeBytePrintableASCIICharacters() {
+        let encoder = DataEncoder()
+        
+        let result = encoder.encodeData(" &9A~", mode: .byte)
+        
+        #expect(result.count == 40)
+        #expect(result.bytes == [
+            0b00100000,
+            0b00100110,
+            0b00111001,
+            0b01000001,
+            0b01111110
+        ])
+    }
+    
+    @Test
+    func encodeByteLatin1SpecialCharacters() {
+        let encoder = DataEncoder()
+        let nbsp = "\u{00A0}"
+        
+        let result = encoder.encodeData("\(nbsp)£°µº¿", mode: .byte)
+        
+        #expect(result.count == 48)
+        #expect(result.bytes == [
+            0b10100000,
+            0b10100011,
+            0b10110000,
+            0b10110101,
+            0b10111010,
+            0b10111111
+        ])
+    }
+    
+    @Test
+    func encodeByteUpperLatin1Range() {
+        let encoder = DataEncoder()
+        
+        let result = encoder.encodeData("ÀÖ×Øß", mode: .byte)
+        
+        #expect(result.count == 40)
+        #expect(result.bytes == [
+            0b11000000,
+            0b11010110,
+            0b11010111,
+            0b11011000,
+            0b11011111
+        ])
+    }
+    
+    @Test
+    func encodeByteLowerLatin1Range() {
+        let encoder = DataEncoder()
+        
+        let result = encoder.encodeData("àæð÷ÿ", mode: .byte)
+        
+        #expect(result.count == 40)
+        #expect(result.bytes == [
+            0b11100000,
+            0b11100110,
+            0b11110000,
+            0b11110111,
+            0b11111111
+        ])
+    }
 }
