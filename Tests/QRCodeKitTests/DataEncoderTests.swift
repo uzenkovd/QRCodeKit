@@ -11,7 +11,7 @@ import Testing
 @Suite
 struct DataEncoderTests {
     
-    //MARK: - encodeData(_:mode:) - Numeric
+    // MARK: - encodeData(_:mode:) - Numeric
     
     @Test
     func encodeNumericSingleDigit() {
@@ -27,43 +27,49 @@ struct DataEncoderTests {
     func encodeNumericTwoDigits() {
         let encoder = DataEncoder()
         
-        let result = encoder.encodeData("12", mode: .numeric)
+        let result = encoder.encodeData("42", mode: .numeric)
         
         #expect(result.count == 7)
-        #expect(result.bytes == [0b00011000])
+        #expect(result.bytes == [0b01010100])
     }
     
     @Test
     func encodeNumericThreeDigits() {
         let encoder = DataEncoder()
         
-        let result = encoder.encodeData("123", mode: .numeric)
+        let result = encoder.encodeData("987", mode: .numeric)
         
         #expect(result.count == 10)
-        #expect(result.bytes == [0b00011110, 0b11000000])
+        #expect(result.bytes == [
+            0b11110110,
+            0b11000000
+        ])
     }
     
     @Test
     func encodeNumericFourDigits() {
         let encoder = DataEncoder()
         
-        let result = encoder.encodeData("1234", mode: .numeric)
+        let result = encoder.encodeData("3141", mode: .numeric)
         
         #expect(result.count == 14)
-        #expect(result.bytes == [0b00011110, 0b11010000])
+        #expect(result.bytes == [
+            0b01001110,
+            0b10000100
+        ])
     }
     
     @Test
     func encodeNumericFiveDigits() {
         let encoder = DataEncoder()
         
-        let result = encoder.encodeData("12345", mode: .numeric)
+        let result = encoder.encodeData("27182", mode: .numeric)
         
         #expect(result.count == 17)
         #expect(result.bytes == [
-            0b00011110,
-            0b11010110,
-            0b10000000
+            0b01000011,
+            0b11101001,
+            0b00000000
         ])
     }
     
@@ -71,27 +77,28 @@ struct DataEncoderTests {
     func encodeNumericSixDigits() {
         let encoder = DataEncoder()
         
-        let result = encoder.encodeData("123456", mode: .numeric)
+        let result = encoder.encodeData("654321", mode: .numeric)
         
         #expect(result.count == 20)
         #expect(result.bytes == [
-            0b00011110,
-            0b11011100,
-            0b10000000
+            0b10100011,
+            0b10010100,
+            0b00010000
         ])
     }
+    
     @Test
     func encodeNumericMultipleGroupsWithRemainder() {
         let encoder = DataEncoder()
         
-        let result = encoder.encodeData("1234567890", mode: .numeric)
+        let result = encoder.encodeData("8675309124", mode: .numeric)
         
         #expect(result.count == 34)
         #expect(result.bytes == [
-            0b00011110,
-            0b11011100,
-            0b10001100,
-            0b01010100,
+            0b11011000,
+            0b11100001,
+            0b00101110,
+            0b01000001,
             0b00000000
         ])
     }
@@ -103,7 +110,10 @@ struct DataEncoderTests {
         let result = encoder.encodeData("007", mode: .numeric)
         
         #expect(result.count == 10)
-        #expect(result.bytes == [0b00000001, 0b11000000])
+        #expect(result.bytes == [
+            0b00000001,
+            0b11000000
+        ])
     }
     
     @Test
@@ -113,10 +123,13 @@ struct DataEncoderTests {
         let result = encoder.encodeData("507", mode: .numeric)
         
         #expect(result.count == 10)
-        #expect(result.bytes == [0b01111110, 0b11000000])
+        #expect(result.bytes == [
+            0b01111110,
+            0b11000000
+        ])
     }
     
-    //MARK: - encodeData(_:mode:) - Alphaumeric
+    // MARK: - encodeData(_:mode:) - Alphanumeric
     
     @Test
     func encodeAlphanumericSingleCharacter() {
@@ -135,7 +148,10 @@ struct DataEncoderTests {
         let result = encoder.encodeData("AZ", mode: .alphanumeric)
         
         #expect(result.count == 11)
-        #expect(result.bytes == [0b00111100, 0b10100000])
+        #expect(result.bytes == [
+            0b00111100,
+            0b10100000
+        ])
     }
     
     @Test
@@ -198,10 +214,59 @@ struct DataEncoderTests {
         let result = encoder.encodeData("::", mode: .alphanumeric)
         
         #expect(result.count == 11)
-        #expect(result.bytes == [0b11111101, 0b00000000])
+        #expect(result.bytes == [
+            0b11111101,
+            0b00000000
+        ])
     }
     
-    //MARK: - encodeData(_:mode:) - Byte
+    // MARK: - encodeData(_:mode:) - Kanji
+    
+    @Test
+    func encodeKanjiSingleCharacter() {
+        let encoder = DataEncoder()
+        
+        let result = encoder.encodeData("漢", mode: .kanji)
+        
+        #expect(result.count == 13)
+        #expect(result.bytes == [
+            0b00111001,
+            0b11111000
+        ])
+    }
+    
+    @Test
+    func encodeKanjiCharactersFromBothRanges() {
+        let encoder = DataEncoder()
+        
+        let result = encoder.encodeData("海紂", mode: .kanji)
+        
+        #expect(result.count == 26)
+        #expect(result.bytes == [
+            0b00110110,
+            0b00011110,
+            0b01100000,
+            0b00000000
+        ])
+    }
+    
+    @Test
+    func encodeKanjiMultipleCharacters() {
+        let encoder = DataEncoder()
+        
+        let result = encoder.encodeData("日本語", mode: .kanji)
+        
+        #expect(result.count == 39)
+        #expect(result.bytes == [
+            0b01110001,
+            0b11010011,
+            0b11111110,
+            0b11010001,
+            0b11010100
+        ])
+    }
+    
+    // MARK: - encodeData(_:mode:) - Byte
     
     @Test
     func encodeByteSingleCharacter() {
