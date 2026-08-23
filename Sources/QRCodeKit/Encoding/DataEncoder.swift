@@ -29,7 +29,7 @@ struct DataEncoder {
             characterCountIndicator,
             bitCount: characterCountIndicatorLength
         )
-        //buffer.append(contentsOf: encodedData)
+        buffer.append(contentsOf: encodedData)
         
         return buffer.bytes
     }
@@ -40,7 +40,7 @@ struct DataEncoder {
         switch mode {
         case .numeric:      return encodeNumeric(message)
         case .alphanumeric: return encodeAlphanumeric(message)
-        case .kanji:        return BitBuffer()
+        case .kanji:        return encodeKanji(message)
         case .byte:         return encodeByte(message)
         }
     }
@@ -94,6 +94,17 @@ struct DataEncoder {
         
         if characterCount == 1 {
             buffer.append(groupValue, bitCount: 6)
+        }
+        
+        return buffer
+    }
+    
+    private func encodeKanji(_ message: String) -> BitBuffer {
+        var buffer = BitBuffer()
+        
+        for character in message {
+            let value = Kanji.value(for: character)!
+            buffer.append(UInt32(value), bitCount: 13)
         }
         
         return buffer
