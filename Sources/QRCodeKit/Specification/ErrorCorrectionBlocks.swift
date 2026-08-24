@@ -52,6 +52,13 @@ enum ErrorCorrectionBlocks {
         }
     }
     
+    static func totalDataCodewords(
+        for version: QRVersion,
+        level: ErrorCorrectionLevel
+    ) -> Int {
+        layout(for: version, level: level).totalDataCodewords
+    }
+    
     static func layout(
         for version: QRVersion,
         level: ErrorCorrectionLevel
