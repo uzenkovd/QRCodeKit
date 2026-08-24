@@ -5,7 +5,7 @@
 //  Created by Dmytro Uzenkov on 11.08.2026.
 //
 
-public enum ErrorCorrectionLevel: Int, Sendable {
+public enum ErrorCorrectionLevel: Int, Sendable, CaseIterable {
     case L = 7
     case M = 15
     case Q = 25
