@@ -38,6 +38,10 @@ struct BitBuffer {
         count = 0
     }
     
+    mutating func append(_ byte: UInt8) {
+        append(UInt32(byte), bitCount: 8)
+    }
+    
     mutating func append(contentsOf other: BitBuffer) {
         var remainingBits = other.count
         
@@ -103,7 +107,6 @@ struct BitBuffer {
             remainingBits -= bitsToAppend
             count += bitsToAppend
         }
-        
     }
     
     private func extractBits(
