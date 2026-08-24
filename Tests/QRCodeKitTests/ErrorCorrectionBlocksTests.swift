@@ -49,6 +49,28 @@ struct ErrorCorrectionBlocksTests {
         #expect(layout.totalCodewords == 134)
     }
     
+    // MARK: - totalDataCodewords(for:level:)
+    
+    @Test
+    func totalDataCodewordsForVersion1Low() {
+        let totalDataCodewords = ErrorCorrectionBlocks.totalDataCodewords(
+            for: .v1,
+            level: .L
+        )
+        
+        #expect(totalDataCodewords == 19)
+    }
+    
+    @Test
+    func totalDataCodewordsForVersion29Quartile() {
+        let totalDataCodewords = ErrorCorrectionBlocks.totalDataCodewords(
+            for: .v29,
+            level: .Q
+        )
+        
+        #expect(totalDataCodewords == 911)
+    }
+    
     // MARK: - layout(for:level:)
     
     @Test
