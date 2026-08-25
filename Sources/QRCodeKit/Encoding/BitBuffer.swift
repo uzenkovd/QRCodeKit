@@ -56,7 +56,7 @@ struct BitBuffer {
     }
     
     mutating func append(_ value: UInt32, bitCount: Int) {
-        precondition(bitCount > 0 && bitCount <= 32)
+        precondition(bitCount >= 0 && bitCount <= 32)
         
         if bitCount < 32 {
             precondition(value < (1 << bitCount))

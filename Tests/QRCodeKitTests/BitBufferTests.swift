@@ -35,7 +35,7 @@ struct BitBufferTests {
     }
 
     @Test
-    func appendZeroBit() {
+    func appendOneZeroBit() {
         var buffer = BitBuffer()
         
         buffer.append(0, bitCount: 1)
@@ -44,6 +44,19 @@ struct BitBufferTests {
         #expect(buffer.byteCount == 1)
         #expect(buffer.isAligned == false)
         #expect(buffer.bytes == [0b00000000])
+    }
+    
+    @Test
+    func appendZeroBits() {
+        var buffer = BitBuffer()
+        
+        buffer.append(0b101, bitCount: 3)
+        buffer.append(0, bitCount: 0)
+        
+        #expect(buffer.count == 3)
+        #expect(buffer.byteCount == 1)
+        #expect(buffer.isAligned == false)
+        #expect(buffer.bytes == [0b10100000])
     }
 
     @Test
