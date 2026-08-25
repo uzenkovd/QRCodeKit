@@ -13,23 +13,66 @@ struct DataEncoder {
         version: QRVersion
     ) -> [UInt8] {
         let modeIndicator = mode.indicator
+        let modeIndicatorLength = 4
         
-        let characterCountIndicator = UInt32(message.count)
+        let encodedData = encodeData(message, mode: mode)
+        
+        let characterCountIndicator: UInt32
+        
+        switch mode {
+        case .byte:
+            characterCountIndicator = UInt32(encodedData.byteCount)
+        case .numeric, .alphanumeric, .kanji:
+            characterCountIndicator = UInt32(message.count)
+        }
+
         let characterCountIndicatorLength = CharacterCountIndicatorLengths.length(
             for: version,
             mode: mode
         )
         
-        let encodedData = encodeData(message, mode: mode)
+        let totalDataCodewords = ErrorCorrectionBlocks.totalDataCodewords(
+            for: version,
+            level: errorCorrectionLevel
+        )
+        
+        let totalDataBits = totalDataCodewords * 8
+        var currentDataBits = (
+            modeIndicatorLength +
+            characterCountIndicatorLength +
+            encodedData.count
+        )
+        
+        precondition(
+            currentDataBits <= totalDataBits,
+            "Encoded data exceeds the selected version and error correction level capacity"
+        )
+        
+        let remainingDataBits = totalDataBits - currentDataBits
+        let terminatorLength = min(4, remainingDataBits)
+        
+        currentDataBits += terminatorLength
+        
+        let byteAlignmentLength = (8 - currentDataBits % 8) % 8
+        
+        currentDataBits += byteAlignmentLength
+        
+        let padByteCount = (totalDataBits - currentDataBits) / 8
+        let padBytes = makePadBytes(count: padByteCount)
         
         var buffer = BitBuffer()
         
-        buffer.append(modeIndicator, bitCount: 4)
-        buffer.append(
-            characterCountIndicator,
-            bitCount: characterCountIndicatorLength
-        )
+        buffer.append(modeIndicator, bitCount: modeIndicatorLength)
+        buffer.append(characterCountIndicator, bitCount: characterCountIndicatorLength)
         buffer.append(contentsOf: encodedData)
+        buffer.append(0, bitCount: terminatorLength)
+        buffer.append(0, bitCount: byteAlignmentLength)
+        buffer.append(contentsOf: padBytes)
+        
+        assert(
+            buffer.count == totalDataBits,
+            "Encoded data does not match the expected data capacity"
+        )
         
         return buffer.bytes
     }
@@ -116,7 +159,19 @@ struct DataEncoder {
         let data = message.data(using: .isoLatin1)!
         
         for byte in data {
-            buffer.append(UInt32(byte), bitCount: 8)
+            buffer.append(byte)
+        }
+        
+        return buffer
+    }
+    
+    private func makePadBytes(count: Int) -> BitBuffer {
+        var buffer = BitBuffer()
+        let padByteValues: [UInt8] = [0xEC, 0x11]
+        
+        for index in 0..<count {
+            let byte = padByteValues[index % padByteValues.count]
+            buffer.append(byte)
         }
         
         return buffer
