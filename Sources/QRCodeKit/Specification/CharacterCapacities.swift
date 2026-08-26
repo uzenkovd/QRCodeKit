@@ -20,26 +20,26 @@ private struct CharacterCapacity {
 }
 
 enum CharacterCapacities {
-    static func maxCapacity(for encodingMode: EncodingMode) -> Int {
+    static func maxCapacity(for mode: EncodingMode) -> Int {
         capacity(
-            version: .max,
-            errorCorrectionLevel: .min,
-            encodingMode: encodingMode
+            for: .max,
+            level: .min,
+            mode: mode
         )
     }
     
     static func capacity(
-        version: QRVersion,
-        errorCorrectionLevel: ErrorCorrectionLevel,
-        encodingMode: EncodingMode
+        for version: QRVersion,
+        level: ErrorCorrectionLevel,
+        mode: EncodingMode
     ) -> Int {
-        guard let capacities = table[version]?[errorCorrectionLevel] else {
+        guard let capacities = table[version]?[level] else {
             preconditionFailure(
-                "Character capacity is missing for \(version) and \(errorCorrectionLevel)"
+                "Character capacity is missing for \(version) and \(level)"
             )
         }
         
-        switch encodingMode {
+        switch mode {
         case .numeric:      return capacities.numeric
         case .alphanumeric: return capacities.alphanumeric
         case .kanji:        return capacities.kanji

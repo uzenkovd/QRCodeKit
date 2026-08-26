@@ -51,7 +51,7 @@ public enum QRVersion: Int, Sendable, CaseIterable, Hashable {
     public static let max: QRVersion = .v40
 }
 
-//MARK: - Strideable
+// MARK: - Strideable
 
 extension QRVersion: Strideable {
     public func advanced(by n: Int) -> QRVersion {

@@ -28,9 +28,9 @@ struct DataAnalyzer {
         version: QRVersion
     ) -> Bool {
         let capacity = CharacterCapacities.capacity(
-            version: version,
-            errorCorrectionLevel: errorCorrectionLevel,
-            encodingMode: mode
+            for: version,
+            level: errorCorrectionLevel,
+            mode: mode
         )
         
         return characterCount <= capacity
@@ -53,9 +53,9 @@ struct DataAnalyzer {
     ) -> QRVersion? {
         for version in QRVersion.allCases {
             let capacity = CharacterCapacities.capacity(
-                version: version,
-                errorCorrectionLevel: errorCorrectionLevel,
-                encodingMode: mode
+                for: version,
+                level: errorCorrectionLevel,
+                mode: mode
             )
             
             if characterCount <= capacity {
