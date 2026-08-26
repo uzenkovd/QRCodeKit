@@ -7,28 +7,30 @@
 
 struct DataAnalyzer {
     func canEncode(_ message: String) -> Bool {
-        EncodingMode.allCases.contains { $0.canEncode(message) }
+        EncodingMode.allCases.contains {
+            $0.canEncode(message)
+        }
     }
     
     func canFit(
         characterCount: Int,
-        encodingMode: EncodingMode
+        mode: EncodingMode
     ) -> Bool {
-        let maxCapacity = CharacterCapacities.maxCapacity(for: encodingMode)
+        let maxCapacity = CharacterCapacities.maxCapacity(for: mode)
         
         return characterCount <= maxCapacity
     }
     
     func canFit(
         characterCount: Int,
-        encodingMode: EncodingMode,
+        mode: EncodingMode,
         errorCorrectionLevel: ErrorCorrectionLevel,
         version: QRVersion
     ) -> Bool {
         let capacity = CharacterCapacities.capacity(
             version: version,
             errorCorrectionLevel: errorCorrectionLevel,
-            encodingMode: encodingMode
+            encodingMode: mode
         )
         
         return characterCount <= capacity
@@ -46,14 +48,14 @@ struct DataAnalyzer {
     
     func recommendedVersion(
         characterCount: Int,
-        encodingMode: EncodingMode,
+        mode: EncodingMode,
         errorCorrectionLevel: ErrorCorrectionLevel
     ) -> QRVersion? {
         for version in QRVersion.allCases {
             let capacity = CharacterCapacities.capacity(
                 version: version,
                 errorCorrectionLevel: errorCorrectionLevel,
-                encodingMode: encodingMode
+                encodingMode: mode
             )
             
             if characterCount <= capacity {
@@ -66,13 +68,13 @@ struct DataAnalyzer {
     
     func maximizeErrorCorrectionLevel(
         characterCount: Int,
-        encodingMode: EncodingMode,
+        mode: EncodingMode,
         version: QRVersion
     ) -> ErrorCorrectionLevel? {
         for level in ErrorCorrectionLevel.descendingOrder {
             if canFit(
                 characterCount: characterCount,
-                encodingMode: encodingMode,
+                mode: mode,
                 errorCorrectionLevel: level,
                 version: version
             ) {

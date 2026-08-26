@@ -15,21 +15,13 @@ struct DataEncoder {
         let modeIndicator = mode.indicator
         let modeIndicatorLength = 4
         
-        let encodedData = encodeData(message, mode: mode)
-        
-        let characterCountIndicator: UInt32
-        
-        switch mode {
-        case .byte:
-            characterCountIndicator = UInt32(encodedData.byteCount)
-        case .numeric, .alphanumeric, .kanji:
-            characterCountIndicator = UInt32(message.count)
-        }
-
+        let characterCountIndicator = UInt32(mode.characterCount(for: message))
         let characterCountIndicatorLength = CharacterCountIndicatorLengths.length(
             for: version,
             mode: mode
         )
+        
+        let encodedData = encodeData(message, mode: mode)
         
         let totalDataCodewords = ErrorCorrectionBlocks.totalDataCodewords(
             for: version,

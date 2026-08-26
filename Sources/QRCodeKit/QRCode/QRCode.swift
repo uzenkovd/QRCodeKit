@@ -48,11 +48,11 @@ public struct QRCode {
             encodingMode = recommended
         }
         
-        let characterCount = message.count
+        let characterCount = encodingMode.characterCount(for: message)
         
         guard dataAnalyzer.canFit(
             characterCount: characterCount,
-            encodingMode: encodingMode
+            mode: encodingMode
         ) else {
             throw QRCodeError.messageIsTooLong
         }
@@ -61,7 +61,7 @@ public struct QRCode {
         if let option = options.version {
             guard dataAnalyzer.canFit(
                 characterCount: characterCount,
-                encodingMode: encodingMode,
+                mode: encodingMode,
                 errorCorrectionLevel: errorCorrectionLevel,
                 version: option
             ) else {
@@ -72,7 +72,7 @@ public struct QRCode {
         } else {
             guard let recommended = dataAnalyzer.recommendedVersion(
                 characterCount: characterCount,
-                encodingMode: encodingMode,
+                mode: encodingMode,
                 errorCorrectionLevel: errorCorrectionLevel
             ) else {
                 throw QRCodeError.messageIsTooLong
@@ -84,7 +84,7 @@ public struct QRCode {
         if options.errorCorrectionLevel == nil {
             if let maximized = dataAnalyzer.maximizeErrorCorrectionLevel(
                 characterCount: characterCount,
-                encodingMode: encodingMode,
+                mode: encodingMode,
                 version: version
             ) {
                 errorCorrectionLevel = maximized

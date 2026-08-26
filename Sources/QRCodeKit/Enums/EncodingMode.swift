@@ -31,13 +31,26 @@ public enum EncodingMode: CaseIterable, Sendable {
     }
     
     func canEncode(_ message: String) -> Bool {
-        precondition(!message.isEmpty)
+        guard !message.isEmpty else {
+            return false
+        }
         
         switch self {
         case .numeric:      return canEncodeNumeric(message)
         case .alphanumeric: return canEncodeAlphanumeric(message)
         case .kanji:        return canEncodeKanji(message)
         case .byte:         return canEncodeByte(message)
+        }
+    }
+    
+    func characterCount(for message: String) -> Int {
+        precondition(canEncode(message))
+        
+        switch self {
+        case .byte:
+            return message.data(using: .isoLatin1)!.count
+        case .numeric, .alphanumeric, .kanji:
+            return message.count
         }
     }
     
