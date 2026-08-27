@@ -13,7 +13,7 @@ struct DataAnalyzer {
     }
     
     func canFit(
-        characterCount: Int,
+        _ characterCount: Int,
         mode: EncodingMode
     ) -> Bool {
         let maxCapacity = CharacterCapacities.maxCapacity(for: mode)
@@ -22,7 +22,7 @@ struct DataAnalyzer {
     }
     
     func canFit(
-        characterCount: Int,
+        _ characterCount: Int,
         mode: EncodingMode,
         errorCorrectionLevel: ErrorCorrectionLevel,
         version: QRVersion
@@ -47,7 +47,7 @@ struct DataAnalyzer {
     }
     
     func recommendedVersion(
-        characterCount: Int,
+        for characterCount: Int,
         mode: EncodingMode,
         errorCorrectionLevel: ErrorCorrectionLevel
     ) -> QRVersion? {
@@ -66,14 +66,14 @@ struct DataAnalyzer {
         return nil
     }
     
-    func maximizeErrorCorrectionLevel(
-        characterCount: Int,
+    func recommendedErrorCorrectionLevel(
+        for characterCount: Int,
         mode: EncodingMode,
         version: QRVersion
     ) -> ErrorCorrectionLevel? {
         for level in ErrorCorrectionLevel.descendingOrder {
             if canFit(
-                characterCount: characterCount,
+                characterCount,
                 mode: mode,
                 errorCorrectionLevel: level,
                 version: version

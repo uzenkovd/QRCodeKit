@@ -31,18 +31,20 @@ public struct QRCode {
             throw QRCodeError.unsupportedMessage
         }
         
-        var errorCorrectionLevel = options.errorCorrectionLevel ?? .default
-        
         let encodingMode: EncodingMode
-        if let option = options.encodingMode {
-            guard option.canEncode(message) else {
+        if let optionMode = options.encodingMode {
+            guard optionMode.canEncode(message) else {
                 throw QRCodeError.wrongEncodingModeForMessage
             }
             
-            encodingMode = option
+            encodingMode = optionMode
         } else {
-            guard let recommended = dataAnalyzer.recommendedEncodingMode(for: message) else {
-                throw QRCodeError.noAppropriateEncodingMode
+            guard let recommended = dataAnalyzer.recommendedEncodingMode(
+                for: message
+            ) else {
+                preconditionFailure(
+                    "Supported message has no recommended encoding mode"
+                )
             }
             
             encodingMode = recommended
@@ -51,44 +53,93 @@ public struct QRCode {
         let characterCount = encodingMode.characterCount(for: message)
         
         guard dataAnalyzer.canFit(
-            characterCount: characterCount,
+            characterCount,
             mode: encodingMode
         ) else {
             throw QRCodeError.messageIsTooLong
         }
         
         let version: QRVersion
-        if let option = options.version {
-            guard dataAnalyzer.canFit(
-                characterCount: characterCount,
-                mode: encodingMode,
-                errorCorrectionLevel: errorCorrectionLevel,
-                version: option
-            ) else {
-                throw QRCodeError.wrongVersionForQRConfiguration
-            }
-            
-            version = option
-        } else {
-            guard let recommended = dataAnalyzer.recommendedVersion(
-                characterCount: characterCount,
-                mode: encodingMode,
-                errorCorrectionLevel: errorCorrectionLevel
-            ) else {
-                throw QRCodeError.messageIsTooLong
-            }
-            
-            version = recommended
-        }
+        let errorCorrectionLevel: ErrorCorrectionLevel
         
-        if options.errorCorrectionLevel == nil {
-            if let maximized = dataAnalyzer.maximizeErrorCorrectionLevel(
-                characterCount: characterCount,
+        switch (options.version, options.errorCorrectionLevel) {
+        case let (optionVersion?, optionLevel?):
+            guard dataAnalyzer.canFit(
+                characterCount,
                 mode: encodingMode,
-                version: version
-            ) {
-                errorCorrectionLevel = maximized
+                errorCorrectionLevel: optionLevel,
+                version: optionVersion
+            ) else {
+                throw QRCodeError.messageDoesNotFitQRConfiguration
             }
+            
+            version = optionVersion
+            errorCorrectionLevel = optionLevel
+            
+        case let (nil, optionLevel?):
+            guard let recommendedVersion = dataAnalyzer.recommendedVersion(
+                for: characterCount,
+                mode: encodingMode,
+                errorCorrectionLevel: optionLevel
+            ) else {
+                throw QRCodeError.messageDoesNotFitErrorCorrectionLevel
+            }
+            
+            version = recommendedVersion
+            errorCorrectionLevel = optionLevel
+            
+        case let (optionVersion?, nil):
+            guard let recommendedLevel =
+                    dataAnalyzer.recommendedErrorCorrectionLevel(
+                        for: characterCount,
+                        mode: encodingMode,
+                        version: optionVersion
+                    )
+            else {
+                throw QRCodeError.messageDoesNotFitVersion
+            }
+            
+            version = optionVersion
+            errorCorrectionLevel = recommendedLevel
+            
+        case (nil, nil):
+            let fallbackLevels = ErrorCorrectionLevel.descendingOrder.drop(
+                while: { $0 != .default }
+            )
+            
+            var recommendedVersion: QRVersion?
+            
+            for level in fallbackLevels {
+                if let candidate = dataAnalyzer.recommendedVersion(
+                    for: characterCount,
+                    mode: encodingMode,
+                    errorCorrectionLevel: level
+                ) {
+                    recommendedVersion = candidate
+                    break
+                }
+            }
+            
+            guard let recommendedVersion else {
+                preconditionFailure(
+                    "Fittable message has no valid version"
+                )
+            }
+            
+            guard let recommendedLevel =
+                    dataAnalyzer.recommendedErrorCorrectionLevel(
+                        for: characterCount,
+                        mode: encodingMode,
+                        version: recommendedVersion
+                    )
+            else {
+                preconditionFailure(
+                    "Recommended version cannot fit the message"
+                )
+            }
+            
+            version = recommendedVersion
+            errorCorrectionLevel = recommendedLevel
         }
         
         let mask = options.mask ?? .default

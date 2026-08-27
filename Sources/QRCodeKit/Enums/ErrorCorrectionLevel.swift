@@ -12,10 +12,7 @@ public enum ErrorCorrectionLevel: Sendable, CaseIterable, Hashable {
     case H
     
     static let descendingOrder: [ErrorCorrectionLevel] = [
-        .H,
-        .Q,
-        .M,
-        .L
+        .H, .Q, .M, .L
     ]
     
     public static let min: ErrorCorrectionLevel = .L

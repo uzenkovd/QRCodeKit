@@ -43,7 +43,7 @@ struct DataAnalyzerTests {
         #expect(analyzer.canEncode("") == false)
     }
     
-    // MARK: - canFit(characterCount:mode:)
+    // MARK: - canFit(_:mode:)
     
     @Test
     func canFitAtMaximumCapacity() {
@@ -59,7 +59,7 @@ struct DataAnalyzerTests {
         for capacity in maxCapacities {
             #expect(
                 analyzer.canFit(
-                    characterCount: capacity.characterCount,
+                    capacity.characterCount,
                     mode: capacity.mode
                 )
             )
@@ -80,14 +80,14 @@ struct DataAnalyzerTests {
         for value in exceedingCounts {
             #expect(
                 !analyzer.canFit(
-                    characterCount: value.characterCount,
+                    value.characterCount,
                     mode: value.mode
                 )
             )
         }
     }
     
-    // MARK: - canFit(characterCount:mode:errorCorrectionLevel:version:)
+    // MARK: - canFit(_:mode:errorCorrectionLevel:version:)
     
     @Test
     func canFitAtConfigurationCapacity() {
@@ -103,7 +103,7 @@ struct DataAnalyzerTests {
         for capacity in capacities {
             #expect(
                 analyzer.canFit(
-                    characterCount: capacity.characterCount,
+                    capacity.characterCount,
                     mode: capacity.mode,
                     errorCorrectionLevel: .H,
                     version: .v1
@@ -126,7 +126,7 @@ struct DataAnalyzerTests {
         for value in exceedingCounts {
             #expect(
                 !analyzer.canFit(
-                    characterCount: value.characterCount,
+                    value.characterCount,
                     mode: value.mode,
                     errorCorrectionLevel: .H,
                     version: .v1
@@ -164,7 +164,7 @@ struct DataAnalyzerTests {
         #expect(result == nil)
     }
     
-    // MARK: - recommendedVersion(characterCount:mode:errorCorrectionLevel:)
+    // MARK: - recommendedVersion(for:mode:errorCorrectionLevel:)
     
     @Test
     func recommendsVersion1AtConfigurationCapacity() {
@@ -179,7 +179,7 @@ struct DataAnalyzerTests {
         
         for capacity in capacities {
             let version = analyzer.recommendedVersion(
-                characterCount: capacity.characterCount,
+                for: capacity.characterCount,
                 mode: capacity.mode,
                 errorCorrectionLevel: .H
             )
@@ -201,7 +201,7 @@ struct DataAnalyzerTests {
         
         for value in characterCounts {
             let version = analyzer.recommendedVersion(
-                characterCount: value.characterCount,
+                for: value.characterCount,
                 mode: value.mode,
                 errorCorrectionLevel: .H
             )
@@ -223,7 +223,7 @@ struct DataAnalyzerTests {
         
         for value in exceedingCounts {
             let version = analyzer.recommendedVersion(
-                characterCount: value.characterCount,
+                for: value.characterCount,
                 mode: value.mode,
                 errorCorrectionLevel: .min
             )
@@ -232,10 +232,10 @@ struct DataAnalyzerTests {
         }
     }
     
-    // MARK: - maximizeErrorCorrectionLevel(characterCount:mode:version:)
+    // MARK: - recommendedErrorCorrectionLevel(for:mode:version:)
     
     @Test
-    func maximizesErrorCorrectionLevel() {
+    func recommendsHighestErrorCorrectionLevel() {
         let analyzer = DataAnalyzer()
         
         let cases: [(characterCount: Int, expectedLevel: ErrorCorrectionLevel)] = [
@@ -246,8 +246,8 @@ struct DataAnalyzerTests {
         ]
         
         for testCase in cases {
-            let level = analyzer.maximizeErrorCorrectionLevel(
-                characterCount: testCase.characterCount,
+            let level = analyzer.recommendedErrorCorrectionLevel(
+                for: testCase.characterCount,
                 mode: .byte,
                 version: .v1
             )
@@ -257,11 +257,11 @@ struct DataAnalyzerTests {
     }
     
     @Test
-    func returnsNoErrorCorrectionLevelAboveVersionCapacity() {
+    func returnsNoRecommendedErrorCorrectionLevelAboveVersionCapacity() {
         let analyzer = DataAnalyzer()
         
-        let level = analyzer.maximizeErrorCorrectionLevel(
-            characterCount: 18,
+        let level = analyzer.recommendedErrorCorrectionLevel(
+            for: 18,
             mode: .byte,
             version: .v1
         )
