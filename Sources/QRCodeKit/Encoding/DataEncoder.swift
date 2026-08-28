@@ -13,10 +13,10 @@ struct DataEncoder {
         version: QRVersion
     ) -> [UInt8] {
         let modeIndicator = mode.indicator
-        let modeIndicatorLength = 4
+        let modeIndicatorBitCount = 4
         
         let characterCountIndicator = UInt32(mode.characterCount(for: message))
-        let characterCountIndicatorLength = CharacterCountIndicatorLengths.length(
+        let characterCountIndicatorBitCount = CharacterCountIndicator.bitCount(
             for: version,
             mode: mode
         )
@@ -30,8 +30,8 @@ struct DataEncoder {
         
         let totalDataBits = totalDataCodewords * 8
         var currentDataBits = (
-            modeIndicatorLength +
-            characterCountIndicatorLength +
+            modeIndicatorBitCount +
+            characterCountIndicatorBitCount +
             encodedData.count
         )
         
@@ -41,24 +41,24 @@ struct DataEncoder {
         )
         
         let remainingDataBits = totalDataBits - currentDataBits
-        let terminatorLength = min(4, remainingDataBits)
+        let terminatorBitCount = min(4, remainingDataBits)
         
-        currentDataBits += terminatorLength
+        currentDataBits += terminatorBitCount
         
-        let byteAlignmentLength = (8 - currentDataBits % 8) % 8
+        let byteAlignmentBitCount = (8 - currentDataBits % 8) % 8
         
-        currentDataBits += byteAlignmentLength
+        currentDataBits += byteAlignmentBitCount
         
         let padByteCount = (totalDataBits - currentDataBits) / 8
         let padBytes = makePadBytes(count: padByteCount)
         
         var buffer = BitBuffer()
         
-        buffer.append(modeIndicator, bitCount: modeIndicatorLength)
-        buffer.append(characterCountIndicator, bitCount: characterCountIndicatorLength)
+        buffer.append(modeIndicator, bitCount: modeIndicatorBitCount)
+        buffer.append(characterCountIndicator, bitCount: characterCountIndicatorBitCount)
         buffer.append(contentsOf: encodedData)
-        buffer.append(0, bitCount: terminatorLength)
-        buffer.append(0, bitCount: byteAlignmentLength)
+        buffer.append(0, bitCount: terminatorBitCount)
+        buffer.append(0, bitCount: byteAlignmentBitCount)
         buffer.append(contentsOf: padBytes)
         
         assert(
