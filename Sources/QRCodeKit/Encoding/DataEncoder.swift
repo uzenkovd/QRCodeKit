@@ -5,7 +5,10 @@
 //  Created by Dmytro Uzenkov on 15.08.2026.
 //
 
+// TODO: Consider extracting mode-specific encoding and validation into dedicated encoders.
 struct DataEncoder {
+
+    // TODO: Consider introducing EncodingResult to expose the individual encoding components.
     func encode(
         _ message: String,
         mode: EncodingMode,

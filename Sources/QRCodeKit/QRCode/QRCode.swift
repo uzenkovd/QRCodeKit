@@ -52,6 +52,7 @@ public struct QRCode {
         
         let characterCount = encodingMode.characterCount(for: message)
         
+        // TODO: Distinguish an inefficient explicitly selected encoding mode from an oversized message.
         guard dataAnalyzer.canFit(
             characterCount,
             mode: encodingMode
@@ -62,6 +63,7 @@ public struct QRCode {
         let version: QRVersion
         let errorCorrectionLevel: ErrorCorrectionLevel
         
+        // TODO: Extract QR configuration selection into QRConfigurationResolver.
         switch (options.version, options.errorCorrectionLevel) {
         case let (optionVersion?, optionLevel?):
             guard dataAnalyzer.canFit(
@@ -142,6 +144,7 @@ public struct QRCode {
             errorCorrectionLevel = recommendedLevel
         }
         
+        // TODO: Select the optimal mask automatically when no mask is specified.
         let mask = options.mask ?? .default
         
         self.message = message
