@@ -12,7 +12,7 @@ import Testing
 struct GF256Tests {
     @Test
     func exponentForZeroIsNil() {
-        #expect(GF256(0).exponent == nil)
+        #expect(GF256.zero.exponent == nil)
     }
 
     @Test
@@ -68,15 +68,15 @@ struct GF256Tests {
     @Test
     func additionWithZeroReturnsSameValue() {
         for value in UInt8.min ... .max {
-            #expect(GF256(value) + GF256(0) == GF256(value))
-            #expect(GF256(0) + GF256(value) == GF256(value))
+            #expect(GF256(value) + GF256.zero == GF256(value))
+            #expect(GF256.zero + GF256(value) == GF256(value))
         }
     }
 
     @Test
     func additionWithItselfReturnsZero() {
         for value in UInt8.min ... .max {
-            #expect(GF256(value) + GF256(value) == GF256(0))
+            #expect(GF256(value) + GF256(value) == GF256.zero)
         }
     }
 
@@ -97,15 +97,15 @@ struct GF256Tests {
     @Test
     func subtractionWithZeroReturnsSameValue() {
         for value in UInt8.min ... .max {
-            #expect(GF256(value) - GF256(0) == GF256(value))
-            #expect(GF256(0) - GF256(value) == GF256(value))
+            #expect(GF256(value) - GF256.zero == GF256(value))
+            #expect(GF256.zero - GF256(value) == GF256(value))
         }
     }
 
     @Test
     func subtractionFromItselfReturnsZero() {
         for value in UInt8.min ... .max {
-            #expect(GF256(value) - GF256(value) == GF256(0))
+            #expect(GF256(value) - GF256(value) == GF256.zero)
         }
     }
 
@@ -126,16 +126,16 @@ struct GF256Tests {
     @Test
     func multiplicationByZeroReturnsZero() {
         for value in UInt8.min ... .max {
-            #expect(GF256(0) * GF256(value) == GF256(0))
-            #expect(GF256(value) * GF256(0) == GF256(0))
+            #expect(GF256.zero * GF256(value) == GF256.zero)
+            #expect(GF256(value) * GF256.zero == GF256.zero)
         }
     }
 
     @Test
     func multiplicationByOneReturnsSameValue() {
         for value in UInt8.min ... .max {
-            #expect(GF256(1) * GF256(value) == GF256(value))
-            #expect(GF256(value) * GF256(1) == GF256(value))
+            #expect(GF256.one * GF256(value) == GF256(value))
+            #expect(GF256(value) * GF256.one == GF256(value))
         }
     }
 
@@ -158,21 +158,21 @@ struct GF256Tests {
     @Test
     func zeroDividedByNonZeroValueReturnsZero() {
         for value in UInt8(1) ... .max {
-            #expect(GF256(0) / GF256(value) == GF256(0))
+            #expect(GF256.zero / GF256(value) == GF256.zero)
         }
     }
 
     @Test
     func divisionByOneReturnsSameValue() {
         for value in UInt8.min ... .max {
-            #expect(GF256(value) / GF256(1) == GF256(value))
+            #expect(GF256(value) / GF256.one == GF256(value))
         }
     }
 
     @Test
     func everyNonZeroValueDividedByItselfReturnsOne() {
         for value in UInt8(1) ... .max {
-            #expect(GF256(value) / GF256(value) == GF256(1))
+            #expect(GF256(value) / GF256(value) == GF256.one)
         }
     }
 

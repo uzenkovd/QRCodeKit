@@ -6,6 +6,9 @@
 //
 
 struct GF256: Equatable {
+    static let zero = GF256(0)
+    static let one = GF256(1)
+
     let value: UInt8
 
     var exponent: Int? {
@@ -29,8 +32,8 @@ extension GF256 {
     }
 
     static func * (lhs: GF256, rhs: GF256) -> GF256 {
-        guard lhs.value != 0, rhs.value != 0 else {
-            return GF256(0)
+        guard lhs != .zero, rhs != .zero else {
+            return .zero
         }
 
         let resultExponent = (lhs.exponent! + rhs.exponent!) % 255
@@ -41,12 +44,12 @@ extension GF256 {
 
     static func / (lhs: GF256, rhs: GF256) -> GF256 {
         precondition(
-            rhs.value != 0,
+            rhs != .zero,
             "Division by zero in GF(256)"
         )
 
-        guard lhs.value != 0 else {
-            return GF256(0)
+        guard lhs != .zero else {
+            return .zero
         }
 
         let resultExponent = (lhs.exponent! - rhs.exponent! + 255) % 255
