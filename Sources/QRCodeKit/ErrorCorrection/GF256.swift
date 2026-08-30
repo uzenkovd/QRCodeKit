@@ -17,14 +17,55 @@ struct GF256: Equatable {
     }
 }
 
+// MARK: - Arithmetic
+
+extension GF256 {
+    static func + (lhs: GF256, rhs: GF256) -> GF256 {
+        GF256(lhs.value ^ rhs.value)
+    }
+
+    static func - (lhs: GF256, rhs: GF256) -> GF256 {
+        GF256(lhs.value ^ rhs.value)
+    }
+
+    static func * (lhs: GF256, rhs: GF256) -> GF256 {
+        guard lhs.value != 0, rhs.value != 0 else {
+            return GF256(0)
+        }
+
+        let resultExponent = (lhs.exponent! + rhs.exponent!) % 255
+        let value = Self.tables.exponent[resultExponent]
+
+        return GF256(value)
+    }
+
+    static func / (lhs: GF256, rhs: GF256) -> GF256 {
+        precondition(
+            rhs.value != 0,
+            "Division by zero in GF(256)"
+        )
+
+        guard lhs.value != 0 else {
+            return GF256(0)
+        }
+
+        let resultExponent = (lhs.exponent! - rhs.exponent! + 255) % 255
+        let value = Self.tables.exponent[resultExponent]
+
+        return GF256(value)
+    }
+}
+
+// MARK: - Log and Exponent Tables
+
 private extension GF256 {
     struct Tables {
-        let exponent: [UInt8]
         let log: [Int?]
+        let exponent: [UInt8]
 
-        init(_ exponent: [UInt8], _ log: [Int?]) {
-            self.exponent = exponent
+        init(_ log: [Int?], _ exponent: [UInt8]) {
             self.log = log
+            self.exponent = exponent
         }
     }
 
@@ -34,20 +75,20 @@ private extension GF256 {
     static let tables = makeTables()
 
     static func makeTables() -> Tables {
-        var exponents = Array(
-            repeating: UInt8.zero,
-            count: 255
-        )
         var logs = Array<Int?>(
             repeating: nil,
             count: 256
+        )
+        var exponents = Array(
+            repeating: UInt8.zero,
+            count: 255
         )
 
         var value = 1
 
         for exponent in 0..<255 {
-            exponents[exponent] = UInt8(value)
             logs[value] = exponent
+            exponents[exponent] = UInt8(value)
 
             value <<= 1
 
@@ -56,6 +97,6 @@ private extension GF256 {
             }
         }
 
-        return Tables(exponents, logs)
+        return Tables(logs, exponents)
     }
 }

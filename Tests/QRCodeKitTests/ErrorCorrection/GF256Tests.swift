@@ -50,7 +50,7 @@ struct GF256Tests {
     func allNonZeroValuesHaveUniqueExponents() {
         var exponents = Set<Int>()
 
-        for value in UInt8(1)...UInt8.max {
+        for value in UInt8(1) ... .max {
             let exponent = GF256(value).exponent
 
             #expect(exponent != nil)
@@ -61,5 +61,133 @@ struct GF256Tests {
         }
 
         #expect(exponents == Set(0..<255))
+    }
+
+    // MARK: - Arithmetic
+
+    @Test
+    func additionWithZeroReturnsSameValue() {
+        for value in UInt8.min ... .max {
+            #expect(GF256(value) + GF256(0) == GF256(value))
+            #expect(GF256(0) + GF256(value) == GF256(value))
+        }
+    }
+
+    @Test
+    func additionWithItselfReturnsZero() {
+        for value in UInt8.min ... .max {
+            #expect(GF256(value) + GF256(value) == GF256(0))
+        }
+    }
+
+    @Test(arguments: [
+        (UInt8(0x05), UInt8(0x03), UInt8(0x06)),
+        (UInt8(0x2A), UInt8(0x11), UInt8(0x3B)),
+        (UInt8(0x80), UInt8(0x1D), UInt8(0x9D)),
+        (UInt8(0xFF), UInt8(0x8E), UInt8(0x71))
+    ])
+    func additionForKnownValues(
+        lhs: UInt8,
+        rhs: UInt8,
+        expected: UInt8
+    ) {
+        #expect(GF256(lhs) + GF256(rhs) == GF256(expected))
+    }
+
+    @Test
+    func subtractionWithZeroReturnsSameValue() {
+        for value in UInt8.min ... .max {
+            #expect(GF256(value) - GF256(0) == GF256(value))
+            #expect(GF256(0) - GF256(value) == GF256(value))
+        }
+    }
+
+    @Test
+    func subtractionFromItselfReturnsZero() {
+        for value in UInt8.min ... .max {
+            #expect(GF256(value) - GF256(value) == GF256(0))
+        }
+    }
+
+    @Test(arguments: [
+        (UInt8(0x05), UInt8(0x03), UInt8(0x06)),
+        (UInt8(0x2A), UInt8(0x11), UInt8(0x3B)),
+        (UInt8(0x80), UInt8(0x1D), UInt8(0x9D)),
+        (UInt8(0xFF), UInt8(0x8E), UInt8(0x71))
+    ])
+    func subtractionForKnownValues(
+        lhs: UInt8,
+        rhs: UInt8,
+        expected: UInt8
+    ) {
+        #expect(GF256(lhs) - GF256(rhs) == GF256(expected))
+    }
+
+    @Test
+    func multiplicationByZeroReturnsZero() {
+        for value in UInt8.min ... .max {
+            #expect(GF256(0) * GF256(value) == GF256(0))
+            #expect(GF256(value) * GF256(0) == GF256(0))
+        }
+    }
+
+    @Test
+    func multiplicationByOneReturnsSameValue() {
+        for value in UInt8.min ... .max {
+            #expect(GF256(1) * GF256(value) == GF256(value))
+            #expect(GF256(value) * GF256(1) == GF256(value))
+        }
+    }
+
+    @Test(arguments: [
+        (UInt8(0x05), UInt8(0x03), UInt8(0x0F)),
+        (UInt8(0x2A), UInt8(0x11), UInt8(0xB0)),
+        (UInt8(0xFF), UInt8(0x8E), UInt8(0xF1)),
+        (UInt8(0xCC), UInt8(0x85), UInt8(0x01)),
+        (UInt8(0x1D), UInt8(0x3A), UInt8(0x98)),
+        (UInt8(0x80), UInt8(0x80), UInt8(0x13))
+    ])
+    func multiplicationForKnownValues(
+        lhs: UInt8,
+        rhs: UInt8,
+        expected: UInt8
+    ) {
+        #expect(GF256(lhs) * GF256(rhs) == GF256(expected))
+    }
+
+    @Test
+    func zeroDividedByNonZeroValueReturnsZero() {
+        for value in UInt8(1) ... .max {
+            #expect(GF256(0) / GF256(value) == GF256(0))
+        }
+    }
+
+    @Test
+    func divisionByOneReturnsSameValue() {
+        for value in UInt8.min ... .max {
+            #expect(GF256(value) / GF256(1) == GF256(value))
+        }
+    }
+
+    @Test
+    func everyNonZeroValueDividedByItselfReturnsOne() {
+        for value in UInt8(1) ... .max {
+            #expect(GF256(value) / GF256(value) == GF256(1))
+        }
+    }
+
+    @Test(arguments: [
+        (UInt8(0x05), UInt8(0x03), UInt8(0x03)),
+        (UInt8(0x2A), UInt8(0x11), UInt8(0xB5)),
+        (UInt8(0xFF), UInt8(0x8E), UInt8(0xE3)),
+        (UInt8(0xCC), UInt8(0x85), UInt8(0x8E)),
+        (UInt8(0x1D), UInt8(0x3A), UInt8(0x8E))
+    ])
+    func divisionForKnownValues(
+        lhs: UInt8,
+        rhs: UInt8,
+        expected: UInt8
+    ) {
+        #expect(GF256(lhs) / GF256(rhs) == GF256(expected))
     }
 }
