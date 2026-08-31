@@ -10,6 +10,8 @@ import Testing
 
 @Suite
 struct GF256Tests {
+    // MARK: - Representation
+
     @Test
     func exponentForZeroIsNil() {
         #expect(GF256.zero.exponent == nil)
@@ -63,7 +65,7 @@ struct GF256Tests {
         #expect(exponents == Set(0..<255))
     }
 
-    // MARK: - Arithmetic
+    // MARK: - Addition
 
     @Test
     func additionWithZeroReturnsSameValue() {
@@ -95,6 +97,17 @@ struct GF256Tests {
     }
 
     @Test
+    func additionAssignmentUpdatesValue() {
+        var value = GF256(0x2A)
+
+        value += GF256(0x11)
+
+        #expect(value == GF256(0x3B))
+    }
+
+    // MARK: - Subtraction
+
+    @Test
     func subtractionWithZeroReturnsSameValue() {
         for value in UInt8.min ... .max {
             #expect(GF256(value) - GF256.zero == GF256(value))
@@ -122,6 +135,17 @@ struct GF256Tests {
     ) {
         #expect(GF256(lhs) - GF256(rhs) == GF256(expected))
     }
+
+    @Test
+    func subtractionAssignmentUpdatesValue() {
+        var value = GF256(0x2A)
+
+        value -= GF256(0x11)
+
+        #expect(value == GF256(0x3B))
+    }
+
+    // MARK: - Multiplication
 
     @Test
     func multiplicationByZeroReturnsZero() {
@@ -154,6 +178,17 @@ struct GF256Tests {
     ) {
         #expect(GF256(lhs) * GF256(rhs) == GF256(expected))
     }
+
+    @Test
+    func multiplicationAssignmentUpdatesValue() {
+        var value = GF256(0x2A)
+
+        value *= GF256(0x11)
+
+        #expect(value == GF256(0xB0))
+    }
+
+    // MARK: - Division
 
     @Test
     func zeroDividedByNonZeroValueReturnsZero() {
@@ -189,5 +224,14 @@ struct GF256Tests {
         expected: UInt8
     ) {
         #expect(GF256(lhs) / GF256(rhs) == GF256(expected))
+    }
+
+    @Test
+    func divisionAssignmentUpdatesValue() {
+        var value = GF256(0x2A)
+
+        value /= GF256(0x11)
+
+        #expect(value == GF256(0xB5))
     }
 }

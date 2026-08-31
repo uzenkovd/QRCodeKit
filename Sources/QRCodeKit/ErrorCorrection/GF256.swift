@@ -5,7 +5,7 @@
 //  Created by Dmytro Uzenkov on 29.08.2026.
 //
 
-struct GF256: Equatable {
+struct GF256: AdditiveArithmetic {
     static let zero = GF256(0)
     static let one = GF256(1)
 
@@ -27,8 +27,16 @@ extension GF256 {
         GF256(lhs.value ^ rhs.value)
     }
 
+    static func += (lhs: inout GF256, rhs: GF256) {
+        lhs = lhs + rhs
+    }
+
     static func - (lhs: GF256, rhs: GF256) -> GF256 {
         GF256(lhs.value ^ rhs.value)
+    }
+
+    static func -= (lhs: inout GF256, rhs: GF256) {
+        lhs = lhs - rhs
     }
 
     static func * (lhs: GF256, rhs: GF256) -> GF256 {
@@ -40,6 +48,10 @@ extension GF256 {
         let value = Self.tables.exponent[resultExponent]
 
         return GF256(value)
+    }
+
+    static func *= (lhs: inout GF256, rhs: GF256) {
+        lhs = lhs * rhs
     }
 
     static func / (lhs: GF256, rhs: GF256) -> GF256 {
@@ -56,6 +68,10 @@ extension GF256 {
         let value = Self.tables.exponent[resultExponent]
 
         return GF256(value)
+    }
+
+    static func /= (lhs: inout GF256, rhs: GF256) {
+        lhs = lhs / rhs
     }
 }
 
