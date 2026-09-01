@@ -10,6 +10,18 @@ import Testing
 
 @Suite
 struct PolynomialTests {
+    // MARK: - Representation
+
+    @Test
+    func onePolynomialHasExpectedRepresentation() {
+        let polynomial = Polynomial.one
+
+        #expect(polynomial.coefficients == [.one])
+        #expect(polynomial.count == 1)
+        #expect(polynomial.degree == 0)
+        #expect(!polynomial.isZero)
+    }
+
     @Test
     func initializationFromUInt8StoresCoefficients() {
         let polynomial = Polynomial([5, 3, 1])
@@ -72,9 +84,38 @@ struct PolynomialTests {
     ) {
         let polynomial = Polynomial(coefficients)
 
-        #expect(polynomial.isZero)
-        #expect(polynomial.degree == 0)
+        #expect(polynomial == .zero)
         #expect(polynomial.coefficients == [.zero])
+        #expect(polynomial.count == 1)
+        #expect(polynomial.degree == 0)
+        #expect(polynomial.isZero)
+    }
+
+    @Test(arguments: [
+        [1],
+        [0, 8, 0],
+        [2, 0, 0],
+        [0, 47, 84, 5]
+    ])
+    func nonZeroPolynomialsAreNotZero(
+        coefficients: [UInt8]
+    ) {
+        #expect(!Polynomial(coefficients).isZero)
+    }
+
+    @Test(arguments: [
+        ([5], 1),
+        ([6, 7], 2),
+        ([2, 3, 0], 3),
+        ([0, 9, 5, 0, 2], 4)
+    ])
+    func countForKnownCoefficients(
+        coefficients: [UInt8],
+        expected: Int
+    ) {
+        let polynomial = Polynomial(coefficients)
+
+        #expect(polynomial.count == expected)
     }
 
     @Test(arguments: [
@@ -94,15 +135,141 @@ struct PolynomialTests {
         #expect(polynomial.degree == expected)
     }
 
+    @Test
+    func subscriptReturnsCoefficientsAtIndex() {
+        let polynomial = Polynomial([5, 3, 2])
+
+        #expect(polynomial[0] == GF256(5))
+        #expect(polynomial[1] == GF256(3))
+        #expect(polynomial[2] == GF256(2))
+    }
+
+    // MARK: - Addition
+
+    @Test
+    func additionWithZeroReturnsSamePolynomial() {
+        let polynomial = Polynomial([5, 3, 2])
+
+        #expect(polynomial + .zero == polynomial)
+        #expect(.zero + polynomial == polynomial)
+    }
+
+    @Test
+    func additionWithItselfReturnsZeroPolynomial() {
+        let polynomial = Polynomial([5, 3, 2])
+
+        #expect(polynomial + polynomial == .zero)
+    }
+
     @Test(arguments: [
-        [1],
-        [0, 8, 0],
-        [2, 0, 0],
-        [0, 47, 84, 5]
+        ([5, 3, 2], [7, 4, 1], [2, 7, 3]),
+        ([5, 3, 2], [7, 4], [5, 4, 6]),
+        ([7, 4], [5, 3, 2], [5, 4, 6]),
+        ([5, 3, 2], [5, 7, 4], [4, 6]),
+        ([5, 3, 2], [5, 3, 4], [6])
     ])
-    func nonZeroPolynomialsAreNotZero(
-        coefficients: [UInt8]
+    func additionForKnownPolynomials(
+        lhs: [UInt8],
+        rhs: [UInt8],
+        expected: [UInt8]
     ) {
-        #expect(!Polynomial(coefficients).isZero)
+        #expect(
+            Polynomial(lhs) + Polynomial(rhs) == Polynomial(expected)
+        )
+    }
+
+    @Test
+    func additionAssignmentUpdatesPolynomial() {
+        var polynomial = Polynomial([5, 3, 2])
+
+        polynomial += Polynomial([7, 4])
+
+        #expect(polynomial == Polynomial([5, 4, 6]))
+    }
+
+    // MARK: - Subtraction
+
+    @Test
+    func subtractionWithZeroReturnsSamePolynomial() {
+        let polynomial = Polynomial([5, 3, 2])
+
+        #expect(polynomial - .zero == polynomial)
+        #expect(.zero - polynomial == polynomial)
+    }
+
+    @Test
+    func subtractionFromItselfReturnsZeroPolynomial() {
+        let polynomial = Polynomial([5, 3, 2])
+
+        #expect(polynomial - polynomial == .zero)
+    }
+
+    @Test(arguments: [
+        ([12, 25, 7], [5, 9, 3], [9, 16, 4]),
+        ([18, 6, 11], [7, 4], [18, 1, 15]),
+        ([21, 8, 3], [21, 13, 7], [5, 4])
+    ])
+    func subtractionForKnownPolynomials(
+        lhs: [UInt8],
+        rhs: [UInt8],
+        expected: [UInt8]
+    ) {
+        #expect(
+            Polynomial(lhs) - Polynomial(rhs) == Polynomial(expected)
+        )
+    }
+
+    @Test
+    func subtractionAssignmentUpdatesPolynomial() {
+        var polynomial = Polynomial([18, 6, 11])
+
+        polynomial -= Polynomial([7, 4])
+
+        #expect(polynomial == Polynomial([18, 1, 15]))
+    }
+
+    // MARK: - Multiplication
+
+    @Test
+    func multiplicationByZeroReturnsZeroPolynomial() {
+        let polynomial = Polynomial([5, 3, 2])
+
+        #expect(polynomial * .zero == .zero)
+        #expect(.zero * polynomial == .zero)
+    }
+
+    @Test
+    func multiplicationByOneReturnsSamePolynomial() {
+        let polynomial = Polynomial([5, 3, 2])
+
+        #expect(polynomial * .one == polynomial)
+        #expect(.one * polynomial == polynomial)
+    }
+
+    @Test(arguments: [
+        ([5, 3, 2], [7, 4], [27, 29, 2, 8]),
+        ([7, 4], [5, 3, 2], [27, 29, 2, 8]),
+        ([5, 3, 2], [7, 4, 1], [27, 29, 7, 11, 2]),
+        ([1, 0, 1], [1, 1], [1, 1, 1, 1]),
+        ([5], [7, 4, 1], [27, 20, 5]),
+        ([1, 0, 0], [7, 4], [7, 4, 0, 0])
+    ])
+    func multiplicationForKnownPolynomials(
+        lhs: [UInt8],
+        rhs: [UInt8],
+        expected: [UInt8]
+    ) {
+        #expect(
+            Polynomial(lhs) * Polynomial(rhs) == Polynomial(expected)
+        )
+    }
+
+    @Test
+    func multiplicationAssignmentUpdatesPolynomial() {
+        var polynomial = Polynomial([5, 3, 2])
+
+        polynomial *= Polynomial([7, 4])
+
+        #expect(polynomial == Polynomial([27, 29, 2, 8]))
     }
 }
