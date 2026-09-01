@@ -99,4 +99,78 @@ extension Polynomial {
     static func *= (lhs: inout Polynomial, rhs: Polynomial) {
         lhs = lhs * rhs
     }
+
+    static func / (lhs: Polynomial, rhs: Polynomial) -> Polynomial {
+        lhs.quotientAndRemainder(dividingBy: rhs).quotient
+    }
+
+    static func /= (lhs: inout Polynomial, rhs: Polynomial) {
+        lhs = lhs / rhs
+    }
+
+    static func % (lhs: Polynomial, rhs: Polynomial) -> Polynomial {
+        lhs.quotientAndRemainder(dividingBy: rhs).remainder
+    }
+
+    static func %= (lhs: inout Polynomial, rhs: Polynomial) {
+        lhs = lhs % rhs
+    }
+}
+
+// MARK: - Long Division
+
+extension Polynomial {
+    func quotientAndRemainder(
+        dividingBy divisor: Polynomial
+    ) -> (quotient: Polynomial, remainder: Polynomial) {
+        // dividend = divisor * quotient + remainder,
+        // where remainder is zero or remainder.degree < divisor.degree
+
+        precondition(
+            !divisor.isZero,
+            "Division by zero polynomial"
+        )
+
+        guard !isZero else {
+            return (.zero, .zero)
+        }
+
+        guard degree >= divisor.degree else {
+            return (.zero, self)
+        }
+
+        let quotientCount = degree - divisor.degree + 1
+        var quotientCoefficients = Array(
+            repeating: GF256.zero,
+            count: quotientCount
+        )
+
+        var workingCoefficients = coefficients
+
+        for quotientIndex in 0..<quotientCount {
+            let quotientCoefficient =
+                workingCoefficients[quotientIndex] / divisor[0]
+
+            quotientCoefficients[quotientIndex] = quotientCoefficient
+
+            for divisorIndex in 0..<divisor.count {
+                let workingIndex = quotientIndex + divisorIndex
+                let product =
+                    quotientCoefficient * divisor[divisorIndex]
+
+                workingCoefficients[workingIndex] -= product
+            }
+        }
+
+        let remainderCoefficients = Array(
+            workingCoefficients.dropFirst(quotientCount)
+        )
+
+        let quotient = Polynomial(quotientCoefficients)
+        let remainder = remainderCoefficients.isEmpty
+            ? .zero
+            : Polynomial(remainderCoefficients)
+
+        return (quotient, remainder)
+    }
 }
