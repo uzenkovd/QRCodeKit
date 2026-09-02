@@ -273,6 +273,31 @@ struct PolynomialTests {
         #expect(polynomial == Polynomial([27, 29, 2, 8]))
     }
 
+    // MARK: - Multiplication by X Power
+
+    @Test
+    func zeroMultipliedByXPowerReturnsZero() {
+        let zero = Polynomial.zero
+
+        #expect(zero.multipliedByXPower(5) == .zero)
+    }
+
+    @Test
+    func multiplicationByZeroPowerReturnsPolynomial() {
+        let polynomial = Polynomial([5, 3, 2])
+
+        #expect(polynomial.multipliedByXPower(0) == polynomial)
+    }
+
+    @Test
+    func multiplicationByXPowerAppendsZeroCoefficients() {
+        let polynomial = Polynomial([5, 3, 2])
+
+        let result = polynomial.multipliedByXPower(3)
+
+        #expect(result == Polynomial([5, 3, 2, 0, 0, 0]))
+    }
+
     // MARK: - Division
 
     @Test

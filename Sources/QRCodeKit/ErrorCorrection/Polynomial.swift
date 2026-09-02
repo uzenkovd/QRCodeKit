@@ -115,6 +115,24 @@ extension Polynomial {
     static func %= (lhs: inout Polynomial, rhs: Polynomial) {
         lhs = lhs % rhs
     }
+
+    func multipliedByXPower(_ exponent: Int) -> Polynomial {
+        precondition(
+            exponent >= 0,
+            "Exponent must be non-negative"
+        )
+
+        guard exponent > 0, !isZero else {
+            return self
+        }
+
+        return Polynomial(
+            coefficients + Array(
+                repeating: .zero,
+                count: exponent
+            )
+        )
+    }
 }
 
 // MARK: - Long Division
