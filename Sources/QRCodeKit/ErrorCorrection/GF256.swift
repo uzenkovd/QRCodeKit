@@ -18,6 +18,15 @@ struct GF256: AdditiveArithmetic {
     init(_ value: UInt8) {
         self.value = value
     }
+
+    init(exponent: Int) {
+        precondition(
+            (0..<255).contains(exponent),
+            "GF(256) exponent must be in the range 0...254"
+        )
+
+        self.value = Self.tables.exponent[exponent]
+    }
 }
 
 // MARK: - Arithmetic
@@ -32,7 +41,8 @@ extension GF256 {
     }
 
     static func - (lhs: GF256, rhs: GF256) -> GF256 {
-        GF256(lhs.value ^ rhs.value)
+        // - is identical to + in GF(256): a - b = a + b
+        lhs + rhs
     }
 
     static func -= (lhs: inout GF256, rhs: GF256) {

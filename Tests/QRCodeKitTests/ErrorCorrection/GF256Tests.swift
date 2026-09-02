@@ -32,20 +32,37 @@ struct GF256Tests {
     }
 
     @Test(arguments: [
-        (UInt8(0x01), 0),
-        (UInt8(0x02), 1),
-        (UInt8(0x80), 7),
-        (UInt8(0x1D), 8),
-        (UInt8(0x3A), 9),
-        (UInt8(0x05), 50),
-        (UInt8(0xCC), 127),
-        (UInt8(0x85), 128),
-        (UInt8(0xFF), 175),
-        (UInt8(0x1C), 200),
-        (UInt8(0x8E), 254)
+        (0x01, 0),
+        (0x02, 1),
+        (0x80, 7),
+        (0x1D, 8),
+        (0x3A, 9),
+        (0x05, 50),
+        (0xCC, 127),
+        (0x85, 128),
+        (0xFF, 175),
+        (0x1C, 200),
+        (0x8E, 254)
     ])
     func exponentForKnownValues(value: UInt8, exponent: Int) {
         #expect(GF256(value).exponent == exponent)
+    }
+
+    @Test(arguments: [
+        (0, 0x01),
+        (1, 0x02),
+        (7, 0x80),
+        (8, 0x1D),
+        (9, 0x3A),
+        (50, 0x05),
+        (127, 0xCC),
+        (128, 0x85),
+        (175, 0xFF),
+        (200, 0x1C),
+        (254, 0x8E)
+    ])
+    func valueForKnownExponents(exponent: Int, value: UInt8) {
+        #expect(GF256(exponent: exponent).value == value)
     }
 
     @Test
@@ -65,28 +82,37 @@ struct GF256Tests {
         #expect(exponents == Set(0..<255))
     }
 
+    @Test
+    func allExponentsRoundTrip() {
+        for exponent in 0..<255 {
+            let element = GF256(exponent: exponent)
+
+            #expect(element.exponent == exponent)
+        }
+    }
+
     // MARK: - Addition
 
     @Test
     func additionWithZeroReturnsSameValue() {
         for value in UInt8.min ... .max {
-            #expect(GF256(value) + GF256.zero == GF256(value))
-            #expect(GF256.zero + GF256(value) == GF256(value))
+            #expect(GF256(value) + .zero == GF256(value))
+            #expect(.zero + GF256(value) == GF256(value))
         }
     }
 
     @Test
     func additionWithItselfReturnsZero() {
         for value in UInt8.min ... .max {
-            #expect(GF256(value) + GF256(value) == GF256.zero)
+            #expect(GF256(value) + GF256(value) == .zero)
         }
     }
 
     @Test(arguments: [
-        (UInt8(0x05), UInt8(0x03), UInt8(0x06)),
-        (UInt8(0x2A), UInt8(0x11), UInt8(0x3B)),
-        (UInt8(0x80), UInt8(0x1D), UInt8(0x9D)),
-        (UInt8(0xFF), UInt8(0x8E), UInt8(0x71))
+        (0x05, 0x03, 0x06),
+        (0x2A, 0x11, 0x3B),
+        (0x80, 0x1D, 0x9D),
+        (0xFF, 0x8E, 0x71)
     ])
     func additionForKnownValues(
         lhs: UInt8,
@@ -110,23 +136,23 @@ struct GF256Tests {
     @Test
     func subtractionWithZeroReturnsSameValue() {
         for value in UInt8.min ... .max {
-            #expect(GF256(value) - GF256.zero == GF256(value))
-            #expect(GF256.zero - GF256(value) == GF256(value))
+            #expect(GF256(value) - .zero == GF256(value))
+            #expect(.zero - GF256(value) == GF256(value))
         }
     }
 
     @Test
     func subtractionFromItselfReturnsZero() {
         for value in UInt8.min ... .max {
-            #expect(GF256(value) - GF256(value) == GF256.zero)
+            #expect(GF256(value) - GF256(value) == .zero)
         }
     }
 
     @Test(arguments: [
-        (UInt8(0x05), UInt8(0x03), UInt8(0x06)),
-        (UInt8(0x2A), UInt8(0x11), UInt8(0x3B)),
-        (UInt8(0x80), UInt8(0x1D), UInt8(0x9D)),
-        (UInt8(0xFF), UInt8(0x8E), UInt8(0x71))
+        (0x05, 0x03, 0x06),
+        (0x2A, 0x11, 0x3B),
+        (0x80, 0x1D, 0x9D),
+        (0xFF, 0x8E, 0x71)
     ])
     func subtractionForKnownValues(
         lhs: UInt8,
@@ -150,26 +176,26 @@ struct GF256Tests {
     @Test
     func multiplicationByZeroReturnsZero() {
         for value in UInt8.min ... .max {
-            #expect(GF256.zero * GF256(value) == GF256.zero)
-            #expect(GF256(value) * GF256.zero == GF256.zero)
+            #expect(.zero * GF256(value) == .zero)
+            #expect(GF256(value) * .zero == .zero)
         }
     }
 
     @Test
     func multiplicationByOneReturnsSameValue() {
         for value in UInt8.min ... .max {
-            #expect(GF256.one * GF256(value) == GF256(value))
-            #expect(GF256(value) * GF256.one == GF256(value))
+            #expect(.one * GF256(value) == GF256(value))
+            #expect(GF256(value) * .one == GF256(value))
         }
     }
 
     @Test(arguments: [
-        (UInt8(0x05), UInt8(0x03), UInt8(0x0F)),
-        (UInt8(0x2A), UInt8(0x11), UInt8(0xB0)),
-        (UInt8(0xFF), UInt8(0x8E), UInt8(0xF1)),
-        (UInt8(0xCC), UInt8(0x85), UInt8(0x01)),
-        (UInt8(0x1D), UInt8(0x3A), UInt8(0x98)),
-        (UInt8(0x80), UInt8(0x80), UInt8(0x13))
+        (0x05, 0x03, 0x0F),
+        (0x2A, 0x11, 0xB0),
+        (0xFF, 0x8E, 0xF1),
+        (0xCC, 0x85, 0x01),
+        (0x1D, 0x3A, 0x98),
+        (0x80, 0x80, 0x13)
     ])
     func multiplicationForKnownValues(
         lhs: UInt8,
@@ -193,30 +219,30 @@ struct GF256Tests {
     @Test
     func zeroDividedByNonZeroValueReturnsZero() {
         for value in UInt8(1) ... .max {
-            #expect(GF256.zero / GF256(value) == GF256.zero)
+            #expect(.zero / GF256(value) == .zero)
         }
     }
 
     @Test
     func divisionByOneReturnsSameValue() {
         for value in UInt8.min ... .max {
-            #expect(GF256(value) / GF256.one == GF256(value))
+            #expect(GF256(value) / .one == GF256(value))
         }
     }
 
     @Test
     func everyNonZeroValueDividedByItselfReturnsOne() {
         for value in UInt8(1) ... .max {
-            #expect(GF256(value) / GF256(value) == GF256.one)
+            #expect(GF256(value) / GF256(value) == .one)
         }
     }
 
     @Test(arguments: [
-        (UInt8(0x05), UInt8(0x03), UInt8(0x03)),
-        (UInt8(0x2A), UInt8(0x11), UInt8(0xB5)),
-        (UInt8(0xFF), UInt8(0x8E), UInt8(0xE3)),
-        (UInt8(0xCC), UInt8(0x85), UInt8(0x8E)),
-        (UInt8(0x1D), UInt8(0x3A), UInt8(0x8E))
+        (0x05, 0x03, 0x03),
+        (0x2A, 0x11, 0xB5),
+        (0x8E, 0x02, 0x47),
+        (0xFF, 0x8E, 0xE3),
+        (0xCC, 0x85, 0x8E)
     ])
     func divisionForKnownValues(
         lhs: UInt8,
