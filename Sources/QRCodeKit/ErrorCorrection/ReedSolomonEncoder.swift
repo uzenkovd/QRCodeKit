@@ -6,6 +6,44 @@
 //
 
 struct ReedSolomonEncoder {
+    func encode(
+        _ dataCodewords: [UInt8],
+        errorCorrectionCodewordCount: Int
+    ) -> [UInt8] {
+        // R(x) = M(x) · xⁿ mod gₙ(x)
+
+        precondition(
+            !dataCodewords.isEmpty,
+            "Data codewords must not be empty"
+        )
+        precondition(
+            errorCorrectionCodewordCount > 0,
+            "Error correction codeword count must be greater than zero"
+        )
+        precondition(
+            dataCodewords.count + errorCorrectionCodewordCount <= 255,
+            "Reed-Solomon block must not exceed 255 codewords"
+        )
+
+        let message = Polynomial(dataCodewords)
+            .multipliedByXPower(errorCorrectionCodewordCount)
+        let generator = Self.generatorPolynomial(
+            degree: errorCorrectionCodewordCount
+        )
+        let remainder = message % generator
+
+        let errorCorrectionCodewords = remainder.coefficients.map(\.value)
+
+        let paddingCount =
+            errorCorrectionCodewordCount - errorCorrectionCodewords.count
+        let padding = Array(
+            repeating: UInt8.zero,
+            count: paddingCount
+        )
+
+        return padding + errorCorrectionCodewords
+    }
+
     static func generatorPolynomial(
         degree: Int
     ) -> Polynomial {
