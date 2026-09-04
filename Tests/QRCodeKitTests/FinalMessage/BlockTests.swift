@@ -25,4 +25,28 @@ struct BlockTests {
         #expect(block.dataCodewordCount == dataCodewords.count)
         #expect(block.errorCorrectionCodewordCount == errorCorrectionCodewords.count)
     }
+
+    @Test
+    func equalityUsesCodewords() {
+        let block = Block(
+            dataCodewords: [32, 91, 11, 120],
+            errorCorrectionCodewords: [196, 35, 39]
+        )
+        let equalBlock = Block(
+            dataCodewords: [32, 91, 11, 120],
+            errorCorrectionCodewords: [196, 35, 39]
+        )
+        let differentDataBlock = Block(
+            dataCodewords: [32, 91, 11, 121],
+            errorCorrectionCodewords: [196, 35, 39]
+        )
+        let differentErrorCorrectionBlock = Block(
+            dataCodewords: [32, 91, 11, 120],
+            errorCorrectionCodewords: [196, 35, 40]
+        )
+
+        #expect(block == equalBlock)
+        #expect(block != differentDataBlock)
+        #expect(block != differentErrorCorrectionBlock)
+    }
 }

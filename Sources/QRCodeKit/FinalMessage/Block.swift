@@ -5,7 +5,7 @@
 //  Created by Dmytro Uzenkov on 04.09.2026.
 //
 
-struct Block {
+struct Block: Equatable {
     let dataCodewords: [UInt8]
     let errorCorrectionCodewords: [UInt8]
 
