@@ -5,6 +5,18 @@
 //  Created by Dmytro Uzenkov on 29.08.2026.
 //
 
+/// An element of GF(2⁸) used by Reed-Solomon arithmetic.
+///
+/// Every nonzero field value can be represented uniquely as αᵉ, where α = 2
+/// is a primitive element and e is in the range 0...254. Thus, value = αᵉ
+/// and e = logα(value). Zero has no exponent because logα(0) is undefined.
+/// Since the 255 nonzero elements form a cyclic multiplicative group, α²⁵⁵ = 1.
+/// Exponent arithmetic during multiplication and division is performed modulo 255.
+///
+/// The field uses the primitive polynomial
+/// p(x) = x⁸ + x⁴ + x³ + x² + 1 (0x11D) for reduction. When multiplication
+/// by α = 2 produces a value outside the 8-bit range, reduction modulo p(x)
+/// is performed by XORing with 0x11D.
 struct GF256: AdditiveArithmetic {
     static let zero = GF256(0)
     static let one = GF256(1)
@@ -33,6 +45,8 @@ struct GF256: AdditiveArithmetic {
 
 extension GF256 {
     static func + (lhs: GF256, rhs: GF256) -> GF256 {
+        // a + b = a ⊕ b
+
         GF256(lhs.value ^ rhs.value)
     }
 
@@ -41,7 +55,8 @@ extension GF256 {
     }
 
     static func - (lhs: GF256, rhs: GF256) -> GF256 {
-        // - is identical to + in GF(256): a - b = a + b
+        // a - b = a + b
+
         lhs + rhs
     }
 
@@ -50,6 +65,8 @@ extension GF256 {
     }
 
     static func * (lhs: GF256, rhs: GF256) -> GF256 {
+        // αⁱ · αʲ = α^((i + j) mod 255)
+
         guard lhs != .zero, rhs != .zero else {
             return .zero
         }
@@ -65,6 +82,8 @@ extension GF256 {
     }
 
     static func / (lhs: GF256, rhs: GF256) -> GF256 {
+        // αⁱ / αʲ = α^((i - j) mod 255)
+
         precondition(
             rhs != .zero,
             "Division by zero in GF(256)"
@@ -104,6 +123,8 @@ private extension GF256 {
     static let tables = makeTables()
 
     static func makeTables() -> Tables {
+        // exponent[e] = αᵉ and log[αᵉ] = e
+
         var logs = Array<Int?>(
             repeating: nil,
             count: 256

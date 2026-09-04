@@ -5,6 +5,18 @@
 //  Created by Dmytro Uzenkov on 02.09.2026.
 //
 
+/// Generates Reed-Solomon error-correction codewords for a single QR data block.
+///
+/// The input codewords form a message polynomial M(x). For n error-correction
+/// codewords, the encoder appends n zero coefficients by multiplying M(x) by xⁿ
+/// and computes the remainder using polynomial long division over GF(256):
+///
+/// R(x) = M(x) · xⁿ mod gₙ(x)
+///
+/// Here, gₙ(x) = (x + α⁰)(x + α¹)...(x + αⁿ⁻¹) is the degree-n generator
+/// polynomial and α = 2. Since the degree of R(x) is less than n, its coefficients
+/// form the error-correction codewords. Leading zeros are restored when necessary
+/// so that exactly n codewords are returned.
 struct ReedSolomonEncoder {
     func encode(
         _ dataCodewords: [UInt8],

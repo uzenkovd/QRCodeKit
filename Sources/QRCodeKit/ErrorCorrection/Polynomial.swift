@@ -5,6 +5,15 @@
 //  Created by Dmytro Uzenkov on 30.08.2026.
 //
 
+/// A polynomial over GF(256) used by Reed-Solomon arithmetic.
+///
+/// Coefficients are stored from highest degree to the constant term.
+/// Thus, [aₘ, ..., a₁, a₀] represents aₘxᵐ + ... + a₁x + a₀,
+/// where each coefficient is an element of GF(256).
+///
+/// Leading zero coefficients are removed to maintain a canonical representation,
+/// while internal and trailing zeros are preserved.
+/// The zero polynomial is represented as [0] and has degree 0 in this implementation.
 struct Polynomial: AdditiveArithmetic {
     static let zero = Polynomial([GF256.zero])
     static let one = Polynomial([GF256.one])
@@ -51,6 +60,8 @@ struct Polynomial: AdditiveArithmetic {
 
 extension Polynomial {
     static func + (lhs: Polynomial, rhs: Polynomial) -> Polynomial {
+        // P(x) + Q(x): rₖ = pₖ + qₖ
+
         let (longer, shorter) = lhs.count >= rhs.count
             ? (lhs, rhs)
             : (rhs, lhs)
@@ -70,7 +81,8 @@ extension Polynomial {
     }
 
     static func - (lhs: Polynomial, rhs: Polynomial) -> Polynomial {
-        // - is identical to + in GF(256): a - b = a + b
+        // P(x) - Q(x) = P(x) + Q(x)
+
         lhs + rhs
     }
 
@@ -79,6 +91,8 @@ extension Polynomial {
     }
 
     static func * (lhs: Polynomial, rhs: Polynomial) -> Polynomial {
+        // P(x) · Q(x): rₖ = Σᵢ₊ⱼ₌ₖ pᵢ · qⱼ
+
         var resultCoefficients = Array(
             repeating: GF256.zero,
             count: lhs.count + rhs.count - 1
@@ -117,6 +131,8 @@ extension Polynomial {
     }
 
     func multipliedByXPower(_ exponent: Int) -> Polynomial {
+        // P(x) · xⁿ: [aₘ, ..., a₀] → [aₘ, ..., a₀, 0, ..., 0]
+
         precondition(
             exponent >= 0,
             "Exponent must be non-negative"
@@ -141,8 +157,8 @@ extension Polynomial {
     func quotientAndRemainder(
         dividingBy divisor: Polynomial
     ) -> (quotient: Polynomial, remainder: Polynomial) {
-        // dividend = divisor * quotient + remainder,
-        // where remainder is zero or remainder.degree < divisor.degree
+        // P(x) = D(x) · Q(x) + R(x),
+        // where R(x) = 0 or deg R(x) < deg D(x)
 
         precondition(
             !divisor.isZero,
