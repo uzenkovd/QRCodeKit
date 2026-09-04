@@ -5,6 +5,7 @@
 //  Created by Dmytro Uzenkov on 16.08.2026.
 //
 
+// TODO: Optimize BitBuffer storage with capacity reservation and byte-aligned fast paths
 struct BitBuffer {
     private var storage: [UInt8]
     private(set) var count: Int
