@@ -5,75 +5,105 @@
 //  Created by Dmytro Uzenkov on 23.08.2026.
 //
 
+struct GroupInfo {
+    let blockCount: Int
+    let dataCodewordCountPerBlock: Int
+
+    var totalDataCodewordCount: Int {
+        blockCount * dataCodewordCountPerBlock
+    }
+
+    init(
+        _ blockCount: Int,
+        _ dataCodewordCountPerBlock: Int
+    ) {
+        precondition(
+            blockCount > 0,
+            "Group block count must be greater than zero"
+        )
+        precondition(
+            dataCodewordCountPerBlock > 0,
+            "Group data codeword count per block must be greater than zero"
+        )
+
+        self.blockCount = blockCount
+        self.dataCodewordCountPerBlock = dataCodewordCountPerBlock
+    }
+}
+
+struct ErrorCorrectionLayout {
+    let errorCorrectionCodewordCountPerBlock: Int
+    let group1: GroupInfo
+    let group2: GroupInfo?
+
+    var totalBlockCount: Int {
+        group1.blockCount + (group2?.blockCount ?? 0)
+    }
+
+    var totalDataCodewordCount: Int {
+        group1.totalDataCodewordCount
+            + (group2?.totalDataCodewordCount ?? 0)
+    }
+
+    var totalErrorCorrectionCodewordCount: Int {
+        totalBlockCount * errorCorrectionCodewordCountPerBlock
+    }
+
+    var totalCodewordCount: Int {
+        totalDataCodewordCount + totalErrorCorrectionCodewordCount
+    }
+
+    init(
+        _ errorCorrectionCodewordCountPerBlock: Int,
+        _ group1: GroupInfo,
+        _ group2: GroupInfo? = nil
+    ) {
+        precondition(
+            errorCorrectionCodewordCountPerBlock > 0,
+            "Error correction codeword count per block must be greater than zero"
+        )
+
+        if let group2 {
+            precondition(
+                group2.dataCodewordCountPerBlock
+                    == group1.dataCodewordCountPerBlock + 1,
+                "Group 2 must have one more data codeword per block than Group 1"
+            )
+        }
+
+        self.errorCorrectionCodewordCountPerBlock =
+            errorCorrectionCodewordCountPerBlock
+        self.group1 = group1
+        self.group2 = group2
+    }
+}
+
 enum ErrorCorrectionBlocks {
-    struct Group {
-        let blockCount: Int
-        let dataCodewordsPerBlock: Int
-        
-        init(_ blockCount: Int, _ dataCodewordsPerBlock: Int) {
-            self.blockCount = blockCount
-            self.dataCodewordsPerBlock = dataCodewordsPerBlock
-        }
-        
-        var totalDataCodewords: Int {
-            blockCount * dataCodewordsPerBlock
-        }
-    }
-    
-    struct Layout {
-        let errorCorrectionCodewordsPerBlock: Int
-        let group1: Group
-        let group2: Group?
-        
-        init(
-            _ errorCorrectionCodewordsPerBlock: Int,
-            _ group1: Group,
-            _ group2: Group? = nil
-        ) {
-            self.errorCorrectionCodewordsPerBlock = errorCorrectionCodewordsPerBlock
-            self.group1 = group1
-            self.group2 = group2
-        }
-        
-        var totalBlockCount: Int {
-            group1.blockCount + (group2?.blockCount ?? 0)
-        }
-        
-        var totalDataCodewords: Int {
-            group1.totalDataCodewords + (group2?.totalDataCodewords ?? 0)
-        }
-        
-        var totalErrorCorrectionCodewords: Int {
-            totalBlockCount * errorCorrectionCodewordsPerBlock
-        }
-        
-        var totalCodewords: Int {
-            totalDataCodewords + totalErrorCorrectionCodewords
-        }
-    }
-    
-    static func totalDataCodewords(
+    static func totalDataCodewordCount(
         for version: QRVersion,
         level: ErrorCorrectionLevel
     ) -> Int {
-        layout(for: version, level: level).totalDataCodewords
+        layout(for: version, level: level).totalDataCodewordCount
     }
-    
+
     static func layout(
         for version: QRVersion,
         level: ErrorCorrectionLevel
-    ) -> Layout {
+    ) -> ErrorCorrectionLayout {
         guard let layout = table[version]?[level] else {
             preconditionFailure(
                 "Error correction block layout is missing for \(version) and \(level)"
             )
         }
-        
+
         return layout
     }
 }
 
 private extension ErrorCorrectionBlocks {
+    typealias Layout = ErrorCorrectionLayout
+    typealias Group = GroupInfo
+
     static let table: [QRVersion: [ErrorCorrectionLevel: Layout]] = [
         .v1: [
             .L: Layout(7, Group(1, 19)),

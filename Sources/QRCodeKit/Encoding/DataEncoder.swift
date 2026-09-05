@@ -26,7 +26,7 @@ struct DataEncoder {
         
         let encodedData = encodeData(message, mode: mode)
         
-        let totalDataCodewords = ErrorCorrectionBlocks.totalDataCodewords(
+        let totalDataCodewords = ErrorCorrectionBlocks.totalDataCodewordCount(
             for: version,
             level: errorCorrectionLevel
         )
