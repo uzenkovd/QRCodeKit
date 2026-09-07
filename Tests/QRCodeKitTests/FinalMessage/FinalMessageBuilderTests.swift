@@ -10,7 +10,7 @@ import Testing
 
 @Suite
 struct FinalMessageBuilderTests {
-    // MARK: - makeGroups(from:layout:)
+    // MARK: - Group Construction
 
     @Test
     func makeGroupsWithOneGroup() {
@@ -83,5 +83,94 @@ struct FinalMessageBuilderTests {
 
         #expect(groups.group1 == expectedGroup1)
         #expect(groups.group2 == expectedGroup2)
+    }
+
+    // MARK: - Codeword Interleaving
+
+    @Test
+    func interleaveCodewordsWithSingleBlockGroup() {
+        let group1 = Group(
+            blocks: [
+                Block(
+                    dataCodewords: [1, 2, 3],
+                    errorCorrectionCodewords: [4, 5]
+                )
+            ]
+        )
+
+        let interleavedCodewords = FinalMessageBuilder.interleaveCodewords(
+            group1: group1,
+            group2: nil
+        )
+
+        #expect(interleavedCodewords.dataCodewords == [1, 2, 3])
+        #expect(interleavedCodewords.errorCorrectionCodewords == [4, 5])
+    }
+
+    @Test
+    func interleaveCodewordsWithOneGroup() {
+        let group1 = Group(
+            blocks: [
+                Block(
+                    dataCodewords: [1, 3, 5],
+                    errorCorrectionCodewords: [7, 9]
+                ),
+                Block(
+                    dataCodewords: [2, 4, 6],
+                    errorCorrectionCodewords: [8, 10]
+                )
+            ]
+        )
+
+        let interleavedCodewords = FinalMessageBuilder.interleaveCodewords(
+            group1: group1,
+            group2: nil
+        )
+
+        #expect(interleavedCodewords.dataCodewords == [1, 2, 3, 4, 5, 6])
+        #expect(interleavedCodewords.errorCorrectionCodewords == [7, 8, 9, 10])
+    }
+
+    @Test
+    func interleaveCodewordsWithTwoGroups() {
+        let group1 = Group(
+            blocks: [
+                Block(
+                    dataCodewords: [1, 5],
+                    errorCorrectionCodewords: [11, 15]
+                ),
+                Block(
+                    dataCodewords: [2, 6],
+                    errorCorrectionCodewords: [12, 16]
+                )
+            ]
+        )
+
+        let group2 = Group(
+            blocks: [
+                Block(
+                    dataCodewords: [3, 7, 9],
+                    errorCorrectionCodewords: [13, 17]
+                ),
+                Block(
+                    dataCodewords: [4, 8, 10],
+                    errorCorrectionCodewords: [14, 18]
+                )
+            ]
+        )
+
+        let interleavedCodewords = FinalMessageBuilder.interleaveCodewords(
+            group1: group1,
+            group2: group2
+        )
+
+        #expect(
+            interleavedCodewords.dataCodewords
+                == [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        )
+        #expect(
+            interleavedCodewords.errorCorrectionCodewords
+                == [11, 12, 13, 14, 15, 16, 17, 18]
+        )
     }
 }

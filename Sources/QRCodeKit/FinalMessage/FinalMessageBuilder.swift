@@ -5,7 +5,11 @@
 //  Created by Dmytro Uzenkov on 05.09.2026.
 //
 
-struct FinalMessageBuilder {
+struct FinalMessageBuilder {}
+
+// MARK: - Group Construction
+
+extension FinalMessageBuilder {
     static func makeGroups(
         from dataCodewords: [UInt8],
         layout: ErrorCorrectionLayout
@@ -90,5 +94,81 @@ struct FinalMessageBuilder {
         )
 
         return Group(blocks: blocks)
+    }
+}
+
+// MARK: - Codeword Interleaving
+
+extension FinalMessageBuilder {
+    static func interleaveCodewords(
+        group1: Group,
+        group2: Group?
+    ) -> (
+        dataCodewords: [UInt8],
+        errorCorrectionCodewords: [UInt8]
+    ) {
+        var blocks = group1.blocks
+
+        if let group2 {
+            blocks.reserveCapacity(
+                group1.blockCount + group2.blockCount
+            )
+            blocks.append(contentsOf: group2.blocks)
+        }
+
+        let totalDataCodewordCount =
+            group1.totalDataCodewordCount
+                + (group2?.totalDataCodewordCount ?? 0)
+        let interleavedDataCodewords = Self.interleave(
+            blocks,
+            codewords: \.dataCodewords,
+            totalCodewordCount: totalDataCodewordCount
+        )
+
+        let totalErrorCorrectionCodewordCount =
+            group1.totalErrorCorrectionCodewordCount
+                + (group2?.totalErrorCorrectionCodewordCount ?? 0)
+        let interleavedErrorCorrectionCodewords = Self.interleave(
+            blocks,
+            codewords: \.errorCorrectionCodewords,
+            totalCodewordCount: totalErrorCorrectionCodewordCount
+        )
+
+        return (
+            interleavedDataCodewords,
+            interleavedErrorCorrectionCodewords
+        )
+    }
+
+    private static func interleave(
+        _ blocks: [Block],
+        codewords keyPath: KeyPath<Block, [UInt8]>,
+        totalCodewordCount: Int
+    ) -> [UInt8] {
+        var interleavedCodewords: [UInt8] = []
+        interleavedCodewords.reserveCapacity(totalCodewordCount)
+
+        let maximumCodewordCountPerBlock = blocks.reduce(0) {
+            max($0, $1[keyPath: keyPath].count)
+        }
+
+        for codewordIndex in 0..<maximumCodewordCountPerBlock {
+            for block in blocks {
+                let blockCodewords = block[keyPath: keyPath]
+
+                if codewordIndex < blockCodewords.count {
+                    interleavedCodewords.append(
+                        blockCodewords[codewordIndex]
+                    )
+                }
+            }
+        }
+
+        assert(
+            interleavedCodewords.count == totalCodewordCount,
+            "Interleaving did not produce the expected codeword count"
+        )
+
+        return interleavedCodewords
     }
 }

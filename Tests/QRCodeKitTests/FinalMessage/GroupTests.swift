@@ -17,16 +17,15 @@ struct GroupTests {
             errorCorrectionCodewords: [196, 35, 39]
         )
 
-        let blocks = [block]
-        let group = Group(blocks: blocks)
+        let group = Group(blocks: [block])
 
-        #expect(group.blocks == blocks)
+        #expect(group.blocks == [block])
         #expect(group.blockCount == 1)
-        #expect(group.dataCodewordCountPerBlock == block.dataCodewordCount)
-        #expect(
-            group.errorCorrectionCodewordCountPerBlock
-                == block.errorCorrectionCodewordCount
-        )
+        #expect(group.dataCodewordCountPerBlock == 4)
+        #expect(group.errorCorrectionCodewordCountPerBlock == 3)
+        #expect(group.totalDataCodewordCount == 4)
+        #expect(group.totalErrorCorrectionCodewordCount == 3)
+        #expect(group.totalCodewordCount == 7)
     }
 
     @Test
@@ -49,15 +48,12 @@ struct GroupTests {
         let group = Group(blocks: blocks)
 
         #expect(group.blocks == blocks)
-        #expect(group.blockCount == blocks.count)
-        #expect(
-            group.dataCodewordCountPerBlock
-                == blocks[0].dataCodewordCount
-        )
-        #expect(
-            group.errorCorrectionCodewordCountPerBlock
-                == blocks[0].errorCorrectionCodewordCount
-        )
+        #expect(group.blockCount == 3)
+        #expect(group.dataCodewordCountPerBlock == 4)
+        #expect(group.errorCorrectionCodewordCountPerBlock == 3)
+        #expect(group.totalDataCodewordCount == 12)
+        #expect(group.totalErrorCorrectionCodewordCount == 9)
+        #expect(group.totalCodewordCount == 21)
     }
 
     @Test

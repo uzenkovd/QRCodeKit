@@ -20,6 +20,18 @@ struct Group: Equatable {
         blocks[0].errorCorrectionCodewordCount
     }
 
+    var totalDataCodewordCount: Int {
+        blockCount * dataCodewordCountPerBlock
+    }
+
+    var totalErrorCorrectionCodewordCount: Int {
+        blockCount * errorCorrectionCodewordCountPerBlock
+    }
+
+    var totalCodewordCount: Int {
+        totalDataCodewordCount + totalErrorCorrectionCodewordCount
+    }
+
     init(blocks: [Block]) {
         precondition(
             !blocks.isEmpty,
