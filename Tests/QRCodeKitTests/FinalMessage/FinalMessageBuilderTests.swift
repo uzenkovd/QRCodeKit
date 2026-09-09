@@ -13,27 +13,37 @@ struct FinalMessageBuilderTests {
     // MARK: - Group Construction
 
     @Test
-    func makeGroupsWithOneGroup() {
-        let dataCodewords: [UInt8] = [1, 2, 3, 4]
-        let layout = ErrorCorrectionLayout(
-            2,
-            GroupInfo(2, 2)
-        )
+    func makeCodewordGroupsWithSingleGroup() {
+        let block1DataCodewords = [UInt8](repeating: 1, count: 17)
+        let block2DataCodewords = [UInt8](repeating: 2, count: 17)
 
-        let groups = FinalMessageBuilder.makeGroups(
+        let dataCodewords =
+            block1DataCodewords
+            + block2DataCodewords
+
+        let groups = FinalMessageBuilder.makeCodewordGroups(
             from: dataCodewords,
-            layout: layout
+            version: .v3,
+            errorCorrectionLevel: .Q
         )
 
         let expectedGroup1 = Group(
             blocks: [
                 Block(
-                    dataCodewords: [1, 2],
-                    errorCorrectionCodewords: [1, 2]
+                    dataCodewords: block1DataCodewords,
+                    errorCorrectionCodewords: [
+                        127, 161, 234, 156, 78, 202,
+                        159, 227, 139, 96, 44, 133,
+                        157, 213, 19, 248, 1, 177
+                    ]
                 ),
                 Block(
-                    dataCodewords: [3, 4],
-                    errorCorrectionCodewords: [5, 2]
+                    dataCodewords: block2DataCodewords,
+                    errorCorrectionCodewords: [
+                        254, 95, 201, 37, 156, 137,
+                        35, 219, 11, 192, 88, 23,
+                        39, 183, 38, 237, 2, 127
+                    ]
                 )
             ]
         )
@@ -43,27 +53,41 @@ struct FinalMessageBuilderTests {
     }
 
     @Test
-    func makeGroupsWithTwoGroups() {
-        let dataCodewords: [UInt8] = [
-            1, 2, 3, 4, 5, 6, 7, 8
-        ]
+    func makeCodewordGroupsWithTwoGroups() {
+        let group1Block1DataCodewords = [UInt8](repeating: 1, count: 15)
+        let group1Block2DataCodewords = [UInt8](repeating: 2, count: 15)
+        let group2Block1DataCodewords = [UInt8](repeating: 3, count: 16)
+        let group2Block2DataCodewords = [UInt8](repeating: 4, count: 16)
 
-        let layout = ErrorCorrectionLayout(
-            2,
-            GroupInfo(1, 2),
-            GroupInfo(2, 3)
-        )
+        let dataCodewords =
+            group1Block1DataCodewords
+            + group1Block2DataCodewords
+            + group2Block1DataCodewords
+            + group2Block2DataCodewords
 
-        let groups = FinalMessageBuilder.makeGroups(
+        let groups = FinalMessageBuilder.makeCodewordGroups(
             from: dataCodewords,
-            layout: layout
+            version: .v5,
+            errorCorrectionLevel: .Q
         )
 
         let expectedGroup1 = Group(
             blocks: [
                 Block(
-                    dataCodewords: [1, 2],
-                    errorCorrectionCodewords: [1, 2]
+                    dataCodewords: group1Block1DataCodewords,
+                    errorCorrectionCodewords: [
+                        25, 217, 173, 177, 165, 233,
+                        144, 48, 146, 3, 169, 205,
+                        25, 97, 12, 115, 108, 175
+                    ]
+                ),
+                Block(
+                    dataCodewords: group1Block2DataCodewords,
+                    errorCorrectionCodewords: [
+                        50, 175, 71, 127, 87, 207,
+                        61, 96, 57, 6, 79, 135,
+                        50, 194, 24, 230, 216, 67
+                    ]
                 )
             ]
         )
@@ -71,12 +95,20 @@ struct FinalMessageBuilderTests {
         let expectedGroup2 = Group(
             blocks: [
                 Block(
-                    dataCodewords: [3, 4, 5],
-                    errorCorrectionCodewords: [2, 0]
+                    dataCodewords: group2Block1DataCodewords,
+                    errorCorrectionCodewords: [
+                        241, 119, 124, 219, 173, 248,
+                        227, 162, 189, 202, 237, 19,
+                        166, 227, 252, 30, 72, 83
+                    ]
                 ),
                 Block(
-                    dataCodewords: [6, 7, 8],
-                    errorCorrectionCodewords: [47, 38]
+                    dataCodewords: group2Block2DataCodewords,
+                    errorCorrectionCodewords: [
+                        170, 180, 91, 57, 122, 182,
+                        146, 110, 177, 5, 113, 207,
+                        149, 146, 77, 40, 224, 196
+                    ]
                 )
             ]
         )
@@ -98,9 +130,13 @@ struct FinalMessageBuilderTests {
             ]
         )
 
-        let interleavedCodewords = FinalMessageBuilder.interleaveCodewords(
+        let groups = CodewordGroups(
             group1: group1,
             group2: nil
+        )
+
+        let interleavedCodewords = FinalMessageBuilder.interleaveCodewords(
+            from: groups
         )
 
         #expect(interleavedCodewords.dataCodewords == [1, 2, 3])
@@ -108,7 +144,7 @@ struct FinalMessageBuilderTests {
     }
 
     @Test
-    func interleaveCodewordsWithOneGroup() {
+    func interleaveCodewordsWithMultipleBlocksGroup() {
         let group1 = Group(
             blocks: [
                 Block(
@@ -122,9 +158,13 @@ struct FinalMessageBuilderTests {
             ]
         )
 
-        let interleavedCodewords = FinalMessageBuilder.interleaveCodewords(
+        let groups = CodewordGroups(
             group1: group1,
             group2: nil
+        )
+
+        let interleavedCodewords = FinalMessageBuilder.interleaveCodewords(
+            from: groups
         )
 
         #expect(interleavedCodewords.dataCodewords == [1, 2, 3, 4, 5, 6])
@@ -159,9 +199,13 @@ struct FinalMessageBuilderTests {
             ]
         )
 
-        let interleavedCodewords = FinalMessageBuilder.interleaveCodewords(
+        let groups = CodewordGroups(
             group1: group1,
             group2: group2
+        )
+
+        let interleavedCodewords = FinalMessageBuilder.interleaveCodewords(
+            from: groups
         )
 
         #expect(

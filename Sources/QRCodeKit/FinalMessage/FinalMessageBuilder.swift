@@ -10,29 +10,39 @@ struct FinalMessageBuilder {}
 // MARK: - Group Construction
 
 extension FinalMessageBuilder {
-    static func makeGroups(
+    static func makeCodewordGroups(
         from dataCodewords: [UInt8],
-        layout: ErrorCorrectionLayout
-    ) -> (group1: Group, group2: Group?) {
+        version: QRVersion,
+        errorCorrectionLevel: ErrorCorrectionLevel
+    ) -> CodewordGroups {
+        let layout = ErrorCorrectionBlocks.layout(
+            for: version,
+            level: errorCorrectionLevel
+        )
+
         precondition(
             dataCodewords.count == layout.totalDataCodewordCount,
             "Data codeword count does not match the error correction layout"
         )
 
+        let group1Info = layout.group1
         let group1DataCodewordCount =
-            layout.group1.totalDataCodewordCount
+            group1Info.totalDataCodewordCount
         let group1DataCodewords = dataCodewords.prefix(
             group1DataCodewordCount
         )
         let group1 = Self.makeGroup(
             from: group1DataCodewords,
-            info: layout.group1,
+            info: group1Info,
             errorCorrectionCodewordCountPerBlock:
                 layout.errorCorrectionCodewordCountPerBlock
         )
 
         guard let group2Info = layout.group2 else {
-            return (group1, nil)
+            return CodewordGroups(
+                group1: group1,
+                group2: nil
+            )
         }
 
         let group2DataCodewords = dataCodewords.dropFirst(
@@ -45,7 +55,10 @@ extension FinalMessageBuilder {
                 layout.errorCorrectionCodewordCountPerBlock
         )
 
-        return (group1, group2)
+        return CodewordGroups(
+            group1: group1,
+            group2: group2
+        )
     }
 
     private static func makeGroup(
@@ -101,37 +114,21 @@ extension FinalMessageBuilder {
 
 extension FinalMessageBuilder {
     static func interleaveCodewords(
-        group1: Group,
-        group2: Group?
+        from groups: CodewordGroups
     ) -> (
         dataCodewords: [UInt8],
         errorCorrectionCodewords: [UInt8]
     ) {
-        var blocks = group1.blocks
+        let blocks = groups.blocks
 
-        if let group2 {
-            blocks.reserveCapacity(
-                group1.blockCount + group2.blockCount
-            )
-            blocks.append(contentsOf: group2.blocks)
-        }
-
-        let totalDataCodewordCount =
-            group1.totalDataCodewordCount
-                + (group2?.totalDataCodewordCount ?? 0)
         let interleavedDataCodewords = Self.interleave(
             blocks,
-            codewords: \.dataCodewords,
-            totalCodewordCount: totalDataCodewordCount
+            codewords: \.dataCodewords
         )
 
-        let totalErrorCorrectionCodewordCount =
-            group1.totalErrorCorrectionCodewordCount
-                + (group2?.totalErrorCorrectionCodewordCount ?? 0)
         let interleavedErrorCorrectionCodewords = Self.interleave(
             blocks,
-            codewords: \.errorCorrectionCodewords,
-            totalCodewordCount: totalErrorCorrectionCodewordCount
+            codewords: \.errorCorrectionCodewords
         )
 
         return (
@@ -142,11 +139,14 @@ extension FinalMessageBuilder {
 
     private static func interleave(
         _ blocks: [Block],
-        codewords keyPath: KeyPath<Block, [UInt8]>,
-        totalCodewordCount: Int
+        codewords keyPath: KeyPath<Block, [UInt8]>
     ) -> [UInt8] {
+        let codewordCount = blocks.reduce(0) {
+            $0 + $1[keyPath: keyPath].count
+        }
+
         var interleavedCodewords: [UInt8] = []
-        interleavedCodewords.reserveCapacity(totalCodewordCount)
+        interleavedCodewords.reserveCapacity(codewordCount)
 
         let maximumCodewordCountPerBlock = blocks.reduce(0) {
             max($0, $1[keyPath: keyPath].count)
@@ -165,7 +165,7 @@ extension FinalMessageBuilder {
         }
 
         assert(
-            interleavedCodewords.count == totalCodewordCount,
+            interleavedCodewords.count == codewordCount,
             "Interleaving did not produce the expected codeword count"
         )
 
