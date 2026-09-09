@@ -8,6 +8,14 @@
 struct Group: Equatable {
     let blocks: [Block]
 
+    var dataCodewords: [UInt8] {
+        blocks.flatMap(\.dataCodewords)
+    }
+
+    var errorCorrectionCodewords: [UInt8] {
+        blocks.flatMap(\.errorCorrectionCodewords)
+    }
+
     var blockCount: Int {
         blocks.count
     }

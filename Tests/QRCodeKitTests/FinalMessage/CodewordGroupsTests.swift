@@ -16,10 +16,10 @@ struct CodewordGroupsTests {
             blocks: [
                 Block(
                     dataCodewords: [1, 2, 3],
-                    errorCorrectionCodewords: [4, 5]
+                    errorCorrectionCodewords: [7, 8]
                 ),
                 Block(
-                    dataCodewords: [6, 7, 8],
+                    dataCodewords: [4, 5, 6],
                     errorCorrectionCodewords: [9, 10]
                 )
             ]
@@ -30,7 +30,10 @@ struct CodewordGroupsTests {
             group2: nil
         )
 
-        #expect(groups.blockCount == 2)
+        #expect(groups.blocks == group1.blocks)
+        #expect(groups.dataCodewords == [1, 2, 3, 4, 5, 6])
+        #expect(groups.errorCorrectionCodewords == [7, 8, 9, 10])
+        #expect(groups.totalBlockCount == 2)
         #expect(groups.totalDataCodewordCount == 6)
         #expect(groups.totalErrorCorrectionCodewordCount == 4)
         #expect(groups.totalCodewordCount == 10)
@@ -42,11 +45,11 @@ struct CodewordGroupsTests {
             blocks: [
                 Block(
                     dataCodewords: [1, 2],
-                    errorCorrectionCodewords: [3, 4]
+                    errorCorrectionCodewords: [11, 12]
                 ),
                 Block(
-                    dataCodewords: [5, 6],
-                    errorCorrectionCodewords: [7, 8]
+                    dataCodewords: [3, 4],
+                    errorCorrectionCodewords: [13, 14]
                 )
             ]
         )
@@ -54,11 +57,11 @@ struct CodewordGroupsTests {
         let group2 = Group(
             blocks: [
                 Block(
-                    dataCodewords: [9, 10, 11],
-                    errorCorrectionCodewords: [12, 13]
+                    dataCodewords: [5, 6, 7],
+                    errorCorrectionCodewords: [15, 16]
                 ),
                 Block(
-                    dataCodewords: [14, 15, 16],
+                    dataCodewords: [8, 9, 10],
                     errorCorrectionCodewords: [17, 18]
                 )
             ]
@@ -69,7 +72,26 @@ struct CodewordGroupsTests {
             group2: group2
         )
 
-        #expect(groups.blockCount == 4)
+        #expect(groups.blocks == group1.blocks + group2.blocks)
+        #expect(
+            groups.dataCodewords
+                == [
+                    1, 2,
+                    3, 4,
+                    5, 6, 7,
+                    8, 9, 10
+                ]
+        )
+        #expect(
+            groups.errorCorrectionCodewords
+                == [
+                    11, 12,
+                    13, 14,
+                    15, 16,
+                    17, 18
+                ]
+        )
+        #expect(groups.totalBlockCount == 4)
         #expect(groups.totalDataCodewordCount == 10)
         #expect(groups.totalErrorCorrectionCodewordCount == 8)
         #expect(groups.totalCodewordCount == 18)

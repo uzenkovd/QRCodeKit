@@ -9,12 +9,20 @@ struct Block: Equatable {
     let dataCodewords: [UInt8]
     let errorCorrectionCodewords: [UInt8]
 
+    var codewords: [UInt8] {
+        dataCodewords + errorCorrectionCodewords
+    }
+
     var dataCodewordCount: Int {
         dataCodewords.count
     }
 
     var errorCorrectionCodewordCount: Int {
         errorCorrectionCodewords.count
+    }
+
+    var codewordCount: Int {
+        dataCodewordCount + errorCorrectionCodewordCount
     }
 
     init(

@@ -11,9 +11,9 @@ import Testing
 @Suite
 struct BlockTests {
     @Test
-    func propertiesForKnownCodewords() {
-        let dataCodewords: [UInt8] = [32, 91, 11, 120]
-        let errorCorrectionCodewords: [UInt8] = [196, 35, 39]
+    func propertiesForCodewords() {
+        let dataCodewords: [UInt8] = [1, 2, 3, 4]
+        let errorCorrectionCodewords: [UInt8] = [5, 6, 7]
 
         let block = Block(
             dataCodewords: dataCodewords,
@@ -22,27 +22,29 @@ struct BlockTests {
 
         #expect(block.dataCodewords == dataCodewords)
         #expect(block.errorCorrectionCodewords == errorCorrectionCodewords)
-        #expect(block.dataCodewordCount == dataCodewords.count)
-        #expect(block.errorCorrectionCodewordCount == errorCorrectionCodewords.count)
+        #expect(block.codewords == [1, 2, 3, 4, 5, 6, 7])
+        #expect(block.dataCodewordCount == 4)
+        #expect(block.errorCorrectionCodewordCount == 3)
+        #expect(block.codewordCount == 7)
     }
 
     @Test
     func equalityUsesCodewords() {
         let block = Block(
-            dataCodewords: [32, 91, 11, 120],
-            errorCorrectionCodewords: [196, 35, 39]
+            dataCodewords: [1, 2, 3, 4],
+            errorCorrectionCodewords: [5, 6, 7]
         )
         let equalBlock = Block(
-            dataCodewords: [32, 91, 11, 120],
-            errorCorrectionCodewords: [196, 35, 39]
+            dataCodewords: [1, 2, 3, 4],
+            errorCorrectionCodewords: [5, 6, 7]
         )
         let differentDataBlock = Block(
-            dataCodewords: [32, 91, 11, 121],
-            errorCorrectionCodewords: [196, 35, 39]
+            dataCodewords: [1, 2, 3, 8],
+            errorCorrectionCodewords: [5, 6, 7]
         )
         let differentErrorCorrectionBlock = Block(
-            dataCodewords: [32, 91, 11, 120],
-            errorCorrectionCodewords: [196, 35, 40]
+            dataCodewords: [1, 2, 3, 4],
+            errorCorrectionCodewords: [5, 6, 8]
         )
 
         #expect(block == equalBlock)

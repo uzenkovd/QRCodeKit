@@ -9,7 +9,40 @@ struct CodewordGroups {
     let group1: Group
     let group2: Group?
 
-    var blockCount: Int {
+    var blocks: [Block] {
+        var blocks = group1.blocks
+
+        if let group2 {
+            blocks.reserveCapacity(totalBlockCount)
+            blocks.append(contentsOf: group2.blocks)
+        }
+
+        return blocks
+    }
+
+    var dataCodewords: [UInt8] {
+        var codewords = group1.dataCodewords
+
+        if let group2 {
+            codewords.reserveCapacity(totalDataCodewordCount)
+            codewords.append(contentsOf: group2.dataCodewords)
+        }
+
+        return codewords
+    }
+
+    var errorCorrectionCodewords: [UInt8] {
+        var codewords = group1.errorCorrectionCodewords
+
+        if let group2 {
+            codewords.reserveCapacity(totalErrorCorrectionCodewordCount)
+            codewords.append(contentsOf: group2.errorCorrectionCodewords)
+        }
+
+        return codewords
+    }
+
+    var totalBlockCount: Int {
         group1.blockCount + (group2?.blockCount ?? 0)
     }
 
@@ -35,7 +68,7 @@ struct CodewordGroups {
             precondition(
                 group2.dataCodewordCountPerBlock
                     == group1.dataCodewordCountPerBlock + 1,
-                "Group 2 must contain one more data codeword per block than Group 1"
+                "Group 2 must have one more data codeword per block than Group 1"
             )
             precondition(
                 group2.errorCorrectionCodewordCountPerBlock
