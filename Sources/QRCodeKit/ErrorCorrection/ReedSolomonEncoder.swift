@@ -39,6 +39,8 @@ struct ReedSolomonEncoder {
 
         let message = Polynomial(dataCodewords)
             .multipliedByXPower(errorCorrectionCodewordCount)
+        // TODO: Reuse the generator polynomial when encoding multiple blocks
+        // with the same error correction codeword count
         let generator = Self.generatorPolynomial(
             degree: errorCorrectionCodewordCount
         )

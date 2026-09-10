@@ -5,7 +5,8 @@
 //  Created by Dmytro Uzenkov on 16.08.2026.
 //
 
-// TODO: Optimize BitBuffer storage with capacity reservation and byte-aligned fast paths
+// TODO: Optimize BitBuffer with capacity reservation and byte-aligned fast paths,
+// including efficient bulk appends after completing a partially filled byte
 struct BitBuffer {
     private var storage: [UInt8]
     private(set) var count: Int
@@ -41,6 +42,12 @@ struct BitBuffer {
     
     mutating func append(_ byte: UInt8) {
         append(UInt32(byte), bitCount: 8)
+    }
+
+    mutating func append(contentsOf bytes: [UInt8]) {
+        for byte in bytes {
+            append(byte)
+        }
     }
     
     mutating func append(contentsOf other: BitBuffer) {

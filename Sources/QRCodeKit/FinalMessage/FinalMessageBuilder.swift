@@ -5,7 +5,32 @@
 //  Created by Dmytro Uzenkov on 05.09.2026.
 //
 
-struct FinalMessageBuilder {}
+struct FinalMessageBuilder {
+    // TODO: Validate that codeword groups match the resolved QR configuration
+    // once QRConfiguration is introduced
+    static func build(
+        from groups: CodewordGroups,
+        version: QRVersion
+    ) -> BitBuffer {
+        let interleaved = Self.interleaveCodewords(from: groups)
+        let remainderBitCount = RemainderBits.bitCount(for: version)
+
+        var finalBits = BitBuffer()
+
+        finalBits.append(contentsOf: interleaved.dataCodewords)
+        finalBits.append(contentsOf: interleaved.errorCorrectionCodewords)
+        finalBits.append(0, bitCount: remainderBitCount)
+
+        let expectedBitCount = groups.totalCodewordCount * 8 + remainderBitCount
+
+        assert(
+            finalBits.count == expectedBitCount,
+            "Final message does not match the expected bit count"
+        )
+
+        return finalBits
+    }
+}
 
 // MARK: - Group Construction
 
@@ -38,27 +63,34 @@ extension FinalMessageBuilder {
                 layout.errorCorrectionCodewordCountPerBlock
         )
 
-        guard let group2Info = layout.group2 else {
-            return CodewordGroups(
-                group1: group1,
-                group2: nil
+        let group2: Group?
+
+        if let group2Info = layout.group2 {
+            let group2DataCodewords = dataCodewords.dropFirst(
+                group1DataCodewordCount
             )
+
+            group2 = Self.makeGroup(
+                from: group2DataCodewords,
+                info: group2Info,
+                errorCorrectionCodewordCountPerBlock:
+                    layout.errorCorrectionCodewordCountPerBlock
+            )
+        } else {
+            group2 = nil
         }
 
-        let group2DataCodewords = dataCodewords.dropFirst(
-            group1DataCodewordCount
-        )
-        let group2 = Self.makeGroup(
-            from: group2DataCodewords,
-            info: group2Info,
-            errorCorrectionCodewordCountPerBlock:
-                layout.errorCorrectionCodewordCountPerBlock
-        )
-
-        return CodewordGroups(
+        let groups = CodewordGroups(
             group1: group1,
             group2: group2
         )
+
+        assert(
+            groups.totalCodewordCount == layout.totalCodewordCount,
+            "Codeword groups do not match the expected error correction layout"
+        )
+
+        return groups
     }
 
     private static func makeGroup(
