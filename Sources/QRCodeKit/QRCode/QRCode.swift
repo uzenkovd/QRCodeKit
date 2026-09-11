@@ -7,12 +7,31 @@
 
 public struct QRCode {
     public let message: String
-    public let version: QRVersion
-    public let encodingMode: EncodingMode
-    public let errorCorrectionLevel: ErrorCorrectionLevel
-    
-    public private(set) var mask: QRMask
-    
+
+    private var configuration: QRConfiguration
+
+    public var version: QRVersion {
+        configuration.version
+    }
+
+    public var encodingMode: EncodingMode {
+        configuration.encodingMode
+    }
+
+    public var errorCorrectionLevel: ErrorCorrectionLevel {
+        configuration.errorCorrectionLevel
+    }
+
+    public var mask: QRMask {
+        guard let mask = configuration.mask else {
+            preconditionFailure(
+                "QR mask must be resolved before accessing it"
+            )
+        }
+
+        return mask
+    }
+
     public var size: Int {
         21 + 4 * (version.rawValue - 1)
     }
@@ -148,9 +167,11 @@ public struct QRCode {
         let mask = options.mask ?? .default
         
         self.message = message
-        self.version = version
-        self.encodingMode = encodingMode
-        self.errorCorrectionLevel = errorCorrectionLevel
-        self.mask = mask
+        self.configuration = QRConfiguration(
+            version: version,
+            encodingMode: encodingMode,
+            errorCorrectionLevel: errorCorrectionLevel,
+            mask: mask
+        )
     }
 }
