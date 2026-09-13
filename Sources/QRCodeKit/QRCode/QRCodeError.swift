@@ -7,11 +7,12 @@
 
 public enum QRCodeError: Error, Sendable, Equatable {
     case emptyMessage
-    case messageIsTooLong
     case unsupportedMessage
+    case messageIsTooLong
     
     case wrongEncodingModeForMessage
-    
+    case messageDoesNotFitEncodingMode
+
     case messageDoesNotFitVersion
     case messageDoesNotFitErrorCorrectionLevel
     case messageDoesNotFitQRConfiguration

@@ -6,22 +6,29 @@
 //
 
 struct QRConfigurationResolver {
-    static func resolve(
+    private let analyzer: DataAnalyzer
+
+    init() {
+        self.analyzer = DataAnalyzer()
+    }
+
+    func resolve(
         for message: String,
         options: QROptions
     ) throws -> QRConfiguration {
-        let analyzer = DataAnalyzer()
+        precondition(
+            !message.isEmpty,
+            "QR configuration cannot be resolved for an empty message"
+        )
 
         let encodingMode = try resolveEncodingMode(
             for: message,
-            requestedMode: options.encodingMode,
-            analyzer: analyzer
+            requestedMode: options.encodingMode
         )
 
         let characterCount = try validatedCharacterCount(
             for: message,
-            mode: encodingMode,
-            analyzer: analyzer
+            mode: encodingMode
         )
 
         let (version, errorCorrectionLevel) =
@@ -29,11 +36,10 @@ struct QRConfigurationResolver {
                 for: characterCount,
                 mode: encodingMode,
                 requestedVersion: options.version,
-                requestedLevel: options.errorCorrectionLevel,
-                analyzer: analyzer
+                requestedLevel: options.errorCorrectionLevel
             )
 
-        // TODO: Select the optimal mask automatically when no mask is specified.
+        // TODO: Defer automatic mask selection to the data masking stage.
         let mask = options.mask ?? .default
 
         return QRConfiguration(
@@ -45,11 +51,12 @@ struct QRConfigurationResolver {
     }
 }
 
+// MARK: - Encoding Mode
+
 private extension QRConfigurationResolver {
-    static func resolveEncodingMode(
+    func resolveEncodingMode(
         for message: String,
-        requestedMode: EncodingMode?,
-        analyzer: DataAnalyzer
+        requestedMode: EncodingMode?
     ) throws -> EncodingMode {
         guard analyzer.canEncode(message) else {
             throw QRCodeError.unsupportedMessage
@@ -63,42 +70,64 @@ private extension QRConfigurationResolver {
             return requestedMode
         }
 
-        guard let recommendedMode = analyzer.recommendedEncodingMode(
+        return recommendedEncodingMode(
             for: message
-        ) else {
-            preconditionFailure(
-                "Supported message has no recommended encoding mode"
-            )
-        }
-
-        return recommendedMode
+        )
     }
 
-    static func validatedCharacterCount(
+    func validatedCharacterCount(
         for message: String,
-        mode: EncodingMode,
-        analyzer: DataAnalyzer
+        mode: EncodingMode
     ) throws -> Int {
         let characterCount = mode.characterCount(for: message)
 
-        // TODO: Distinguish an inefficient explicitly selected encoding mode
-        // from an oversized message.
-        guard analyzer.canFit(
+        if analyzer.canFit(
             characterCount,
             mode: mode
-        ) else {
-            throw QRCodeError.messageIsTooLong
+        ) {
+            return characterCount
         }
 
-        return characterCount
+        let recommendedMode = recommendedEncodingMode(
+            for: message
+        )
+
+        let recommendedCharacterCount =
+            recommendedMode.characterCount(for: message)
+
+        if analyzer.canFit(
+            recommendedCharacterCount,
+            mode: recommendedMode
+        ) {
+            throw QRCodeError.messageDoesNotFitEncodingMode
+        }
+
+        throw QRCodeError.messageIsTooLong
     }
 
-    static func resolveVersionAndErrorCorrectionLevel(
+    func recommendedEncodingMode(
+        for message: String
+    ) -> EncodingMode {
+        guard let mode = analyzer.recommendedEncodingMode(
+            for: message
+        ) else {
+            preconditionFailure(
+                "Encodable message has no recommended encoding mode"
+            )
+        }
+
+        return mode
+    }
+}
+
+// MARK: - Version and Error Correction
+
+private extension QRConfigurationResolver {
+    func resolveVersionAndErrorCorrectionLevel(
         for characterCount: Int,
         mode: EncodingMode,
         requestedVersion: QRVersion?,
-        requestedLevel: ErrorCorrectionLevel?,
-        analyzer: DataAnalyzer
+        requestedLevel: ErrorCorrectionLevel?
     ) throws -> (
         version: QRVersion,
         errorCorrectionLevel: ErrorCorrectionLevel
@@ -141,16 +170,14 @@ private extension QRConfigurationResolver {
         case (nil, nil):
             return resolveAutomaticVersionAndErrorCorrectionLevel(
                 for: characterCount,
-                mode: mode,
-                analyzer: analyzer
+                mode: mode
             )
         }
     }
 
-    static func resolveAutomaticVersionAndErrorCorrectionLevel(
+    func resolveAutomaticVersionAndErrorCorrectionLevel(
         for characterCount: Int,
-        mode: EncodingMode,
-        analyzer: DataAnalyzer
+        mode: EncodingMode
     ) -> (
         version: QRVersion,
         errorCorrectionLevel: ErrorCorrectionLevel
@@ -174,7 +201,7 @@ private extension QRConfigurationResolver {
 
         guard let version = recommendedVersion else {
             preconditionFailure(
-                "Fittable message has no valid version"
+                "Message fits QR capacity but no valid version was found"
             )
         }
 
@@ -184,7 +211,7 @@ private extension QRConfigurationResolver {
             version: version
         ) else {
             preconditionFailure(
-                "Recommended version cannot fit the message"
+                "Recommended version has no fitting error correction level"
             )
         }
 
