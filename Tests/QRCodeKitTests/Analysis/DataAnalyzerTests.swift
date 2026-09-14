@@ -10,262 +10,208 @@ import Testing
 
 @Suite
 struct DataAnalyzerTests {
-    
-    // MARK: - canEncode(_:)
-    
-    @Test
-    func canEncodeSupportedMessages() {
-        let analyzer = DataAnalyzer()
-        
-        let messages = [
-            "0123456789",
-            "HELLO WORLD",
-            "日本語",
-            "Café"
-        ]
-        
-        for message in messages {
-            #expect(analyzer.canEncode(message))
-        }
+
+    // MARK: - Encoding Mode
+
+    @Test(arguments: [
+        ("0123456789", EncodingMode.numeric),
+        ("HELLO WORLD", EncodingMode.alphanumeric),
+        ("日本語", EncodingMode.kanji),
+        ("Café", EncodingMode.byte),
+    ])
+    func recommendsMostEfficientEncodingMode(
+        message: String,
+        expectedMode: EncodingMode
+    ) {
+        let mode = DataAnalyzer.recommendedEncodingMode(
+            for: message
+        )
+
+        #expect(mode == expectedMode)
     }
-    
-    @Test
-    func cannotEncodeUnsupportedMessage() {
-        let analyzer = DataAnalyzer()
-        
-        #expect(analyzer.canEncode("🙂𠜎") == false)
-    }
-    
-    @Test
-    func cannotEncodeEmptyMessage() {
-        let analyzer = DataAnalyzer()
-        
-        #expect(analyzer.canEncode("") == false)
-    }
-    
-    // MARK: - canFit(_:mode:)
-    
-    @Test
-    func canFitAtMaximumCapacity() {
-        let analyzer = DataAnalyzer()
-        
-        let maxCapacities: [(mode: EncodingMode, characterCount: Int)] = [
-            (.numeric, 7089),
-            (.alphanumeric, 4296),
-            (.kanji, 1817),
-            (.byte, 2953)
-        ]
-        
-        for capacity in maxCapacities {
-            #expect(
-                analyzer.canFit(
-                    capacity.characterCount,
-                    mode: capacity.mode
-                )
-            )
-        }
-    }
-    
-    @Test
-    func cannotFitAboveMaximumCapacity() {
-        let analyzer = DataAnalyzer()
-        
-        let exceedingCounts: [(mode: EncodingMode, characterCount: Int)] = [
-            (.numeric, 7089 + 1),
-            (.alphanumeric, 4296 + 1),
-            (.kanji, 1817 + 1),
-            (.byte, 2953 + 1)
-        ]
-        
-        for value in exceedingCounts {
-            #expect(
-                !analyzer.canFit(
-                    value.characterCount,
-                    mode: value.mode
-                )
-            )
-        }
-    }
-    
-    // MARK: - canFit(_:mode:errorCorrectionLevel:version:)
-    
-    @Test
-    func canFitAtConfigurationCapacity() {
-        let analyzer = DataAnalyzer()
-        
-        let capacities: [(mode: EncodingMode, characterCount: Int)] = [
-            (.numeric, 17),
-            (.alphanumeric, 10),
-            (.kanji, 4),
-            (.byte, 7)
-        ]
-        
-        for capacity in capacities {
-            #expect(
-                analyzer.canFit(
-                    capacity.characterCount,
-                    mode: capacity.mode,
-                    errorCorrectionLevel: .H,
-                    version: .v1
-                )
-            )
-        }
-    }
-    
-    @Test
-    func cannotFitAboveConfigurationCapacity() {
-        let analyzer = DataAnalyzer()
-        
-        let exceedingCounts: [(mode: EncodingMode, characterCount: Int)] = [
-            (.numeric, 17 + 1),
-            (.alphanumeric, 10 + 1),
-            (.kanji, 4 + 1),
-            (.byte, 7 + 1)
-        ]
-        
-        for value in exceedingCounts {
-            #expect(
-                !analyzer.canFit(
-                    value.characterCount,
-                    mode: value.mode,
-                    errorCorrectionLevel: .H,
-                    version: .v1
-                )
-            )
-        }
-    }
-    
-    // MARK: - recommendedEncodingMode(for:)
-    
-    @Test
-    func recommendsMostEfficientEncodingMode() {
-        let analyzer = DataAnalyzer()
-        
-        let cases: [(message: String, expectedMode: EncodingMode)] = [
-            ("0123456789", .numeric),
-            ("HELLO WORLD", .alphanumeric),
-            ("日本語", .kanji),
-            ("Café", .byte)
-        ]
-        
-        for testCase in cases {
-            #expect(
-                analyzer.recommendedEncodingMode(for: testCase.message) == testCase.expectedMode
-            )
-        }
-    }
-    
+
     @Test
     func returnsNoRecommendedEncodingModeForUnsupportedMessage() {
-        let analyzer = DataAnalyzer()
-        
-        let result = analyzer.recommendedEncodingMode(for: "🙂𠜎")
-        
-        #expect(result == nil)
+        let mode = DataAnalyzer.recommendedEncodingMode(
+            for: "🙂𠜎"
+        )
+
+        #expect(mode == nil)
     }
-    
-    // MARK: - recommendedVersion(for:mode:errorCorrectionLevel:)
-    
+
     @Test
-    func recommendsVersion1AtConfigurationCapacity() {
-        let analyzer = DataAnalyzer()
-        
-        let capacities: [(mode: EncodingMode, characterCount: Int)] = [
-            (.numeric, 17),
-            (.alphanumeric, 10),
-            (.kanji, 4),
-            (.byte, 7)
-        ]
-        
-        for capacity in capacities {
-            let version = analyzer.recommendedVersion(
-                for: capacity.characterCount,
-                mode: capacity.mode,
-                errorCorrectionLevel: .H
-            )
-            
-            #expect(version == .v1)
-        }
+    func returnsNoRecommendedEncodingModeForEmptyMessage() {
+        let mode = DataAnalyzer.recommendedEncodingMode(
+            for: ""
+        )
+
+        #expect(mode == nil)
     }
-    
-    @Test
-    func recommendsNextVersionWhenPreviousCapacityExceeded() {
-        let analyzer = DataAnalyzer()
-        
-        let characterCounts: [(mode: EncodingMode, characterCount: Int)] = [
-            (.numeric, 235 + 1),
-            (.alphanumeric, 143 + 1),
-            (.kanji, 60 + 1),
-            (.byte, 98 + 1)
-        ]
-        
-        for value in characterCounts {
-            let version = analyzer.recommendedVersion(
-                for: value.characterCount,
-                mode: value.mode,
-                errorCorrectionLevel: .H
-            )
-            
-            #expect(version == .v10)
-        }
+
+    // MARK: - Capacity
+
+    @Test(arguments: [
+        (EncodingMode.numeric, 7089),
+        (EncodingMode.alphanumeric, 4296),
+        (EncodingMode.kanji, 1817),
+        (EncodingMode.byte, 2953),
+    ])
+    func canFitAtMaximumCapacity(
+        mode: EncodingMode,
+        characterCount: Int
+    ) {
+        let result = DataAnalyzer.canFit(
+            characterCount,
+            mode: mode
+        )
+
+        #expect(result)
     }
-    
-    @Test
-    func returnsNoRecommendedVersionAboveMaximumCapacity() {
-        let analyzer = DataAnalyzer()
-        
-        let exceedingCounts: [(mode: EncodingMode, characterCount: Int)] = [
-            (.numeric, 7089 + 1),
-            (.alphanumeric, 4296 + 1),
-            (.kanji, 1817 + 1),
-            (.byte, 2953 + 1)
-        ]
-        
-        for value in exceedingCounts {
-            let version = analyzer.recommendedVersion(
-                for: value.characterCount,
-                mode: value.mode,
-                errorCorrectionLevel: .min
-            )
-            
-            #expect(version == nil)
-        }
+
+    @Test(arguments: [
+        (EncodingMode.numeric, 7089 + 1),
+        (EncodingMode.alphanumeric, 4296 + 1),
+        (EncodingMode.kanji, 1817 + 1),
+        (EncodingMode.byte, 2953 + 1),
+    ])
+    func cannotFitAboveMaximumCapacity(
+        mode: EncodingMode,
+        characterCount: Int
+    ) {
+        let result = DataAnalyzer.canFit(
+            characterCount,
+            mode: mode
+        )
+
+        #expect(!result)
     }
-    
-    // MARK: - recommendedErrorCorrectionLevel(for:mode:version:)
-    
-    @Test
-    func recommendsHighestErrorCorrectionLevel() {
-        let analyzer = DataAnalyzer()
-        
-        let cases: [(characterCount: Int, expectedLevel: ErrorCorrectionLevel)] = [
-            (7, .H),
-            (7 + 1, .Q),
-            (11 + 1, .M),
-            (14 + 1, .L)
-        ]
-        
-        for testCase in cases {
-            let level = analyzer.recommendedErrorCorrectionLevel(
-                for: testCase.characterCount,
-                mode: .byte,
-                version: .v1
-            )
-            
-            #expect(level == testCase.expectedLevel)
-        }
+
+    @Test(arguments: [
+        (EncodingMode.numeric, 17),
+        (EncodingMode.alphanumeric, 10),
+        (EncodingMode.kanji, 4),
+        (EncodingMode.byte, 7),
+    ])
+    func canFitAtConfigurationCapacity(
+        mode: EncodingMode,
+        characterCount: Int
+    ) {
+        let result = DataAnalyzer.canFit(
+            characterCount,
+            mode: mode,
+            version: .v1,
+            errorCorrectionLevel: .H
+        )
+
+        #expect(result)
     }
-    
-    @Test
-    func returnsNoRecommendedErrorCorrectionLevelAboveVersionCapacity() {
-        let analyzer = DataAnalyzer()
-        
-        let level = analyzer.recommendedErrorCorrectionLevel(
-            for: 18,
+
+    @Test(arguments: [
+        (EncodingMode.numeric, 17 + 1),
+        (EncodingMode.alphanumeric, 10 + 1),
+        (EncodingMode.kanji, 4 + 1),
+        (EncodingMode.byte, 7 + 1),
+    ])
+    func cannotFitAboveConfigurationCapacity(
+        mode: EncodingMode,
+        characterCount: Int
+    ) {
+        let result = DataAnalyzer.canFit(
+            characterCount,
+            mode: mode,
+            version: .v1,
+            errorCorrectionLevel: .H
+        )
+
+        #expect(!result)
+    }
+
+    // MARK: - Version and Error Correction
+
+    @Test(arguments: [
+        (EncodingMode.numeric, 17),
+        (EncodingMode.alphanumeric, 10),
+        (EncodingMode.kanji, 4),
+        (EncodingMode.byte, 7),
+    ])
+    func minimumVersionIsVersion1AtConfigurationCapacity(
+        mode: EncodingMode,
+        characterCount: Int
+    ) {
+        let version = DataAnalyzer.minimumVersion(
+            for: characterCount,
+            mode: mode,
+            errorCorrectionLevel: .H
+        )
+
+        #expect(version == .v1)
+    }
+
+    @Test(arguments: [
+        (EncodingMode.numeric, 236),
+        (EncodingMode.alphanumeric, 144),
+        (EncodingMode.kanji, 61),
+        (EncodingMode.byte, 99),
+    ])
+    func minimumVersionAdvancesWhenPreviousVersionCapacityIsExceeded(
+        mode: EncodingMode,
+        characterCount: Int
+    ) {
+        let version = DataAnalyzer.minimumVersion(
+            for: characterCount,
+            mode: mode,
+            errorCorrectionLevel: .H
+        )
+
+        #expect(version == .v10)
+    }
+
+    @Test(arguments: [
+        (EncodingMode.numeric, 7089 + 1),
+        (EncodingMode.alphanumeric, 4296 + 1),
+        (EncodingMode.kanji, 1817 + 1),
+        (EncodingMode.byte, 2953 + 1),
+    ])
+    func returnsNoMinimumVersionAboveMaximumCapacity(
+        mode: EncodingMode,
+        characterCount: Int
+    ) {
+        let version = DataAnalyzer.minimumVersion(
+            for: characterCount,
+            mode: mode,
+            errorCorrectionLevel: .L
+        )
+
+        #expect(version == nil)
+    }
+
+    @Test(arguments: [
+        (7, ErrorCorrectionLevel.H),
+        (8, ErrorCorrectionLevel.Q),
+        (12, ErrorCorrectionLevel.M),
+        (15, ErrorCorrectionLevel.L),
+    ])
+    func returnsStrongestFittingErrorCorrectionLevel(
+        characterCount: Int,
+        expectedLevel: ErrorCorrectionLevel
+    ) {
+        let level = DataAnalyzer.strongestErrorCorrectionLevel(
+            for: characterCount,
             mode: .byte,
             version: .v1
         )
-        
+
+        #expect(level == expectedLevel)
+    }
+
+    @Test
+    func returnsNoErrorCorrectionLevelWhenVersionCannotFitMessage() {
+        let level = DataAnalyzer.strongestErrorCorrectionLevel(
+            for: 17 + 1,
+            mode: .byte,
+            version: .v1
+        )
+
         #expect(level == nil)
     }
 }

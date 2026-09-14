@@ -6,12 +6,6 @@
 //
 
 struct QRConfigurationResolver {
-    private let analyzer: DataAnalyzer
-
-    init() {
-        self.analyzer = DataAnalyzer()
-    }
-
     func resolve(
         for message: String,
         options: QROptions
@@ -58,21 +52,21 @@ private extension QRConfigurationResolver {
         for message: String,
         requestedMode: EncodingMode?
     ) throws -> EncodingMode {
-        guard analyzer.canEncode(message) else {
+        guard let recommendedMode = DataAnalyzer.recommendedEncodingMode(
+            for: message
+        ) else {
             throw QRCodeError.unsupportedMessage
         }
 
-        if let requestedMode {
-            guard requestedMode.canEncode(message) else {
-                throw QRCodeError.wrongEncodingModeForMessage
-            }
-
-            return requestedMode
+        guard let requestedMode else {
+            return recommendedMode
         }
 
-        return recommendedEncodingMode(
-            for: message
-        )
+        guard requestedMode.canEncode(message) else {
+            throw QRCodeError.wrongEncodingModeForMessage
+        }
+
+        return requestedMode
     }
 
     func validatedCharacterCount(
@@ -81,7 +75,7 @@ private extension QRConfigurationResolver {
     ) throws -> Int {
         let characterCount = mode.characterCount(for: message)
 
-        if analyzer.canFit(
+        if DataAnalyzer.canFit(
             characterCount,
             mode: mode
         ) {
@@ -95,7 +89,7 @@ private extension QRConfigurationResolver {
         let recommendedCharacterCount =
             recommendedMode.characterCount(for: message)
 
-        if analyzer.canFit(
+        if DataAnalyzer.canFit(
             recommendedCharacterCount,
             mode: recommendedMode
         ) {
@@ -108,7 +102,7 @@ private extension QRConfigurationResolver {
     func recommendedEncodingMode(
         for message: String
     ) -> EncodingMode {
-        guard let mode = analyzer.recommendedEncodingMode(
+        guard let mode = DataAnalyzer.recommendedEncodingMode(
             for: message
         ) else {
             preconditionFailure(
@@ -134,11 +128,11 @@ private extension QRConfigurationResolver {
     ) {
         switch (requestedVersion, requestedLevel) {
         case let (version?, level?):
-            guard analyzer.canFit(
+            guard DataAnalyzer.canFit(
                 characterCount,
                 mode: mode,
-                errorCorrectionLevel: level,
-                version: version
+                version: version,
+                errorCorrectionLevel: level
             ) else {
                 throw QRCodeError.messageDoesNotFitQRConfiguration
             }
@@ -146,7 +140,7 @@ private extension QRConfigurationResolver {
             return (version, level)
 
         case let (nil, level?):
-            guard let version = analyzer.recommendedVersion(
+            guard let version = DataAnalyzer.minimumVersion(
                 for: characterCount,
                 mode: mode,
                 errorCorrectionLevel: level
@@ -157,7 +151,7 @@ private extension QRConfigurationResolver {
             return (version, level)
 
         case let (version?, nil):
-            guard let level = analyzer.recommendedErrorCorrectionLevel(
+            guard let level = DataAnalyzer.strongestErrorCorrectionLevel(
                 for: characterCount,
                 mode: mode,
                 version: version
@@ -186,26 +180,26 @@ private extension QRConfigurationResolver {
             while: { $0 != .default }
         )
 
-        var recommendedVersion: QRVersion?
+        var selectedVersion: QRVersion?
 
         for level in fallbackLevels {
-            if let candidate = analyzer.recommendedVersion(
+            if let candidate = DataAnalyzer.minimumVersion(
                 for: characterCount,
                 mode: mode,
                 errorCorrectionLevel: level
             ) {
-                recommendedVersion = candidate
+                selectedVersion = candidate
                 break
             }
         }
 
-        guard let version = recommendedVersion else {
+        guard let version = selectedVersion else {
             preconditionFailure(
                 "Message fits QR capacity but no valid version was found"
             )
         }
 
-        guard let level = analyzer.recommendedErrorCorrectionLevel(
+        guard let level = DataAnalyzer.strongestErrorCorrectionLevel(
             for: characterCount,
             mode: mode,
             version: version

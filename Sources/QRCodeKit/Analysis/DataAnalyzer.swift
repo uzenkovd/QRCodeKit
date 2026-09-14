@@ -5,83 +5,74 @@
 //  Created by Dmytro Uzenkov on 12.08.2026.
 //
 
-struct DataAnalyzer {
-    func canEncode(_ message: String) -> Bool {
-        EncodingMode.allCases.contains {
+enum DataAnalyzer {
+    // MARK: - Encoding Mode
+
+    static func recommendedEncodingMode(
+        for message: String
+    ) -> EncodingMode? {
+        EncodingMode.recommendedOrder.first {
             $0.canEncode(message)
         }
     }
-    
-    func canFit(
+
+    // MARK: - Capacity
+
+    static func canFit(
         _ characterCount: Int,
         mode: EncodingMode
     ) -> Bool {
-        let maxCapacity = CharacterCapacities.maxCapacity(for: mode)
-        
+        let maxCapacity = CharacterCapacities.maxCapacity(
+            for: mode
+        )
+
         return characterCount <= maxCapacity
     }
-    
-    func canFit(
+
+    static func canFit(
         _ characterCount: Int,
         mode: EncodingMode,
-        errorCorrectionLevel: ErrorCorrectionLevel,
-        version: QRVersion
+        version: QRVersion,
+        errorCorrectionLevel: ErrorCorrectionLevel
     ) -> Bool {
         let capacity = CharacterCapacities.capacity(
             for: version,
             level: errorCorrectionLevel,
             mode: mode
         )
-        
+
         return characterCount <= capacity
     }
-    
-    func recommendedEncodingMode(for message: String) -> EncodingMode? {
-        for mode in EncodingMode.recommendedOrder {
-            if mode.canEncode(message) {
-                return mode
-            }
-        }
-        
-        return nil
-    }
-    
-    func recommendedVersion(
+
+    // MARK: - Version and Error Correction
+
+    static func minimumVersion(
         for characterCount: Int,
         mode: EncodingMode,
         errorCorrectionLevel: ErrorCorrectionLevel
     ) -> QRVersion? {
-        for version in QRVersion.allCases {
-            let capacity = CharacterCapacities.capacity(
-                for: version,
-                level: errorCorrectionLevel,
-                mode: mode
+        QRVersion.allCases.first {
+            canFit(
+                characterCount,
+                mode: mode,
+                version: $0,
+                errorCorrectionLevel: errorCorrectionLevel
             )
-            
-            if characterCount <= capacity {
-                return version
-            }
         }
-        
-        return nil
     }
-    
-    func recommendedErrorCorrectionLevel(
+
+    static func strongestErrorCorrectionLevel(
         for characterCount: Int,
         mode: EncodingMode,
         version: QRVersion
     ) -> ErrorCorrectionLevel? {
-        for level in ErrorCorrectionLevel.descendingOrder {
-            if canFit(
+        ErrorCorrectionLevel.descendingOrder.first {
+            canFit(
                 characterCount,
                 mode: mode,
-                errorCorrectionLevel: level,
-                version: version
-            ) {
-                return level
-            }
+                version: version,
+                errorCorrectionLevel: $0
+            )
         }
-        
-        return nil
     }
 }
