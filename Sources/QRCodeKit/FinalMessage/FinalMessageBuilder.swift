@@ -5,9 +5,7 @@
 //  Created by Dmytro Uzenkov on 05.09.2026.
 //
 
-struct FinalMessageBuilder {
-    // TODO: Validate that codeword groups match the resolved QR configuration
-    // once QRConfiguration is introduced
+enum FinalMessageBuilder {
     static func build(
         from groups: CodewordGroups,
         version: QRVersion
@@ -29,116 +27,6 @@ struct FinalMessageBuilder {
         )
 
         return finalBits
-    }
-}
-
-// MARK: - Group Construction
-
-extension FinalMessageBuilder {
-    static func makeCodewordGroups(
-        from dataCodewords: [UInt8],
-        version: QRVersion,
-        errorCorrectionLevel: ErrorCorrectionLevel
-    ) -> CodewordGroups {
-        let layout = ErrorCorrectionBlocks.layout(
-            for: version,
-            level: errorCorrectionLevel
-        )
-
-        precondition(
-            dataCodewords.count == layout.totalDataCodewordCount,
-            "Data codeword count does not match the error correction layout"
-        )
-
-        let group1Info = layout.group1
-        let group1DataCodewordCount =
-            group1Info.totalDataCodewordCount
-        let group1DataCodewords = dataCodewords.prefix(
-            group1DataCodewordCount
-        )
-        let group1 = Self.makeGroup(
-            from: group1DataCodewords,
-            info: group1Info,
-            errorCorrectionCodewordCountPerBlock:
-                layout.errorCorrectionCodewordCountPerBlock
-        )
-
-        let group2: Group?
-
-        if let group2Info = layout.group2 {
-            let group2DataCodewords = dataCodewords.dropFirst(
-                group1DataCodewordCount
-            )
-
-            group2 = Self.makeGroup(
-                from: group2DataCodewords,
-                info: group2Info,
-                errorCorrectionCodewordCountPerBlock:
-                    layout.errorCorrectionCodewordCountPerBlock
-            )
-        } else {
-            group2 = nil
-        }
-
-        let groups = CodewordGroups(
-            group1: group1,
-            group2: group2
-        )
-
-        assert(
-            groups.totalCodewordCount == layout.totalCodewordCount,
-            "Codeword groups do not match the expected error correction layout"
-        )
-
-        return groups
-    }
-
-    private static func makeGroup(
-        from dataCodewords: ArraySlice<UInt8>,
-        info: GroupInfo,
-        errorCorrectionCodewordCountPerBlock: Int
-    ) -> Group {
-        precondition(
-            dataCodewords.count == info.totalDataCodewordCount,
-            "Group data codeword count does not match the expected layout"
-        )
-
-        var blocks: [Block] = []
-        blocks.reserveCapacity(info.blockCount)
-
-        let encoder = ReedSolomonEncoder()
-        var currentIndex = dataCodewords.startIndex
-
-        for _ in 0..<info.blockCount {
-            let endIndex = dataCodewords.index(
-                currentIndex,
-                offsetBy: info.dataCodewordCountPerBlock
-            )
-
-            let blockDataCodewords = Array(
-                dataCodewords[currentIndex..<endIndex]
-            )
-
-            let blockErrorCorrectionCodewords = encoder.encode(
-                blockDataCodewords,
-                errorCorrectionCodewordCount: errorCorrectionCodewordCountPerBlock
-            )
-
-            let block = Block(
-                dataCodewords: blockDataCodewords,
-                errorCorrectionCodewords: blockErrorCorrectionCodewords
-            )
-
-            blocks.append(block)
-            currentIndex = endIndex
-        }
-
-        assert(
-            currentIndex == dataCodewords.endIndex,
-            "Group construction did not consume all data codewords"
-        )
-
-        return Group(blocks: blocks)
     }
 }
 

@@ -32,9 +32,9 @@ struct ErrorCorrectionBlocksTests {
         )
 
         #expect(layout.errorCorrectionCodewordCountPerBlock == 7)
-        #expect(layout.group1.blockCount == 1)
-        #expect(layout.group1.dataCodewordCountPerBlock == 19)
-        #expect(layout.group2 == nil)
+        #expect(layout.group1Info.blockCount == 1)
+        #expect(layout.group1Info.dataCodewordCountPerBlock == 19)
+        #expect(layout.group2Info == nil)
         #expect(layout.totalBlockCount == 1)
         #expect(layout.totalDataCodewordCount == 19)
         #expect(layout.totalErrorCorrectionCodewordCount == 7)
@@ -50,10 +50,10 @@ struct ErrorCorrectionBlocksTests {
         )
 
         #expect(layout.errorCorrectionCodewordCountPerBlock == 18)
-        #expect(layout.group1.blockCount == 2)
-        #expect(layout.group1.dataCodewordCountPerBlock == 15)
-        #expect(layout.group2?.blockCount == 2)
-        #expect(layout.group2?.dataCodewordCountPerBlock == 16)
+        #expect(layout.group1Info.blockCount == 2)
+        #expect(layout.group1Info.dataCodewordCountPerBlock == 15)
+        #expect(layout.group2Info?.blockCount == 2)
+        #expect(layout.group2Info?.dataCodewordCountPerBlock == 16)
         #expect(layout.totalBlockCount == 4)
         #expect(layout.totalDataCodewordCount == 62)
         #expect(layout.totalErrorCorrectionCodewordCount == 72)
@@ -92,9 +92,9 @@ struct ErrorCorrectionBlocksTests {
         )
 
         #expect(layout.errorCorrectionCodewordCountPerBlock == 7)
-        #expect(layout.group1.blockCount == 1)
-        #expect(layout.group1.dataCodewordCountPerBlock == 19)
-        #expect(layout.group2 == nil)
+        #expect(layout.group1Info.blockCount == 1)
+        #expect(layout.group1Info.dataCodewordCountPerBlock == 19)
+        #expect(layout.group2Info == nil)
     }
 
     @Test
@@ -105,9 +105,9 @@ struct ErrorCorrectionBlocksTests {
         )
 
         #expect(layout.errorCorrectionCodewordCountPerBlock == 28)
-        #expect(layout.group1.blockCount == 17)
-        #expect(layout.group1.dataCodewordCountPerBlock == 46)
-        #expect(layout.group2 == nil)
+        #expect(layout.group1Info.blockCount == 17)
+        #expect(layout.group1Info.dataCodewordCountPerBlock == 46)
+        #expect(layout.group2Info == nil)
     }
 
     @Test
@@ -118,10 +118,10 @@ struct ErrorCorrectionBlocksTests {
         )
 
         #expect(layout.errorCorrectionCodewordCountPerBlock == 30)
-        #expect(layout.group1.blockCount == 1)
-        #expect(layout.group1.dataCodewordCountPerBlock == 23)
-        #expect(layout.group2?.blockCount == 37)
-        #expect(layout.group2?.dataCodewordCountPerBlock == 24)
+        #expect(layout.group1Info.blockCount == 1)
+        #expect(layout.group1Info.dataCodewordCountPerBlock == 23)
+        #expect(layout.group2Info?.blockCount == 37)
+        #expect(layout.group2Info?.dataCodewordCountPerBlock == 24)
     }
 
     @Test
@@ -132,10 +132,10 @@ struct ErrorCorrectionBlocksTests {
         )
 
         #expect(layout.errorCorrectionCodewordCountPerBlock == 30)
-        #expect(layout.group1.blockCount == 20)
-        #expect(layout.group1.dataCodewordCountPerBlock == 15)
-        #expect(layout.group2?.blockCount == 61)
-        #expect(layout.group2?.dataCodewordCountPerBlock == 16)
+        #expect(layout.group1Info.blockCount == 20)
+        #expect(layout.group1Info.dataCodewordCountPerBlock == 15)
+        #expect(layout.group2Info?.blockCount == 61)
+        #expect(layout.group2Info?.dataCodewordCountPerBlock == 16)
     }
 
     @Test

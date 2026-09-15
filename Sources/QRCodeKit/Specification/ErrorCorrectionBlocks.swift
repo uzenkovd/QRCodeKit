@@ -33,16 +33,16 @@ struct GroupInfo {
 
 struct ErrorCorrectionLayout {
     let errorCorrectionCodewordCountPerBlock: Int
-    let group1: GroupInfo
-    let group2: GroupInfo?
+    let group1Info: GroupInfo
+    let group2Info: GroupInfo?
 
     var totalBlockCount: Int {
-        group1.blockCount + (group2?.blockCount ?? 0)
+        group1Info.blockCount + (group2Info?.blockCount ?? 0)
     }
 
     var totalDataCodewordCount: Int {
-        group1.totalDataCodewordCount
-            + (group2?.totalDataCodewordCount ?? 0)
+        group1Info.totalDataCodewordCount
+            + (group2Info?.totalDataCodewordCount ?? 0)
     }
 
     var totalErrorCorrectionCodewordCount: Int {
@@ -73,8 +73,8 @@ struct ErrorCorrectionLayout {
 
         self.errorCorrectionCodewordCountPerBlock =
             errorCorrectionCodewordCountPerBlock
-        self.group1 = group1
-        self.group2 = group2
+        self.group1Info = group1
+        self.group2Info = group2
     }
 }
 
