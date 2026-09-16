@@ -13,7 +13,7 @@ struct FinalMessageBuilderTests {
     // MARK: - Final Message Building
 
     @Test
-    func buildWithoutRemainderBits() {
+    func buildFromSingleGroupWithoutRemainderBits() {
         let dataCodewords = (1...19).map { UInt8($0) }
         let errorCorrectionCodewords = (20...26).map { UInt8($0) }
 
@@ -31,17 +31,19 @@ struct FinalMessageBuilderTests {
             group2: nil
         )
 
+        let expectedCodewords = (1...26).map { UInt8($0) }
+
         let finalBits = FinalMessageBuilder.build(
             from: groups,
             version: .v1
         )
 
-        #expect(finalBits.bytes == (1...26).map { UInt8($0) })
+        #expect(finalBits.bytes == expectedCodewords)
         #expect(finalBits.count == 26 * 8 + 0)
     }
 
     @Test
-    func buildWithRemainderBits() {
+    func buildFromTwoGroupsWithRemainderBits() {
         let group1Block1DataCodewords =
             stride(from: 1, through: 57, by: 4).map { UInt8($0) }
         let group1Block2DataCodewords =
@@ -93,12 +95,12 @@ struct FinalMessageBuilderTests {
             group2: group2
         )
 
+        let expectedCodewords = (1...134).map { UInt8($0) }
+
         let finalBits = FinalMessageBuilder.build(
             from: groups,
             version: .v5
         )
-
-        let expectedCodewords = (1...134).map { UInt8($0) }
 
         #expect(finalBits.bytes == expectedCodewords + [0])
         #expect(finalBits.count == 134 * 8 + 7)
@@ -107,7 +109,7 @@ struct FinalMessageBuilderTests {
     // MARK: - Codeword Interleaving
 
     @Test
-    func interleaveCodewordsWithSingleBlockGroup() {
+    func interleaveCodewordsInSingleBlockGroup() {
         let group1 = Group(
             blocks: [
                 Block(
@@ -122,16 +124,16 @@ struct FinalMessageBuilderTests {
             group2: nil
         )
 
-        let interleavedCodewords = FinalMessageBuilder.interleaveCodewords(
+        let interleaved = FinalMessageBuilder.interleaveCodewords(
             from: groups
         )
 
-        #expect(interleavedCodewords.dataCodewords == [1, 2, 3])
-        #expect(interleavedCodewords.errorCorrectionCodewords == [4, 5])
+        #expect(interleaved.dataCodewords == [1, 2, 3])
+        #expect(interleaved.errorCorrectionCodewords == [4, 5])
     }
 
     @Test
-    func interleaveCodewordsWithMultipleBlocksGroup() {
+    func interleaveCodewordsInMultipleBlockGroup() {
         let group1 = Group(
             blocks: [
                 Block(
@@ -150,16 +152,16 @@ struct FinalMessageBuilderTests {
             group2: nil
         )
 
-        let interleavedCodewords = FinalMessageBuilder.interleaveCodewords(
+        let interleaved = FinalMessageBuilder.interleaveCodewords(
             from: groups
         )
 
-        #expect(interleavedCodewords.dataCodewords == [1, 2, 3, 4, 5, 6])
-        #expect(interleavedCodewords.errorCorrectionCodewords == [7, 8, 9, 10])
+        #expect(interleaved.dataCodewords == [1, 2, 3, 4, 5, 6])
+        #expect(interleaved.errorCorrectionCodewords == [7, 8, 9, 10])
     }
 
     @Test
-    func interleaveCodewordsWithTwoGroups() {
+    func interleaveCodewordsInTwoGroups() {
         let group1 = Group(
             blocks: [
                 Block(
@@ -191,16 +193,16 @@ struct FinalMessageBuilderTests {
             group2: group2
         )
 
-        let interleavedCodewords = FinalMessageBuilder.interleaveCodewords(
+        let interleaved = FinalMessageBuilder.interleaveCodewords(
             from: groups
         )
 
         #expect(
-            interleavedCodewords.dataCodewords
+            interleaved.dataCodewords
                 == [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
         )
         #expect(
-            interleavedCodewords.errorCorrectionCodewords
+            interleaved.errorCorrectionCodewords
                 == [11, 12, 13, 14, 15, 16, 17, 18]
         )
     }

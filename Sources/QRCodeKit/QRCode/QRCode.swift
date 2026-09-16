@@ -9,6 +9,7 @@ public struct QRCode {
     public let message: String
 
     private var configuration: QRConfiguration
+    private let codewordGroups: CodewordGroups
 
     public var version: QRVersion {
         configuration.version
@@ -35,7 +36,7 @@ public struct QRCode {
     public var size: Int {
         21 + 4 * (version.rawValue - 1)
     }
-    
+
     public init(
         _ message: String,
         options: QROptions = QROptions()
@@ -49,7 +50,20 @@ public struct QRCode {
             options: options
         )
 
+        let dataCodewords = DataEncoder().encode(
+            message,
+            mode: configuration.encodingMode,
+            version: configuration.version,
+            errorCorrectionLevel: configuration.errorCorrectionLevel
+        )
+
+        let codewordGroups = CodewordGroupsBuilder.build(
+            from: dataCodewords,
+            layout: configuration.errorCorrectionLayout
+        )
+
         self.message = message
         self.configuration = configuration
+        self.codewordGroups = codewordGroups
     }
 }

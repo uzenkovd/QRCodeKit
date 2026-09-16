@@ -11,4 +11,11 @@ struct QRConfiguration {
     let errorCorrectionLevel: ErrorCorrectionLevel
 
     var mask: QRMask?
+
+    var errorCorrectionLayout: ErrorCorrectionLayout {
+        ErrorCorrectionBlocks.layout(
+            for: version,
+            level: errorCorrectionLevel
+        )
+    }
 }

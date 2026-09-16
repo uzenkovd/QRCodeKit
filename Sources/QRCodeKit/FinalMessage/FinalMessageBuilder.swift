@@ -10,8 +10,10 @@ enum FinalMessageBuilder {
         from groups: CodewordGroups,
         version: QRVersion
     ) -> BitBuffer {
-        let interleaved = Self.interleaveCodewords(from: groups)
-        let remainderBitCount = RemainderBits.bitCount(for: version)
+        let interleaved = interleaveCodewords(from: groups)
+        let remainderBitCount = RemainderBits.bitCount(
+            for: version
+        )
 
         var finalBits = BitBuffer()
 
@@ -19,7 +21,8 @@ enum FinalMessageBuilder {
         finalBits.append(contentsOf: interleaved.errorCorrectionCodewords)
         finalBits.append(0, bitCount: remainderBitCount)
 
-        let expectedBitCount = groups.totalCodewordCount * 8 + remainderBitCount
+        let expectedBitCount =
+            groups.totalCodewordCount * 8 + remainderBitCount
 
         assert(
             finalBits.count == expectedBitCount,
@@ -41,12 +44,12 @@ extension FinalMessageBuilder {
     ) {
         let blocks = groups.blocks
 
-        let interleavedDataCodewords = Self.interleave(
+        let interleavedDataCodewords = interleave(
             blocks,
             codewords: \.dataCodewords
         )
 
-        let interleavedErrorCorrectionCodewords = Self.interleave(
+        let interleavedErrorCorrectionCodewords = interleave(
             blocks,
             codewords: \.errorCorrectionCodewords
         )
