@@ -27,7 +27,7 @@ enum CharacterCapacities {
             mode: mode
         )
     }
-    
+
     static func capacity(
         for version: QRVersion,
         level: ErrorCorrectionLevel,
@@ -38,7 +38,7 @@ enum CharacterCapacities {
                 "Character capacity is missing for \(version) and \(level)"
             )
         }
-        
+
         switch mode {
         case .numeric:      return capacities.numeric
         case .alphanumeric: return capacities.alphanumeric

@@ -46,18 +46,30 @@ public enum QRVersion: Int, Sendable, CaseIterable, Hashable {
     case v38
     case v39
     case v40
-    
+
     public static let min: QRVersion = .v1
     public static let max: QRVersion = .v40
+
+    var size: Int {
+        21 + 4 * (rawValue - 1)
+    }
 }
 
 // MARK: - Strideable
 
 extension QRVersion: Strideable {
     public func advanced(by n: Int) -> QRVersion {
-        QRVersion(rawValue: rawValue + n)!
+        guard let version = QRVersion(
+            rawValue: rawValue + n
+        ) else {
+            preconditionFailure(
+                "Advanced QR version is out of bounds"
+            )
+        }
+
+        return version
     }
-    
+
     public func distance(to other: QRVersion) -> Int {
         other.rawValue - rawValue
     }

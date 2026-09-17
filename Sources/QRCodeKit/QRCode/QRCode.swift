@@ -34,7 +34,7 @@ public struct QRCode {
     }
 
     public var size: Int {
-        21 + 4 * (version.rawValue - 1)
+        version.size
     }
 
     public init(

@@ -11,7 +11,7 @@ public struct QROptions {
     public var encodingMode: EncodingMode?
     public var errorCorrectionLevel: ErrorCorrectionLevel?
     public var mask: QRMask?
-    
+
     public init(
         version: QRVersion? = nil,
         encodingMode: EncodingMode? = nil,
