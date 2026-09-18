@@ -10,26 +10,28 @@ enum QRModuleColor: Equatable {
     case dark
 }
 
-enum QRStructuralRole: Equatable {
-    case finderPattern
+enum QRFunctionPattern: Equatable {
+    case finder
     case separator
-    case alignmentPattern
-    case timingPattern
-    case darkModule
-    case formatInformation
-    case versionInformation
+    case alignment
+    case timing
 }
 
-enum QRReservedArea: Equatable {
-    case formatInformation
-    case versionInformation
+enum QRInformationType: Equatable {
+    case format
+    case version
 }
 
 enum QRModule: Equatable {
     case unset
-    case reserved(QRReservedArea)
-    case structural(
-        role: QRStructuralRole,
+    case reserved(QRInformationType)
+    case function(
+        pattern: QRFunctionPattern,
+        color: QRModuleColor
+    )
+    case darkModule
+    case information(
+        type: QRInformationType,
         color: QRModuleColor
     )
     case data(color: QRModuleColor)

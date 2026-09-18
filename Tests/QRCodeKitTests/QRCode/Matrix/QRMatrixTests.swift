@@ -32,24 +32,24 @@ struct QRMatrixTests {
     func storeModulesAtCoordinates() {
         var matrix = QRMatrix(version: .v1)
 
-        matrix[0, 0] = .structural(
-            role: .finderPattern,
+        matrix[0, 0] = .function(
+            pattern: .finder,
             color: .dark
         )
         matrix[7, 13] = .data(color: .light)
-        matrix[20, 20] = .reserved(.formatInformation)
+        matrix[20, 20] = .reserved(.format)
 
         #expect(
             matrix[0, 0]
-                == .structural(
-                    role: .finderPattern,
+                == .function(
+                    pattern: .finder,
                     color: .dark
                 )
         )
         #expect(matrix[7, 13] == .data(color: .light))
         #expect(
             matrix[20, 20]
-                == .reserved(.formatInformation)
+                == .reserved(.format)
         )
     }
 }
