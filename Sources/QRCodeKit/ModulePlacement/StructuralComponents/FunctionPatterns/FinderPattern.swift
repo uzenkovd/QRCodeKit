@@ -52,11 +52,6 @@ private extension FinderPattern {
                 let matrixRow = startRow + row
                 let matrixColumn = startColumn + column
 
-                precondition(
-                    matrix[matrixRow, matrixColumn] == .unset,
-                    "Finder pattern can only be placed on unset modules"
-                )
-
                 let distanceToEdge = min(
                     min(row, column),
                     min(
@@ -68,11 +63,30 @@ private extension FinderPattern {
                 let color: QRModuleColor =
                     distanceToEdge == 1 ? .light : .dark
 
-                matrix[matrixRow, matrixColumn] = .function(
-                    pattern: .finder,
-                    color: color
+                placeModule(
+                    atRow: matrixRow,
+                    column: matrixColumn,
+                    color: color,
+                    in: &matrix
                 )
             }
         }
+    }
+
+    static func placeModule(
+        atRow row: Int,
+        column: Int,
+        color: QRModuleColor,
+        in matrix: inout QRMatrix
+    ) {
+        precondition(
+            matrix[row, column] == .unset,
+            "Finder pattern can only be placed on unset modules"
+        )
+
+        matrix[row, column] = .function(
+            pattern: .finder,
+            color: color
+        )
     }
 }
