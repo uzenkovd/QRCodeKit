@@ -38,7 +38,7 @@ struct AlignmentPatternTests {
         QRVersion.v1,
         .v2,
         .v7,
-        .v40
+        .max
     ])
     func leaveOtherModulesUnset(
         version: QRVersion
@@ -56,12 +56,14 @@ struct AlignmentPatternTests {
 
         for row in 0..<matrix.size {
             for column in 0..<matrix.size {
-                if !Self.isAlignmentPatternModule(
-                    row: row,
-                    column: column,
-                    centers: centers
-                ) {
-                    #expect(matrix[row, column] == .unset)
+                if matrix[row, column] != .unset {
+                    #expect(
+                        Self.isAlignmentPatternModule(
+                            row: row,
+                            column: column,
+                            centers: centers
+                        )
+                    )
                 }
             }
         }

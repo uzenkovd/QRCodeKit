@@ -35,7 +35,10 @@ struct FinderPatternTests {
         )
     }
 
-    @Test(arguments: [QRVersion.min, QRVersion.max])
+    @Test(arguments: [
+        QRVersion.min,
+        .max
+    ])
     func leaveOtherModulesUnset(
         version: QRVersion
     ) {
@@ -45,12 +48,14 @@ struct FinderPatternTests {
 
         for row in 0..<matrix.size {
             for column in 0..<matrix.size {
-                if !Self.isFinderPatternModule(
-                    row: row,
-                    column: column,
-                    matrixSize: matrix.size
-                ) {
-                    #expect(matrix[row, column] == .unset)
+                if matrix[row, column] != .unset {
+                    #expect(
+                        Self.isFinderPatternModule(
+                            row: row,
+                            column: column,
+                            matrixSize: matrix.size
+                        )
+                    )
                 }
             }
         }
@@ -79,14 +84,15 @@ private extension FinderPatternTests {
     ) {
         for row in 0..<patternSize {
             for column in 0..<patternSize {
-                let module =
-                    matrix[startRow + row, startColumn + column]
                 let expectedModule = QRModule.function(
                     pattern: .finder,
                     color: expectedPattern[row][column]
                 )
 
-                #expect(module == expectedModule)
+                #expect(
+                    matrix[startRow + row, startColumn + column]
+                        == expectedModule
+                )
             }
         }
     }

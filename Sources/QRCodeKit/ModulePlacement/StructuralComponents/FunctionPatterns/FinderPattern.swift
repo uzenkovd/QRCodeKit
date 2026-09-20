@@ -51,17 +51,10 @@ private extension FinderPattern {
             for column in 0..<size {
                 let matrixRow = startRow + row
                 let matrixColumn = startColumn + column
-
-                let distanceToEdge = min(
-                    min(row, column),
-                    min(
-                        size - 1 - row,
-                        size - 1 - column
-                    )
+                let color = color(
+                    atRow: row,
+                    column: column
                 )
-
-                let color: QRModuleColor =
-                    distanceToEdge == 1 ? .light : .dark
 
                 placeModule(
                     atRow: matrixRow,
@@ -71,6 +64,23 @@ private extension FinderPattern {
                 )
             }
         }
+    }
+
+    static func color(
+        atRow row: Int,
+        column: Int
+    ) -> QRModuleColor {
+        let distanceToEdge = min(
+            min(row, column),
+            min(
+                size - 1 - row,
+                size - 1 - column
+            )
+        )
+
+        return distanceToEdge == 1
+            ? .light
+            : .dark
     }
 
     static func placeModule(

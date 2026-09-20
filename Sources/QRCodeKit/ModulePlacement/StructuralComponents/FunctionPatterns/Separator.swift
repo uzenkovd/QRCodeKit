@@ -67,7 +67,6 @@ private extension Separator {
                 column: cornerColumn,
                 in: &matrix
             )
-
             placeModule(
                 atRow: cornerRow,
                 column: cornerColumn + offset * columnStep,

@@ -23,7 +23,10 @@ struct SeparatorTests {
         Self.expectBottomLeftSeparator(in: matrix)
     }
 
-    @Test(arguments: [QRVersion.min, QRVersion.max])
+    @Test(arguments: [
+        QRVersion.min,
+        .max
+    ])
     func leaveOtherModulesUnset(
         version: QRVersion
     ) {
@@ -33,12 +36,14 @@ struct SeparatorTests {
 
         for row in 0..<matrix.size {
             for column in 0..<matrix.size {
-                if !Self.isSeparatorModule(
-                    row: row,
-                    column: column,
-                    matrixSize: matrix.size
-                ) {
-                    #expect(matrix[row, column] == .unset)
+                if matrix[row, column] != .unset {
+                    #expect(
+                        Self.isSeparatorModule(
+                            row: row,
+                            column: column,
+                            matrixSize: matrix.size
+                        )
+                    )
                 }
             }
         }
