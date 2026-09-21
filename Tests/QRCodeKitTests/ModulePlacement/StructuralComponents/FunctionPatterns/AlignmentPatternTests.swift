@@ -16,13 +16,13 @@ struct AlignmentPatternTests {
     ) {
         var matrix = QRMatrix(version: version)
 
+        let centers = Self.expectedCenters(
+            for: version
+        )
+
         AlignmentPattern.place(
             in: &matrix,
             version: version
-        )
-
-        let centers = Self.expectedCenters(
-            for: version
         )
 
         for center in centers {
@@ -45,13 +45,13 @@ struct AlignmentPatternTests {
     ) {
         var matrix = QRMatrix(version: version)
 
+        let centers = Self.expectedCenters(
+            for: version
+        )
+
         AlignmentPattern.place(
             in: &matrix,
             version: version
-        )
-
-        let centers = Self.expectedCenters(
-            for: version
         )
 
         for row in 0..<matrix.size {

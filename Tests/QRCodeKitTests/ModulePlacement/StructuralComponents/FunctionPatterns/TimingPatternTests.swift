@@ -16,12 +16,12 @@ struct TimingPatternTests {
     ) {
         var matrix = QRMatrix(version: version)
 
-        TimingPattern.place(in: &matrix)
-
         let endCoordinate =
             matrix.size - Self.endCoordinateOffset
 
         let timingRange = Self.startCoordinate...endCoordinate
+
+        TimingPattern.place(in: &matrix)
 
         for coordinate in timingRange {
             let expectedModule = Self.expectedModule(
@@ -48,10 +48,10 @@ struct TimingPatternTests {
     ) {
         var matrix = QRMatrix(version: version)
 
-        TimingPattern.place(in: &matrix)
-
         let endCoordinate =
             matrix.size - Self.endCoordinateOffset
+
+        TimingPattern.place(in: &matrix)
 
         for row in 0..<matrix.size {
             for column in 0..<matrix.size {
@@ -77,17 +77,17 @@ struct TimingPatternTests {
     ) {
         var matrix = QRMatrix(version: version)
 
+        let coordinates =
+            AlignmentPatternCenters.coordinates(
+                for: version
+            )
+
         AlignmentPattern.place(
             in: &matrix,
             version: version
         )
 
         TimingPattern.place(in: &matrix)
-
-        let coordinates =
-            AlignmentPatternCenters.coordinates(
-                for: version
-            )
 
         for centerCoordinate in coordinates.dropFirst().dropLast() {
             for offset in -2...2 {
