@@ -10,15 +10,35 @@ enum AlignmentPattern {
         in matrix: inout QRMatrix,
         version: QRVersion
     ) {
-        let centers = validCenters(
-            for: version
+        let coordinates =
+            AlignmentPatternCenters.coordinates(
+                for: version
+            )
+
+        guard !coordinates.isEmpty else {
+            return
+        }
+
+        let lastIndex = coordinates.index(
+            before: coordinates.endIndex
         )
 
-        for center in centers {
-            place(
-                centeredAt: center,
-                in: &matrix
-            )
+        for rowIndex in coordinates.indices {
+            for columnIndex in coordinates.indices {
+                guard !isFinderPatternPosition(
+                    rowIndex: rowIndex,
+                    columnIndex: columnIndex,
+                    lastIndex: lastIndex
+                ) else {
+                    continue
+                }
+
+                place(
+                    centeredAtRow: coordinates[rowIndex],
+                    column: coordinates[columnIndex],
+                    in: &matrix
+                )
+            }
         }
     }
 }
@@ -28,61 +48,23 @@ enum AlignmentPattern {
 private extension AlignmentPattern {
     static let size = 5
 
-    struct Center: Hashable {
-        let row: Int
-        let column: Int
-    }
-
-    static func validCenters(
-        for version: QRVersion
-    ) -> [Center] {
-        let coordinates =
-            AlignmentPatternCenters.coordinates(
-                for: version
-            )
-
-        guard
-            let firstCoordinate = coordinates.first,
-            let lastCoordinate = coordinates.last
-        else {
-            return []
-        }
-
-        let allCenters = coordinates.flatMap { row in
-            coordinates.map { column in
-                Center(
-                    row: row,
-                    column: column
-                )
-            }
-        }
-
-        let excludedCenters: Set<Center> = [
-            Center(
-                row: firstCoordinate,
-                column: firstCoordinate
-            ),
-            Center(
-                row: firstCoordinate,
-                column: lastCoordinate
-            ),
-            Center(
-                row: lastCoordinate,
-                column: firstCoordinate
-            )
-        ]
-
-        return allCenters.filter { center in
-            !excludedCenters.contains(center)
-        }
+    static func isFinderPatternPosition(
+        rowIndex: Int,
+        columnIndex: Int,
+        lastIndex: Int
+    ) -> Bool {
+        rowIndex == 0 && columnIndex == 0 ||
+        rowIndex == 0 && columnIndex == lastIndex ||
+        rowIndex == lastIndex && columnIndex == 0
     }
 
     static func place(
-        centeredAt center: Center,
+        centeredAtRow centerRow: Int,
+        column centerColumn: Int,
         in matrix: inout QRMatrix
     ) {
-        let startRow = center.row - size / 2
-        let startColumn = center.column - size / 2
+        let startRow = centerRow - size / 2
+        let startColumn = centerColumn - size / 2
 
         for row in 0..<size {
             for column in 0..<size {

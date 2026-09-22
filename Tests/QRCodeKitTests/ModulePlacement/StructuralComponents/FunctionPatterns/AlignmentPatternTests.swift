@@ -34,12 +34,7 @@ struct AlignmentPatternTests {
         }
     }
 
-    @Test(arguments: [
-        QRVersion.v1,
-        .v2,
-        .v7,
-        .max
-    ])
+    @Test(arguments: QRVersion.allCases)
     func leaveOtherModulesUnset(
         version: QRVersion
     ) {

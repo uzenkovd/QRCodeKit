@@ -7,9 +7,35 @@
 
 enum FinderPattern {
     static func place(in matrix: inout QRMatrix) {
-        placeTopLeft(in: &matrix)
-        placeTopRight(in: &matrix)
-        placeBottomLeft(in: &matrix)
+        let farStartCoordinate = matrix.size - size
+
+        for row in 0..<size {
+            for column in 0..<size {
+                let color = color(
+                    atRow: row,
+                    column: column
+                )
+
+                placeModule(
+                    atRow: row,
+                    column: column,
+                    color: color,
+                    in: &matrix
+                )
+                placeModule(
+                    atRow: row,
+                    column: farStartCoordinate + column,
+                    color: color,
+                    in: &matrix
+                )
+                placeModule(
+                    atRow: farStartCoordinate + row,
+                    column: column,
+                    color: color,
+                    in: &matrix
+                )
+            }
+        }
     }
 }
 
@@ -17,54 +43,6 @@ enum FinderPattern {
 
 private extension FinderPattern {
     static let size = 7
-
-    static func placeTopLeft(in matrix: inout QRMatrix) {
-        place(
-            atRow: 0,
-            column: 0,
-            in: &matrix
-        )
-    }
-
-    static func placeTopRight(in matrix: inout QRMatrix) {
-        place(
-            atRow: 0,
-            column: matrix.size - size,
-            in: &matrix
-        )
-    }
-
-    static func placeBottomLeft(in matrix: inout QRMatrix) {
-        place(
-            atRow: matrix.size - size,
-            column: 0,
-            in: &matrix
-        )
-    }
-
-    static func place(
-        atRow startRow: Int,
-        column startColumn: Int,
-        in matrix: inout QRMatrix
-    ) {
-        for row in 0..<size {
-            for column in 0..<size {
-                let matrixRow = startRow + row
-                let matrixColumn = startColumn + column
-                let color = color(
-                    atRow: row,
-                    column: column
-                )
-
-                placeModule(
-                    atRow: matrixRow,
-                    column: matrixColumn,
-                    color: color,
-                    in: &matrix
-                )
-            }
-        }
-    }
 
     static func color(
         atRow row: Int,

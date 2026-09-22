@@ -35,10 +35,7 @@ struct FinderPatternTests {
         )
     }
 
-    @Test(arguments: [
-        QRVersion.min,
-        .max
-    ])
+    @Test(arguments: QRVersion.allCases)
     func leaveOtherModulesUnset(
         version: QRVersion
     ) {
