@@ -20,6 +20,27 @@ struct BitBufferTests {
         #expect(buffer.bytes.isEmpty)
     }
 
+    // MARK: - Bit Access
+
+    @Test
+    func accessBitsByIndex() {
+        var buffer = BitBuffer()
+        let expectedBits = [
+            true, false, true, true,
+            false, false, true, false,
+            true, false, true, false
+        ]
+
+        buffer.append(
+            0b101100101010,
+            bitCount: 12
+        )
+
+        for index in expectedBits.indices {
+            #expect(buffer[index] == expectedBits[index])
+        }
+    }
+
     // MARK: - append(_:bitCount:)
 
     @Test

@@ -39,7 +39,20 @@ struct BitBuffer {
         storage = []
         count = 0
     }
-    
+
+    subscript(index: Int) -> Bool {
+        precondition(
+            index >= 0 && index < count,
+            "Bit index is out of range"
+        )
+
+        let byteIndex = index / 8
+        let bitOffset = index % 8
+        let mask = UInt8(0b1000_0000) >> bitOffset
+
+        return (storage[byteIndex] & mask) != 0
+    }
+
     mutating func append(_ byte: UInt8) {
         append(UInt32(byte), bitCount: 8)
     }
