@@ -40,10 +40,7 @@ struct DataPlacerTests {
             from: expectedBits
         )
 
-        DataPlacer.place(
-            bits,
-            in: &matrix
-        )
+        DataPlacer.place(bits, in: &matrix)
 
         for (position, bit) in zip(
             expectedPositions,
@@ -71,9 +68,7 @@ struct DataPlacerTests {
         for row in 0..<expectedMatrix.size {
             for column in 0..<expectedMatrix.size {
                 if expectedMatrix[row, column] == .unset {
-                    expectedMatrix[row, column] = .data(
-                        color: .light
-                    )
+                    expectedMatrix[row, column] = .data(color: .light)
                 }
             }
         }
@@ -85,10 +80,7 @@ struct DataPlacerTests {
             count: bitCount
         )
 
-        DataPlacer.place(
-            bits,
-            in: &matrix
-        )
+        DataPlacer.place(bits, in: &matrix)
 
         #expect(matrix == expectedMatrix)
     }
@@ -167,10 +159,14 @@ private extension DataPlacerTests {
             buffer.append(UInt8(0))
         }
 
-        buffer.append(
-            0,
-            bitCount: count % 8
-        )
+        let remainingBitCount = count % 8
+
+        if remainingBitCount > 0 {
+            buffer.append(
+                0,
+                bitCount: remainingBitCount
+            )
+        }
 
         return buffer
     }
