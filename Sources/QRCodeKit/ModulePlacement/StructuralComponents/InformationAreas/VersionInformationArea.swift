@@ -10,7 +10,7 @@ enum VersionInformationArea {
         in matrix: inout QRMatrix,
         version: QRVersion
     ) {
-        guard version.rawValue >= 7 else {
+        guard version >= .v7 else {
             return
         }
 
@@ -29,6 +29,56 @@ enum VersionInformationArea {
                 in: &matrix
             )
         }
+    }
+
+    static func place(
+        in matrix: inout QRMatrix,
+        version: QRVersion
+    ) {
+        guard version >= .v7 else {
+            return
+        }
+
+        let information = encodedValue(for: version)
+
+        for index in 0..<bitCount {
+            let bit = (information >> index) & 1
+            let color: QRModuleColor = bit == 1 ? .dark : .light
+            let positions = bitPositions(
+                for: index,
+                matrixSize: matrix.size
+            )
+
+            placeModule(
+                at: positions.topRightCopy,
+                color: color,
+                in: &matrix
+            )
+            placeModule(
+                at: positions.bottomLeftCopy,
+                color: color,
+                in: &matrix
+            )
+        }
+    }
+}
+
+// MARK: - Information Encoding
+
+private extension VersionInformationArea {
+    static let generatorPolynomial: UInt32 = 0x1F25
+    static let remainderBitCount = 12
+
+    static func encodedValue(
+        for version: QRVersion
+    ) -> UInt32 {
+        let data = UInt32(version.rawValue)
+
+        return BCHEncoder.encode(
+            data,
+            generator: generatorPolynomial,
+            remainderBitCount: remainderBitCount
+        )
     }
 }
 
@@ -82,5 +132,25 @@ private extension VersionInformationArea {
         )
 
         matrix[position.row, position.column] = .reserved(.version)
+    }
+}
+
+// MARK: - Module Placement
+
+private extension VersionInformationArea {
+    static func placeModule(
+        at position: Position,
+        color: QRModuleColor,
+        in matrix: inout QRMatrix
+    ) {
+        precondition(
+            matrix[position.row, position.column] == .reserved(.version),
+            "Version information can only be placed on reserved version information modules"
+        )
+
+        matrix[position.row, position.column] = .information(
+            type: .version,
+            color: color
+        )
     }
 }
