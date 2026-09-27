@@ -65,6 +65,11 @@ private extension ModulePlacerTests {
             }
         }
 
+        VersionInformationArea.place(
+            in: &matrix,
+            version: version
+        )
+
         return matrix
     }
 
