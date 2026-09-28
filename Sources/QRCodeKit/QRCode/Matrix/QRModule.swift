@@ -8,6 +8,13 @@
 enum QRModuleColor: Equatable {
     case light
     case dark
+
+    var inverted: QRModuleColor {
+        switch self {
+        case .light: .dark
+        case .dark: .light
+        }
+    }
 }
 
 enum QRFunctionPattern: Equatable {
