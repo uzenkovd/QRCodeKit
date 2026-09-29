@@ -42,4 +42,19 @@ enum QRModule: Equatable {
         color: QRModuleColor
     )
     case data(color: QRModuleColor)
+
+    var color: QRModuleColor? {
+        switch self {
+        case let .function(_, color),
+             let .information(_, color),
+             let .data(color):
+            return color
+
+        case .darkModule:
+            return .dark
+
+        case .unset, .reserved:
+            return nil
+        }
+    }
 }
