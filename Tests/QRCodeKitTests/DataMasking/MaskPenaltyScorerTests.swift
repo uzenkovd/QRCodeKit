@@ -49,6 +49,58 @@ struct MaskPenaltyScorerTests {
         #expect(breakdown.consecutiveModules == 7)
     }
 
+    // MARK: - Same-Color Blocks
+
+    @Test
+    func returnZeroForMixedColorBlocks() {
+        let matrix = Self.makeCheckerboardMatrix()
+
+        let breakdown = MaskPenaltyScorer.penaltyBreakdown(
+            for: matrix
+        )
+
+        #expect(breakdown.sameColorBlocks == 0)
+    }
+
+    @Test
+    func scoreSingleSameColorBlock() {
+        var matrix = Self.makeCheckerboardMatrix()
+
+        Self.fillSquare(
+            ofSize: 2,
+            with: .dark,
+            atRow: 0,
+            column: 0,
+            in: &matrix
+        )
+
+        let breakdown = MaskPenaltyScorer.penaltyBreakdown(
+            for: matrix
+        )
+
+        #expect(breakdown.sameColorBlocks == 3)
+    }
+
+    @Test
+    func scoreOverlappingSameColorBlocks() {
+        var matrix = Self.makeCheckerboardMatrix()
+        let startCoordinate = matrix.size - 3
+
+        Self.fillSquare(
+            ofSize: 3,
+            with: .light,
+            atRow: startCoordinate,
+            column: startCoordinate,
+            in: &matrix
+        )
+
+        let breakdown = MaskPenaltyScorer.penaltyBreakdown(
+            for: matrix
+        )
+
+        #expect(breakdown.sameColorBlocks == 12)
+    }
+
     // MARK: - Finder-Like Patterns
 
     @Test(arguments: [
@@ -134,6 +186,43 @@ struct MaskPenaltyScorerTests {
 
         #expect(breakdown.finderLikePatterns == 40)
     }
+
+    // MARK: - Dark Module Balance
+
+    @Test(arguments: darkModuleBalanceTestCases)
+    func scoreDarkModuleBalance(
+        darkModuleCount: Int,
+        expectedPenalty: Int
+    ) {
+        let matrix = Self.makeMatrix(
+            withDarkModuleCount: darkModuleCount
+        )
+
+        let breakdown = MaskPenaltyScorer.penaltyBreakdown(
+            for: matrix
+        )
+
+        #expect(breakdown.darkModuleBalance == expectedPenalty)
+    }
+}
+
+// MARK: - Dark Module Balance Test Cases
+
+private extension MaskPenaltyScorerTests {
+    typealias DarkModuleBalanceTestCase = (
+        darkModuleCount: Int,
+        expectedPenalty: Int
+    )
+
+    static let darkModuleBalanceTestCases: [DarkModuleBalanceTestCase] = [
+        (0, 100),
+        (198, 10),
+        (199, 0),
+        (221, 0),
+        (242, 0),
+        (243, 10),
+        (441, 100)
+    ]
 }
 
 // MARK: - Test Matrices
@@ -203,6 +292,47 @@ private extension MaskPenaltyScorerTests {
         }
 
         return matrix
+    }
+
+    static func makeMatrix(
+        withDarkModuleCount darkModuleCount: Int,
+        version: QRVersion = .min
+    ) -> QRMatrix {
+        var matrix = QRMatrix(version: version)
+
+        let size = matrix.size
+        let totalModuleCount = size * size
+
+        precondition(
+            (0...totalModuleCount).contains(darkModuleCount),
+            "Test dark module count must be within the matrix capacity"
+        )
+
+        for row in 0..<size {
+            for column in 0..<size {
+                let moduleIndex = row * size + column
+                let color: QRModuleColor =
+                    moduleIndex < darkModuleCount ? .dark : .light
+
+                matrix[row, column] = .data(color: color)
+            }
+        }
+
+        return matrix
+    }
+
+    static func fillSquare(
+        ofSize size: Int,
+        with color: QRModuleColor,
+        atRow startRow: Int,
+        column startColumn: Int,
+        in matrix: inout QRMatrix
+    ) {
+        for row in startRow..<(startRow + size) {
+            for column in startColumn..<(startColumn + size) {
+                matrix[row, column] = .data(color: color)
+            }
+        }
     }
 
     static func color(

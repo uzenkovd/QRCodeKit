@@ -16,10 +16,19 @@ enum MaskPenaltyScorer {
         for matrix: QRMatrix
     ) -> PenaltyBreakdown {
         let lineEvaluation = evaluateLines(in: matrix)
+        let sameColorBlocks = penaltyForSameColorBlocks(
+            in: matrix
+        )
+        let darkModuleBalance = penaltyForDarkModuleBalance(
+            darkModuleCount: lineEvaluation.darkModuleCount,
+            totalModuleCount: matrix.size * matrix.size
+        )
 
         return PenaltyBreakdown(
             consecutiveModules: lineEvaluation.consecutiveModulesPenalty,
-            finderLikePatterns: lineEvaluation.finderLikePatternsPenalty
+            sameColorBlocks: sameColorBlocks,
+            finderLikePatterns: lineEvaluation.finderLikePatternsPenalty,
+            darkModuleBalance: darkModuleBalance
         )
     }
 }
@@ -29,10 +38,15 @@ enum MaskPenaltyScorer {
 extension MaskPenaltyScorer {
     struct PenaltyBreakdown: Equatable {
         let consecutiveModules: Int
+        let sameColorBlocks: Int
         let finderLikePatterns: Int
+        let darkModuleBalance: Int
 
         var total: Int {
-            consecutiveModules + finderLikePatterns
+            consecutiveModules
+            + sameColorBlocks
+            + finderLikePatterns
+            + darkModuleBalance
         }
     }
 }
@@ -43,6 +57,7 @@ private extension MaskPenaltyScorer {
     struct LineEvaluation {
         let consecutiveModulesPenalty: Int
         let finderLikePatternsPenalty: Int
+        let darkModuleCount: Int
     }
 
     static func evaluateLines(
@@ -52,40 +67,42 @@ private extension MaskPenaltyScorer {
 
         var consecutiveModulesPenalty = 0
         var finderLikePatternsPenalty = 0
+        var darkModuleCount = 0
+
+        var columnTrackers = Array(
+            repeating: LinePenaltyTracker(),
+            count: size
+        )
 
         for row in 0..<size {
-            var tracker = LinePenaltyTracker()
+            var rowTracker = LinePenaltyTracker()
 
             for column in 0..<size {
                 let color = resolvedColor(
                     of: matrix[row, column]
                 )
 
-                tracker.process(color)
+                rowTracker.process(color)
+                columnTrackers[column].process(color)
+
+                if color == .dark {
+                    darkModuleCount += 1
+                }
             }
 
-            consecutiveModulesPenalty += tracker.consecutiveModulesPenalty
-            finderLikePatternsPenalty += tracker.finderLikePatternsPenalty
+            consecutiveModulesPenalty += rowTracker.consecutiveModulesPenalty
+            finderLikePatternsPenalty += rowTracker.finderLikePatternsPenalty
         }
 
-        for column in 0..<size {
-            var tracker = LinePenaltyTracker()
-
-            for row in 0..<size {
-                let color = resolvedColor(
-                    of: matrix[row, column]
-                )
-
-                tracker.process(color)
-            }
-
+        for tracker in columnTrackers {
             consecutiveModulesPenalty += tracker.consecutiveModulesPenalty
             finderLikePatternsPenalty += tracker.finderLikePatternsPenalty
         }
 
         return LineEvaluation(
             consecutiveModulesPenalty: consecutiveModulesPenalty,
-            finderLikePatternsPenalty: finderLikePatternsPenalty
+            finderLikePatternsPenalty: finderLikePatternsPenalty,
+            darkModuleCount: darkModuleCount
         )
     }
 }
@@ -173,6 +190,52 @@ private extension MaskPenaltyScorer {
             finderLikePatternsPenalty += 40
             lastPenalizedPatternStart = patternStart
         }
+    }
+}
+
+// MARK: - Same-Color Blocks
+
+private extension MaskPenaltyScorer {
+    static func penaltyForSameColorBlocks(
+        in matrix: QRMatrix
+    ) -> Int {
+        let size = matrix.size
+        var penalty = 0
+
+        for row in 0..<(size - 1) {
+            for column in 0..<(size - 1) {
+                let topLeft = resolvedColor(of: matrix[row, column])
+                let topRight = resolvedColor(of: matrix[row, column + 1])
+                let bottomLeft = resolvedColor(of: matrix[row + 1, column])
+                let bottomRight = resolvedColor(of: matrix[row + 1, column + 1])
+
+                if topLeft == topRight &&
+                    topLeft == bottomLeft &&
+                    topLeft == bottomRight {
+                    penalty += 3
+                }
+            }
+        }
+
+        return penalty
+    }
+}
+
+// MARK: - Dark Module Balance
+
+private extension MaskPenaltyScorer {
+    static func penaltyForDarkModuleBalance(
+        darkModuleCount: Int,
+        totalModuleCount: Int
+    ) -> Int {
+        let deviationFromHalf = abs(
+            darkModuleCount * 2 - totalModuleCount
+        )
+
+        let fivePercentStepCount =
+            deviationFromHalf * 10 / totalModuleCount
+
+        return fivePercentStepCount * 10
     }
 }
 
