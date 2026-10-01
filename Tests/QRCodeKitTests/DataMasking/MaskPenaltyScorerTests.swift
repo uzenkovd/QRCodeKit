@@ -10,6 +10,26 @@ import Testing
 
 @Suite
 struct MaskPenaltyScorerTests {
+    // MARK: - Reserved Information Modules
+
+    @Test
+    func scoreReservedInformationModulesAsLight() {
+        var matrix = Self.makeCheckerboardMatrix()
+
+        let expectedBreakdown = MaskPenaltyScorer.penaltyBreakdown(
+            for: matrix
+        )
+
+        matrix[0, 1] = .reserved(.format)
+        matrix[1, 0] = .reserved(.version)
+
+        let breakdown = MaskPenaltyScorer.penaltyBreakdown(
+            for: matrix
+        )
+
+        #expect(breakdown == expectedBreakdown)
+    }
+
     // MARK: - Consecutive Modules
 
     @Test

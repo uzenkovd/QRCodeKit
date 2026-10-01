@@ -247,7 +247,7 @@ private extension MaskPenaltyScorer {
     ) -> QRModuleColor {
         guard let color = module.color else {
             preconditionFailure(
-                "Mask penalties can only be scored on a complete QR matrix"
+                "Mask penalties cannot be scored while the matrix contains unset modules"
             )
         }
 

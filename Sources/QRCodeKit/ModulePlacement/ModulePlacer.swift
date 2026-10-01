@@ -29,11 +29,6 @@ enum ModulePlacer {
 
         DataPlacer.place(bits, in: &matrix)
 
-        VersionInformationArea.place(
-            in: &matrix,
-            version: version
-        )
-
         return matrix
     }
 }

@@ -53,7 +53,10 @@ enum QRModule: Equatable {
         case .darkModule:
             return .dark
 
-        case .unset, .reserved:
+        case .reserved:
+            return .light
+
+        case .unset:
             return nil
         }
     }
