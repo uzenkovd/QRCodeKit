@@ -15,8 +15,6 @@ public enum QRMask: Int, Sendable, CaseIterable {
     case pattern6
     case pattern7
 
-    public static let `default`: QRMask = .pattern0
-
     func shouldInvert(
         atRow row: Int,
         column: Int

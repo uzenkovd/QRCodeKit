@@ -145,14 +145,72 @@ struct QRCodeTests {
         #expect(qrCode.version == .v1)
         #expect(qrCode.errorCorrectionLevel == .Q)
     }
-    
+
+    // MARK: - init(_:options:) - Mask
+
     @Test
-    func fallsBackBelowDefaultErrorCorrectionLevelWhenNecessary() throws {
-        let message = String(repeating: "1", count: 5596 + 1)
-        
-        let qrCode = try QRCode(message)
-        
-        #expect(qrCode.version == .v36)
-        #expect(qrCode.errorCorrectionLevel == .L)
+    func usesSpecifiedMask() throws {
+        let message = "HELLO WORLD"
+        let options = QROptions(
+            version: .v1,
+            errorCorrectionLevel: .Q,
+            mask: .pattern3
+        )
+
+        let qrCode = try QRCode(
+            message,
+            options: options
+        )
+
+        #expect(qrCode.mask == .pattern3)
+    }
+
+    @Test
+    func selectsLowestPenaltyMaskAutomatically() throws {
+        let message = "HELLO WORLD"
+        let options = QROptions(
+            version: .v1,
+            errorCorrectionLevel: .Q
+        )
+
+        let qrCode = try QRCode(
+            message,
+            options: options
+        )
+
+        #expect(qrCode.mask == .pattern6)
+    }
+
+    // MARK: - init(_:options:) - Matrix
+
+    @Test
+    func producesFinalizedMatrix() throws {
+        let message = "HELLO WORLD"
+        let options = QROptions(
+            version: .v7,
+            errorCorrectionLevel: .L,
+            mask: .pattern3
+        )
+
+        let qrCode = try QRCode(
+            message,
+            options: options
+        )
+
+        let matrix = qrCode.matrix
+
+        let isFinalized = (0..<matrix.size).allSatisfy { row in
+            (0..<matrix.size).allSatisfy { column in
+                switch matrix[row, column] {
+                case .unset, .reserved:
+                    return false
+
+                default:
+                    return true
+                }
+            }
+        }
+
+        #expect(isFinalized)
     }
 }

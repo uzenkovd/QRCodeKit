@@ -33,14 +33,11 @@ struct QRConfigurationResolver {
                 requestedLevel: options.errorCorrectionLevel
             )
 
-        // TODO: Defer automatic mask selection to the data masking stage.
-        let mask = options.mask ?? .default
-
         return QRConfiguration(
             version: version,
             encodingMode: encodingMode,
             errorCorrectionLevel: errorCorrectionLevel,
-            mask: mask
+            mask: options.mask
         )
     }
 }

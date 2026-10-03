@@ -8,7 +8,9 @@
 public struct QRCode {
     public let message: String
 
-    private var configuration: QRConfiguration
+    let matrix: QRMatrix
+
+    private let configuration: QRConfiguration
     private let codewordGroups: CodewordGroups
 
     public var version: QRVersion {
@@ -45,7 +47,7 @@ public struct QRCode {
             throw QRCodeError.emptyMessage
         }
 
-        let configuration = try QRConfigurationResolver().resolve(
+        var configuration = try QRConfigurationResolver().resolve(
             for: message,
             options: options
         )
@@ -62,7 +64,27 @@ public struct QRCode {
             layout: configuration.errorCorrectionLayout
         )
 
+        let finalMessage = FinalMessageBuilder.build(
+            from: codewordGroups,
+            version: configuration.version
+        )
+
+        var matrix = ModulePlacer.place(
+            finalMessage,
+            version: configuration.version
+        )
+
+        let selectedMask = DataMasker.apply(
+            to: &matrix,
+            version: configuration.version,
+            errorCorrectionLevel: configuration.errorCorrectionLevel,
+            requestedMask: configuration.mask
+        )
+
+        configuration.mask = selectedMask
+
         self.message = message
+        self.matrix = matrix
         self.configuration = configuration
         self.codewordGroups = codewordGroups
     }
