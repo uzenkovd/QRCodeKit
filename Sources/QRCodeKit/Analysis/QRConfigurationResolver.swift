@@ -36,8 +36,7 @@ struct QRConfigurationResolver {
         return QRConfiguration(
             version: version,
             encodingMode: encodingMode,
-            errorCorrectionLevel: errorCorrectionLevel,
-            mask: options.mask
+            errorCorrectionLevel: errorCorrectionLevel
         )
     }
 }

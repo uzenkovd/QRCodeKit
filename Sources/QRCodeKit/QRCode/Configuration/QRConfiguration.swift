@@ -10,8 +10,6 @@ struct QRConfiguration {
     let encodingMode: EncodingMode
     let errorCorrectionLevel: ErrorCorrectionLevel
 
-    var mask: QRMask?
-
     var errorCorrectionLayout: ErrorCorrectionLayout {
         ErrorCorrectionBlocks.layout(
             for: version,

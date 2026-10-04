@@ -7,17 +7,20 @@
 
 enum DataMasker {
     static func apply(
-        to matrix: inout QRMatrix,
+        to matrix: QRMatrix,
         version: QRVersion,
         errorCorrectionLevel: ErrorCorrectionLevel,
         requestedMask: QRMask?
-    ) -> QRMask {
+    ) -> QRSymbol {
         let selectedMask: QRMask
+        var symbolMatrix: QRMatrix
 
         if let requestedMask {
+            symbolMatrix = matrix
+
             MaskApplier.apply(
                 requestedMask,
-                to: &matrix
+                to: &symbolMatrix
             )
 
             selectedMask = requestedMask
@@ -26,18 +29,21 @@ enum DataMasker {
                 for: matrix
             )
 
-            matrix = bestCandidate.matrix
+            symbolMatrix = bestCandidate.matrix
             selectedMask = bestCandidate.mask
         }
 
         finalize(
-            &matrix,
+            &symbolMatrix,
             version: version,
             level: errorCorrectionLevel,
             mask: selectedMask
         )
 
-        return selectedMask
+        return QRSymbol(
+            matrix: symbolMatrix,
+            mask: selectedMask
+        )
     }
 }
 

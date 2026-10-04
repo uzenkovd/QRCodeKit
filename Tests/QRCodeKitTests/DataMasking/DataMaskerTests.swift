@@ -16,7 +16,7 @@ struct DataMaskerTests {
     func applyRequestedMaskCorrectly(
         mask: QRMask
     ) {
-        var matrix = Self.makeHelloWorldMatrix()
+        let matrix = Self.makeHelloWorldMatrix()
 
         let expectedMatrix = Self.makeFinalizedMatrix(
             from: matrix,
@@ -25,15 +25,15 @@ struct DataMaskerTests {
             mask: mask
         )
 
-        let selectedMask = DataMasker.apply(
-            to: &matrix,
+        let symbol = DataMasker.apply(
+            to: matrix,
             version: .v1,
             errorCorrectionLevel: .Q,
             requestedMask: mask
         )
 
-        #expect(selectedMask == mask)
-        #expect(matrix == expectedMatrix)
+        #expect(symbol.mask == mask)
+        #expect(symbol.matrix == expectedMatrix)
     }
 
     // MARK: - Automatic Mask Selection
@@ -59,7 +59,7 @@ struct DataMaskerTests {
 
     @Test
     func selectLowestPenaltyMaskForHelloWorld() {
-        var matrix = Self.makeHelloWorldMatrix()
+        let matrix = Self.makeHelloWorldMatrix()
 
         let expectedMatrix = Self.makeFinalizedMatrix(
             from: matrix,
@@ -68,15 +68,15 @@ struct DataMaskerTests {
             mask: .pattern6
         )
 
-        let selectedMask = DataMasker.apply(
-            to: &matrix,
+        let symbol = DataMasker.apply(
+            to: matrix,
             version: .v1,
             errorCorrectionLevel: .Q,
             requestedMask: nil
         )
 
-        #expect(selectedMask == .pattern6)
-        #expect(matrix == expectedMatrix)
+        #expect(symbol.mask == .pattern6)
+        #expect(symbol.matrix == expectedMatrix)
     }
 
     @Test
@@ -109,7 +109,7 @@ struct DataMaskerTests {
 
         #expect(penalties == expectedPenalties)
 
-        var matrix = originalMatrix
+        let matrix = originalMatrix
 
         let expectedMatrix = Self.makeFinalizedMatrix(
             from: matrix,
@@ -118,22 +118,22 @@ struct DataMaskerTests {
             mask: .pattern0
         )
 
-        let selectedMask = DataMasker.apply(
-            to: &matrix,
+        let symbol = DataMasker.apply(
+            to: matrix,
             version: .v1,
             errorCorrectionLevel: .M,
             requestedMask: nil
         )
 
-        #expect(selectedMask == .pattern0)
-        #expect(matrix == expectedMatrix)
+        #expect(symbol.mask == .pattern0)
+        #expect(symbol.matrix == expectedMatrix)
     }
 
     // MARK: - Matrix Finalization
 
     @Test
     func placeVersionInformationForVersion7() {
-        var matrix = Self.makeZeroDataMatrix(
+        let matrix = Self.makeZeroDataMatrix(
             for: .v7,
             level: .L
         )
@@ -145,15 +145,15 @@ struct DataMaskerTests {
             mask: .pattern3
         )
 
-        let selectedMask = DataMasker.apply(
-            to: &matrix,
+        let symbol = DataMasker.apply(
+            to: matrix,
             version: .v7,
             errorCorrectionLevel: .L,
             requestedMask: .pattern3
         )
 
-        #expect(selectedMask == .pattern3)
-        #expect(matrix == expectedMatrix)
+        #expect(symbol.mask == .pattern3)
+        #expect(symbol.matrix == expectedMatrix)
     }
 }
 

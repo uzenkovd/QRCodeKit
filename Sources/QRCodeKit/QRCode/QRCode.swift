@@ -8,7 +8,7 @@
 public struct QRCode {
     public let message: String
 
-    let matrix: QRMatrix
+    let symbol: QRSymbol
 
     private let configuration: QRConfiguration
     private let codewordGroups: CodewordGroups
@@ -26,17 +26,11 @@ public struct QRCode {
     }
 
     public var mask: QRMask {
-        guard let mask = configuration.mask else {
-            preconditionFailure(
-                "QR mask must be resolved before accessing it"
-            )
-        }
-
-        return mask
+        symbol.mask
     }
 
     public var size: Int {
-        version.size
+        symbol.size
     }
 
     public init(
@@ -47,7 +41,7 @@ public struct QRCode {
             throw QRCodeError.emptyMessage
         }
 
-        var configuration = try QRConfigurationResolver().resolve(
+        let configuration = try QRConfigurationResolver().resolve(
             for: message,
             options: options
         )
@@ -69,22 +63,20 @@ public struct QRCode {
             version: configuration.version
         )
 
-        var matrix = ModulePlacer.place(
+        let matrix = ModulePlacer.place(
             finalMessage,
             version: configuration.version
         )
 
-        let selectedMask = DataMasker.apply(
-            to: &matrix,
+        let symbol = DataMasker.apply(
+            to: matrix,
             version: configuration.version,
             errorCorrectionLevel: configuration.errorCorrectionLevel,
-            requestedMask: configuration.mask
+            requestedMask: options.mask
         )
 
-        configuration.mask = selectedMask
-
         self.message = message
-        self.matrix = matrix
+        self.symbol = symbol
         self.configuration = configuration
         self.codewordGroups = codewordGroups
     }

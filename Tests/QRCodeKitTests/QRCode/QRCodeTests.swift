@@ -197,7 +197,7 @@ struct QRCodeTests {
             options: options
         )
 
-        let matrix = qrCode.matrix
+        let matrix = qrCode.symbol.matrix
 
         let isFinalized = (0..<matrix.size).allSatisfy { row in
             (0..<matrix.size).allSatisfy { column in

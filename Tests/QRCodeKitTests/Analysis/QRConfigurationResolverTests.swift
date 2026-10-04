@@ -331,38 +331,4 @@ struct QRConfigurationResolverTests {
         #expect(configuration.version == .v36)
         #expect(configuration.errorCorrectionLevel == .L)
     }
-
-    // MARK: - Mask
-
-    @Test
-    func leavesMaskUnresolvedWhenNotSpecified() throws {
-        let message = "HELLO"
-        let options = QROptions()
-
-        let resolver = QRConfigurationResolver()
-
-        let configuration = try resolver.resolve(
-            for: message,
-            options: options
-        )
-
-        #expect(configuration.mask == nil)
-    }
-
-    @Test
-    func usesRequestedMaskWhenSpecified() throws {
-        let message = "HELLO"
-        let options = QROptions(
-            mask: .pattern5
-        )
-
-        let resolver = QRConfigurationResolver()
-
-        let configuration = try resolver.resolve(
-            for: message,
-            options: options
-        )
-
-        #expect(configuration.mask == .pattern5)
-    }
 }
