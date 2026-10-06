@@ -5,11 +5,17 @@
 //  Created by Dmytro Uzenkov on 02.09.2026.
 //
 
-/// Generates Reed-Solomon error correction codewords for a single QR data block.
+/// Generates Reed-Solomon error correction codewords for QR data blocks.
 ///
-/// The input codewords form a message polynomial M(x). For n error correction
-/// codewords, the encoder appends n zero coefficients by multiplying M(x) by xⁿ
-/// and computes the remainder using polynomial long division over GF(256):
+/// Each encoder is configured with a fixed error correction codeword count.
+/// Its generator polynomial is constructed once and reused for every block
+/// encoded by that instance.
+///
+/// The input codewords are interpreted as the coefficients of a message
+/// polynomial M(x), ordered from the highest-degree term to the constant term.
+/// For n error correction codewords, the encoder appends n zero coefficients
+/// by multiplying M(x) by xⁿ and computes the remainder using polynomial long
+/// division over GF(256):
 ///
 /// R(x) = M(x) · xⁿ mod gₙ(x)
 ///
@@ -18,9 +24,25 @@
 /// form the error correction codewords. Leading zeros are restored when necessary
 /// so that exactly n codewords are returned.
 struct ReedSolomonEncoder {
+    private let generator: Polynomial
+
+    private var errorCorrectionCodewordCount: Int {
+        generator.degree
+    }
+
+    init(errorCorrectionCodewordCount: Int) {
+        precondition(
+            errorCorrectionCodewordCount > 0,
+            "Error correction codeword count must be greater than zero"
+        )
+
+        self.generator = Self.generatorPolynomial(
+            degree: errorCorrectionCodewordCount
+        )
+    }
+
     func encode(
-        _ dataCodewords: [UInt8],
-        errorCorrectionCodewordCount: Int
+        _ dataCodewords: [UInt8]
     ) -> [UInt8] {
         // R(x) = M(x) · xⁿ mod gₙ(x)
 
@@ -29,35 +51,32 @@ struct ReedSolomonEncoder {
             "Data codewords must not be empty"
         )
         precondition(
-            errorCorrectionCodewordCount > 0,
-            "Error correction codeword count must be greater than zero"
-        )
-        precondition(
             dataCodewords.count + errorCorrectionCodewordCount <= 255,
             "Reed-Solomon block must not exceed 255 codewords"
         )
 
         let message = Polynomial(dataCodewords)
-            .multipliedByXPower(errorCorrectionCodewordCount)
-        // TODO: Reuse the generator polynomial when encoding multiple blocks
-        // with the same error correction codeword count
-        let generator = Self.generatorPolynomial(
-            degree: errorCorrectionCodewordCount
+        let shiftedMessage = message.multipliedByXPower(
+            errorCorrectionCodewordCount
         )
-        let remainder = message % generator
+        let remainder = shiftedMessage % generator
 
-        let errorCorrectionCodewords = remainder.coefficients.map(\.value)
+        let remainderCodewords = remainder.coefficients.map(\.value)
 
-        let paddingCount =
-            errorCorrectionCodewordCount - errorCorrectionCodewords.count
-        let padding = Array(
+        let leadingZeroCodewordCount =
+            errorCorrectionCodewordCount - remainderCodewords.count
+        let leadingZeroCodewords = Array(
             repeating: UInt8.zero,
-            count: paddingCount
+            count: leadingZeroCodewordCount
         )
 
-        return padding + errorCorrectionCodewords
+        return leadingZeroCodewords + remainderCodewords
     }
+}
 
+// MARK: - Generator Polynomial
+
+extension ReedSolomonEncoder {
     static func generatorPolynomial(
         degree: Int
     ) -> Polynomial {

@@ -15,6 +15,11 @@ enum CodewordGroupsBuilder {
             "Data codeword count does not match the error correction layout"
         )
 
+        let encoder = ReedSolomonEncoder(
+            errorCorrectionCodewordCount:
+                layout.errorCorrectionCodewordCountPerBlock
+        )
+
         let group1Info = layout.group1Info
         let group1DataCodewordCount =
             group1Info.totalDataCodewordCount
@@ -25,8 +30,7 @@ enum CodewordGroupsBuilder {
         let group1 = makeGroup(
             from: group1DataCodewords,
             groupInfo: group1Info,
-            errorCorrectionCodewordCountPerBlock:
-                layout.errorCorrectionCodewordCountPerBlock
+            encoder: encoder
         )
 
         let group2: Group?
@@ -39,8 +43,7 @@ enum CodewordGroupsBuilder {
             group2 = makeGroup(
                 from: group2DataCodewords,
                 groupInfo: group2Info,
-                errorCorrectionCodewordCountPerBlock:
-                    layout.errorCorrectionCodewordCountPerBlock
+                encoder: encoder
             )
         } else {
             group2 = nil
@@ -66,7 +69,7 @@ private extension CodewordGroupsBuilder {
     static func makeGroup(
         from dataCodewords: ArraySlice<UInt8>,
         groupInfo: GroupInfo,
-        errorCorrectionCodewordCountPerBlock: Int
+        encoder: ReedSolomonEncoder
     ) -> Group {
         precondition(
             dataCodewords.count == groupInfo.totalDataCodewordCount,
@@ -76,7 +79,6 @@ private extension CodewordGroupsBuilder {
         var blocks: [Block] = []
         blocks.reserveCapacity(groupInfo.blockCount)
 
-        let encoder = ReedSolomonEncoder()
         var currentIndex = dataCodewords.startIndex
 
         for _ in 0..<groupInfo.blockCount {
@@ -90,8 +92,7 @@ private extension CodewordGroupsBuilder {
             )
 
             let blockErrorCorrectionCodewords = encoder.encode(
-                blockDataCodewords,
-                errorCorrectionCodewordCount: errorCorrectionCodewordCountPerBlock
+                blockDataCodewords
             )
 
             let block = Block(
