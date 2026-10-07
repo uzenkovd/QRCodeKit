@@ -22,12 +22,9 @@ enum ByteEncoder {
         _ message: String
     ) -> BitBuffer {
         let data = validatedLatin1Data(for: message)
+        var buffer = BitBuffer(minimumCapacity: data.count * 8)
 
-        var buffer = BitBuffer()
-
-        for byte in data {
-            buffer.append(byte)
-        }
+        buffer.append(contentsOf: data)
 
         return buffer
     }

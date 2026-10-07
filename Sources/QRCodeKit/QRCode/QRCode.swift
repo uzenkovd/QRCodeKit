@@ -46,11 +46,9 @@ public struct QRCode {
             options: options
         )
 
-        let dataCodewords = DataEncoder().encode(
+        let dataCodewords = DataEncoder.encode(
             message,
-            mode: configuration.encodingMode,
-            version: configuration.version,
-            errorCorrectionLevel: configuration.errorCorrectionLevel
+            using: configuration
         )
 
         let codewordGroups = CodewordGroupsBuilder.build(

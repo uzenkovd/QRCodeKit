@@ -5,6 +5,8 @@
 //  Created by Dmytro Uzenkov on 14.09.2026.
 //
 
+import Foundation
+
 enum KanjiEncoder {
     static func canEncode(_ message: String) -> Bool {
         guard !message.isEmpty else {
@@ -35,7 +37,8 @@ enum KanjiEncoder {
             "Message cannot be encoded in kanji mode"
         )
 
-        var buffer = BitBuffer()
+        let encodedBitCount = message.count * 13
+        var buffer = BitBuffer(minimumCapacity: encodedBitCount)
 
         for character in message {
             let value = value(for: character)!

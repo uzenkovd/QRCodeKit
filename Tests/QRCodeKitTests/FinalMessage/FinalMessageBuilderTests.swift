@@ -39,7 +39,7 @@ struct FinalMessageBuilderTests {
         )
 
         #expect(finalBits.bytes == expectedCodewords)
-        #expect(finalBits.count == 26 * 8 + 0)
+        #expect(finalBits.count == 26 * 8)
     }
 
     @Test

@@ -5,67 +5,79 @@
 //  Created by Dmytro Uzenkov on 15.08.2026.
 //
 
-struct DataEncoder {
-    // TODO: Consider introducing EncodingResult to expose the individual encoding components.
-    func encode(
+enum DataEncoder {
+    static func encode(
         _ message: String,
-        mode: EncodingMode,
-        version: QRVersion,
-        errorCorrectionLevel: ErrorCorrectionLevel
+        using configuration: QRConfiguration
     ) -> [UInt8] {
+        let mode = configuration.encodingMode
+
         let modeIndicator = mode.indicator
         let modeIndicatorBitCount = 4
 
         let characterCountIndicator = UInt32(
             mode.characterCount(for: message)
         )
-        let characterCountIndicatorBitCount = CharacterCountIndicator.bitCount(
-            for: version,
+        let characterCountIndicatorBitCount =
+            CharacterCountIndicator.bitCount(
+                for: configuration.version,
+                mode: mode
+            )
+
+        let encodedData = encodeData(
+            message,
             mode: mode
         )
 
-        let encodedData = encodeData(message, mode: mode)
+        let totalDataCodewordCount =
+            configuration.errorCorrectionLayout.totalDataCodewordCount
+        let totalDataBitCount = totalDataCodewordCount * 8
 
-        let totalDataCodewords = ErrorCorrectionBlocks.totalDataCodewordCount(
-            for: version,
-            level: errorCorrectionLevel
-        )
-
-        let totalDataBits = totalDataCodewords * 8
-        var currentDataBits = (
-            modeIndicatorBitCount +
-            characterCountIndicatorBitCount +
-            encodedData.count
-        )
+        var currentDataBitCount =
+            modeIndicatorBitCount
+            + characterCountIndicatorBitCount
+            + encodedData.count
 
         precondition(
-            currentDataBits <= totalDataBits,
+            currentDataBitCount <= totalDataBitCount,
             "Encoded data exceeds the selected version and error correction level capacity"
         )
 
-        let remainingDataBits = totalDataBits - currentDataBits
-        let terminatorBitCount = min(4, remainingDataBits)
+        let remainingDataBitCount = totalDataBitCount - currentDataBitCount
+        let terminatorBitCount = min(
+            4,
+            remainingDataBitCount
+        )
 
-        currentDataBits += terminatorBitCount
+        currentDataBitCount += terminatorBitCount
 
-        let byteAlignmentBitCount = (8 - currentDataBits % 8) % 8
+        let byteAlignmentBitCount = (8 - currentDataBitCount % 8) % 8
 
-        currentDataBits += byteAlignmentBitCount
+        currentDataBitCount += byteAlignmentBitCount
 
-        let padByteCount = (totalDataBits - currentDataBits) / 8
-        let padBytes = makePadBytes(count: padByteCount)
+        let padCodewordCount = (totalDataBitCount - currentDataBitCount) / 8
 
-        var buffer = BitBuffer()
+        var buffer = BitBuffer(minimumCapacity: totalDataBitCount)
 
-        buffer.append(modeIndicator, bitCount: modeIndicatorBitCount)
-        buffer.append(characterCountIndicator, bitCount: characterCountIndicatorBitCount)
+        buffer.append(
+            modeIndicator,
+            bitCount: modeIndicatorBitCount
+        )
+        buffer.append(
+            characterCountIndicator,
+            bitCount: characterCountIndicatorBitCount
+        )
         buffer.append(contentsOf: encodedData)
         buffer.append(0, bitCount: terminatorBitCount)
         buffer.append(0, bitCount: byteAlignmentBitCount)
-        buffer.append(contentsOf: padBytes)
+
+        appendPadCodewords(
+            count: padCodewordCount,
+            to: &buffer
+        )
 
         assert(
-            buffer.count == totalDataBits,
+            buffer.count == totalDataBitCount,
             "Encoded data does not match the expected data capacity"
         )
 
@@ -76,7 +88,7 @@ struct DataEncoder {
 // MARK: - Encoding Helpers
 
 private extension DataEncoder {
-    func encodeData(
+    static func encodeData(
         _ message: String,
         mode: EncodingMode
     ) -> BitBuffer {
@@ -88,15 +100,20 @@ private extension DataEncoder {
         }
     }
 
-    func makePadBytes(count: Int) -> BitBuffer {
-        let padByteValues: [UInt8] = [0xEC, 0x11]
-        var buffer = BitBuffer()
+    static func appendPadCodewords(
+        count: Int,
+        to buffer: inout BitBuffer
+    ) {
+        precondition(
+            buffer.isAligned,
+            "Pad codewords can only be appended to byte-aligned data"
+        )
 
         for index in 0..<count {
-            let byte = padByteValues[index % padByteValues.count]
-            buffer.append(byte)
-        }
+            let padCodeword: UInt8 =
+                index.isMultiple(of: 2) ? 0xEC : 0x11
 
-        return buffer
+            buffer.append(padCodeword)
+        }
     }
 }

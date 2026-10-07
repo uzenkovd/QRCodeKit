@@ -255,12 +255,14 @@ private extension DataMaskerTests {
     ]
 
     static func makeHelloWorldMatrix() -> QRMatrix {
-        var bits = BitBuffer()
+        let codewordCount =
+            helloWorldDataCodewords.count
+            + helloWorldErrorCorrectionCodewords.count
+
+        var bits = BitBuffer(minimumCapacity: codewordCount * 8)
 
         bits.append(contentsOf: helloWorldDataCodewords)
-        bits.append(
-            contentsOf: helloWorldErrorCorrectionCodewords
-        )
+        bits.append(contentsOf: helloWorldErrorCorrectionCodewords)
 
         return ModulePlacer.place(
             bits,
@@ -269,9 +271,13 @@ private extension DataMaskerTests {
     }
 
     static func makeMaskSelectionTieMatrix() -> QRMatrix {
-        var bits = BitBuffer()
+        let repetitionCount = 13
 
-        for _ in 0..<13 {
+        var bits = BitBuffer(
+            minimumCapacity: repetitionCount * 2 * 8
+        )
+
+        for _ in 0..<repetitionCount {
             bits.append(UInt8(0x00))
             bits.append(UInt8(0x24))
         }
@@ -295,7 +301,8 @@ private extension DataMaskerTests {
             for: version
         )
 
-        var bits = BitBuffer()
+        let bitCount = codewordCount * 8 + remainderBitCount
+        var bits = BitBuffer(minimumCapacity: bitCount)
 
         for _ in 0..<codewordCount {
             bits.append(UInt8(0))

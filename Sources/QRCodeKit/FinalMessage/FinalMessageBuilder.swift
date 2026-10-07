@@ -15,14 +15,14 @@ enum FinalMessageBuilder {
             for: version
         )
 
-        var finalBits = BitBuffer()
+        let expectedBitCount =
+            groups.totalCodewordCount * 8 + remainderBitCount
+
+        var finalBits = BitBuffer(minimumCapacity: expectedBitCount)
 
         finalBits.append(contentsOf: interleaved.dataCodewords)
         finalBits.append(contentsOf: interleaved.errorCorrectionCodewords)
         finalBits.append(0, bitCount: remainderBitCount)
-
-        let expectedBitCount =
-            groups.totalCodewordCount * 8 + remainderBitCount
 
         assert(
             finalBits.count == expectedBitCount,

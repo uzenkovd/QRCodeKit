@@ -71,7 +71,7 @@ private extension ModulePlacerTests {
     static func makeZeroBitBuffer(
         count: Int
     ) -> BitBuffer {
-        var buffer = BitBuffer()
+        var buffer = BitBuffer(minimumCapacity: count)
 
         for _ in 0..<(count / 8) {
             buffer.append(UInt8(0))

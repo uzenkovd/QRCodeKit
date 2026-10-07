@@ -35,7 +35,9 @@ enum AlphanumericEncoder {
             "Message cannot be encoded in alphanumeric mode"
         )
 
-        var buffer = BitBuffer()
+        let encodedBitCount = (message.count * 11 + 1) / 2
+        var buffer = BitBuffer(minimumCapacity: encodedBitCount)
+
         var groupValue: UInt32 = 0
         var groupCharacterCount = 0
 

@@ -138,7 +138,7 @@ private extension DataPlacerTests {
     static func makeBitBuffer(
         from bits: [Bool]
     ) -> BitBuffer {
-        var buffer = BitBuffer()
+        var buffer = BitBuffer(minimumCapacity: bits.count)
 
         for bit in bits {
             buffer.append(
@@ -153,7 +153,7 @@ private extension DataPlacerTests {
     static func makeZeroBitBuffer(
         count: Int
     ) -> BitBuffer {
-        var buffer = BitBuffer()
+        var buffer = BitBuffer(minimumCapacity: count)
 
         for _ in 0..<(count / 8) {
             buffer.append(UInt8(0))

@@ -14,13 +14,15 @@ struct DataEncoderTests {
 
     @Test
     func encodeNumericVersion1High() {
-        let encoder = DataEncoder()
-
-        let result = encoder.encode(
-            "1",
-            mode: .numeric,
+        let configuration = QRConfiguration(
             version: .v1,
+            encodingMode: .numeric,
             errorCorrectionLevel: .H
+        )
+
+        let result = DataEncoder.encode(
+            "1",
+            using: configuration
         )
 
         #expect(result == [
@@ -38,14 +40,16 @@ struct DataEncoderTests {
 
     @Test
     func encodeNumericAtExactCapacity() {
-        let encoder = DataEncoder()
         let message = "1234567890123456789012345678901234"
-
-        let result = encoder.encode(
-            message,
-            mode: .numeric,
+        let configuration = QRConfiguration(
             version: .v1,
+            encodingMode: .numeric,
             errorCorrectionLevel: .M
+        )
+
+        let result = DataEncoder.encode(
+            message,
+            using: configuration
         )
 
         #expect(result == [
@@ -72,13 +76,15 @@ struct DataEncoderTests {
 
     @Test
     func encodeAlphanumericVersion1High() {
-        let encoder = DataEncoder()
-
-        let result = encoder.encode(
-            "A",
-            mode: .alphanumeric,
+        let configuration = QRConfiguration(
             version: .v1,
+            encodingMode: .alphanumeric,
             errorCorrectionLevel: .H
+        )
+
+        let result = DataEncoder.encode(
+            "A",
+            using: configuration
         )
 
         #expect(result == [
@@ -96,14 +102,16 @@ struct DataEncoderTests {
 
     @Test
     func encodeAlphanumericWithShortenedTerminator() {
-        let encoder = DataEncoder()
         let message = "ABCDEFGHIJKLMNOP"
-
-        let result = encoder.encode(
-            message,
-            mode: .alphanumeric,
+        let configuration = QRConfiguration(
             version: .v1,
+            encodingMode: .alphanumeric,
             errorCorrectionLevel: .Q
+        )
+
+        let result = DataEncoder.encode(
+            message,
+            using: configuration
         )
 
         #expect(result == [
@@ -127,13 +135,15 @@ struct DataEncoderTests {
 
     @Test
     func encodeKanjiVersion1High() {
-        let encoder = DataEncoder()
-
-        let result = encoder.encode(
-            "漢",
-            mode: .kanji,
+        let configuration = QRConfiguration(
             version: .v1,
+            encodingMode: .kanji,
             errorCorrectionLevel: .H
+        )
+
+        let result = DataEncoder.encode(
+            "漢",
+            using: configuration
         )
 
         #expect(result == [
@@ -151,13 +161,15 @@ struct DataEncoderTests {
 
     @Test
     func encodeKanjiUsesVersionSpecificCharacterCountIndicatorLength() {
-        let encoder = DataEncoder()
-
-        let result = encoder.encode(
-            "海",
-            mode: .kanji,
+        let configuration = QRConfiguration(
             version: .v10,
+            encodingMode: .kanji,
             errorCorrectionLevel: .H
+        )
+
+        let result = DataEncoder.encode(
+            "海",
+            using: configuration
         )
 
         #expect(result.count == 122)
@@ -179,13 +191,15 @@ struct DataEncoderTests {
 
     @Test
     func encodeByteVersion1High() {
-        let encoder = DataEncoder()
-
-        let result = encoder.encode(
-            "a",
-            mode: .byte,
+        let configuration = QRConfiguration(
             version: .v1,
+            encodingMode: .byte,
             errorCorrectionLevel: .H
+        )
+
+        let result = DataEncoder.encode(
+            "a",
+            using: configuration
         )
 
         #expect(result == [
@@ -203,13 +217,15 @@ struct DataEncoderTests {
 
     @Test
     func encodeByteUsesByteCountForCharacterCountIndicator() {
-        let encoder = DataEncoder()
-
-        let result = encoder.encode(
-            "\r\n",
-            mode: .byte,
+        let configuration = QRConfiguration(
             version: .v1,
+            encodingMode: .byte,
             errorCorrectionLevel: .H
+        )
+
+        let result = DataEncoder.encode(
+            "\r\n",
+            using: configuration
         )
 
         #expect(result == [

@@ -39,7 +39,9 @@ enum NumericEncoder {
             "Message cannot be encoded in numeric mode"
         )
 
-        var buffer = BitBuffer()
+        let encodedBitCount = (message.count * 10 + 2) / 3
+        var buffer = BitBuffer(minimumCapacity: encodedBitCount)
+
         var groupValue: UInt32 = 0
         var digitCount = 0
 
