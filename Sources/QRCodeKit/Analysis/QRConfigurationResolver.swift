@@ -5,8 +5,8 @@
 //  Created by Dmytro Uzenkov on 12.09.2026.
 //
 
-struct QRConfigurationResolver {
-    func resolve(
+enum QRConfigurationResolver {
+    static func resolve(
         for message: String,
         options: QROptions
     ) throws -> QRConfiguration {
@@ -44,7 +44,7 @@ struct QRConfigurationResolver {
 // MARK: - Encoding Mode
 
 private extension QRConfigurationResolver {
-    func resolveEncodingMode(
+    static func resolveEncodingMode(
         for message: String,
         requestedMode: EncodingMode?
     ) throws -> EncodingMode {
@@ -65,7 +65,7 @@ private extension QRConfigurationResolver {
         return requestedMode
     }
 
-    func validatedCharacterCount(
+    static func validatedCharacterCount(
         for message: String,
         mode: EncodingMode
     ) throws -> Int {
@@ -95,7 +95,7 @@ private extension QRConfigurationResolver {
         throw QRCodeError.messageIsTooLong
     }
 
-    func recommendedEncodingMode(
+    static func recommendedEncodingMode(
         for message: String
     ) -> EncodingMode {
         guard let mode = DataAnalyzer.recommendedEncodingMode(
@@ -113,7 +113,7 @@ private extension QRConfigurationResolver {
 // MARK: - Version and Error Correction
 
 private extension QRConfigurationResolver {
-    func resolveVersionAndErrorCorrectionLevel(
+    static func resolveVersionAndErrorCorrectionLevel(
         for characterCount: Int,
         mode: EncodingMode,
         requestedVersion: QRVersion?,
@@ -165,7 +165,7 @@ private extension QRConfigurationResolver {
         }
     }
 
-    func resolveAutomaticVersionAndErrorCorrectionLevel(
+    static func resolveAutomaticVersionAndErrorCorrectionLevel(
         for characterCount: Int,
         mode: EncodingMode
     ) -> (

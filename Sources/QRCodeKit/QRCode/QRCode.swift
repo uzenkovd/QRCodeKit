@@ -41,7 +41,7 @@ public struct QRCode {
             throw QRCodeError.emptyMessage
         }
 
-        let configuration = try QRConfigurationResolver().resolve(
+        let configuration = try QRConfigurationResolver.resolve(
             for: message,
             options: options
         )

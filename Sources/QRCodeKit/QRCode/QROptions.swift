@@ -5,7 +5,6 @@
 //  Created by Dmytro Uzenkov on 11.08.2026.
 //
 
-// TODO: Refine option selection with explicit auto, min, max strategies.
 public struct QROptions {
     public var version: QRVersion?
     public var encodingMode: EncodingMode?

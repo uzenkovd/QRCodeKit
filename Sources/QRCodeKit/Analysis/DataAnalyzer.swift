@@ -22,6 +22,11 @@ enum DataAnalyzer {
         _ characterCount: Int,
         mode: EncodingMode
     ) -> Bool {
+        precondition(
+            characterCount >= 0,
+            "Character count must not be negative"
+        )
+
         let maxCapacity = CharacterCapacities.maxCapacity(
             for: mode
         )
@@ -35,6 +40,11 @@ enum DataAnalyzer {
         version: QRVersion,
         errorCorrectionLevel: ErrorCorrectionLevel
     ) -> Bool {
+        precondition(
+            characterCount >= 0,
+            "Character count must not be negative"
+        )
+
         let capacity = CharacterCapacities.capacity(
             for: version,
             level: errorCorrectionLevel,

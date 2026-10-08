@@ -10,7 +10,6 @@ import Testing
 
 @Suite
 struct QROptionsTests {
-
     // MARK: - init(version:encodingMode:errorCorrectionLevel:mask:)
 
     @Test

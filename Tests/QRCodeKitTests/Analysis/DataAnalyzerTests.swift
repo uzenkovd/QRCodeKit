@@ -10,14 +10,13 @@ import Testing
 
 @Suite
 struct DataAnalyzerTests {
-
     // MARK: - Encoding Mode
 
     @Test(arguments: [
         ("0123456789", EncodingMode.numeric),
         ("HELLO WORLD", EncodingMode.alphanumeric),
         ("日本語", EncodingMode.kanji),
-        ("Café", EncodingMode.byte),
+        ("Café", EncodingMode.byte)
     ])
     func recommendsMostEfficientEncodingMode(
         message: String,
@@ -54,7 +53,7 @@ struct DataAnalyzerTests {
         (EncodingMode.numeric, 7089),
         (EncodingMode.alphanumeric, 4296),
         (EncodingMode.kanji, 1817),
-        (EncodingMode.byte, 2953),
+        (EncodingMode.byte, 2953)
     ])
     func canFitAtMaximumCapacity(
         mode: EncodingMode,
@@ -72,7 +71,7 @@ struct DataAnalyzerTests {
         (EncodingMode.numeric, 7089 + 1),
         (EncodingMode.alphanumeric, 4296 + 1),
         (EncodingMode.kanji, 1817 + 1),
-        (EncodingMode.byte, 2953 + 1),
+        (EncodingMode.byte, 2953 + 1)
     ])
     func cannotFitAboveMaximumCapacity(
         mode: EncodingMode,
@@ -90,7 +89,7 @@ struct DataAnalyzerTests {
         (EncodingMode.numeric, 17),
         (EncodingMode.alphanumeric, 10),
         (EncodingMode.kanji, 4),
-        (EncodingMode.byte, 7),
+        (EncodingMode.byte, 7)
     ])
     func canFitAtConfigurationCapacity(
         mode: EncodingMode,
@@ -110,7 +109,7 @@ struct DataAnalyzerTests {
         (EncodingMode.numeric, 17 + 1),
         (EncodingMode.alphanumeric, 10 + 1),
         (EncodingMode.kanji, 4 + 1),
-        (EncodingMode.byte, 7 + 1),
+        (EncodingMode.byte, 7 + 1)
     ])
     func cannotFitAboveConfigurationCapacity(
         mode: EncodingMode,
@@ -132,7 +131,7 @@ struct DataAnalyzerTests {
         (EncodingMode.numeric, 17),
         (EncodingMode.alphanumeric, 10),
         (EncodingMode.kanji, 4),
-        (EncodingMode.byte, 7),
+        (EncodingMode.byte, 7)
     ])
     func minimumVersionIsVersion1AtConfigurationCapacity(
         mode: EncodingMode,
@@ -151,7 +150,7 @@ struct DataAnalyzerTests {
         (EncodingMode.numeric, 236),
         (EncodingMode.alphanumeric, 144),
         (EncodingMode.kanji, 61),
-        (EncodingMode.byte, 99),
+        (EncodingMode.byte, 99)
     ])
     func minimumVersionAdvancesWhenPreviousVersionCapacityIsExceeded(
         mode: EncodingMode,
@@ -170,7 +169,7 @@ struct DataAnalyzerTests {
         (EncodingMode.numeric, 7089 + 1),
         (EncodingMode.alphanumeric, 4296 + 1),
         (EncodingMode.kanji, 1817 + 1),
-        (EncodingMode.byte, 2953 + 1),
+        (EncodingMode.byte, 2953 + 1)
     ])
     func returnsNoMinimumVersionAboveMaximumCapacity(
         mode: EncodingMode,
@@ -189,7 +188,7 @@ struct DataAnalyzerTests {
         (7, ErrorCorrectionLevel.H),
         (8, ErrorCorrectionLevel.Q),
         (12, ErrorCorrectionLevel.M),
-        (15, ErrorCorrectionLevel.L),
+        (15, ErrorCorrectionLevel.L)
     ])
     func returnsStrongestFittingErrorCorrectionLevel(
         characterCount: Int,
