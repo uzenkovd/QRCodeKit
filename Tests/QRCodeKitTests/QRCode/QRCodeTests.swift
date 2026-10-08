@@ -10,8 +10,7 @@ import Testing
 
 @Suite
 struct QRCodeTests {
-
-    // MARK: - init(_:options:) - Message
+    // MARK: - String Initialization
 
     @Test
     func rejectsEmptyMessage() {
@@ -40,7 +39,27 @@ struct QRCodeTests {
         }
     }
 
-    // MARK: - init(_:options:) - Encoding Mode
+    // MARK: - QRContent Initialization
+
+    @Test
+    func initializesFromPlainTextContent() throws {
+        let content = QRContent.text("HELLO WORLD")
+
+        let qrCode = try QRCode(content)
+
+        #expect(qrCode.message == content.payload)
+    }
+
+    @Test
+    func rejectsEmptyPlainTextContent() {
+        #expect(throws: QRCodeError.emptyMessage) {
+            try QRCode(
+                .text("")
+            )
+        }
+    }
+
+    // MARK: - Encoding Mode
 
     @Test
     func rejectsWrongEncodingMode() {
@@ -72,7 +91,7 @@ struct QRCodeTests {
         }
     }
 
-    // MARK: - init(_:options:) - Version and Error Correction Level
+    // MARK: - Version and Error Correction
 
     @Test
     func rejectsMessageThatDoesNotFitQRConfiguration() {
@@ -127,7 +146,7 @@ struct QRCodeTests {
         }
     }
 
-    // MARK: - init(_:options:) - Explicit Options
+    // MARK: - Explicit Options
 
     @Test
     func usesSpecifiedOptions() throws {
@@ -152,7 +171,7 @@ struct QRCodeTests {
         #expect(qrCode.size == 21)
     }
 
-    // MARK: - init(_:options:) - Automatic Selection
+    // MARK: - Automatic Selection
 
     @Test
     func selectsConfigurationAndMaskAutomatically() throws {
@@ -164,7 +183,7 @@ struct QRCodeTests {
         #expect(qrCode.mask == .pattern6)
     }
 
-    // MARK: - init(_:options:) - Reference Symbols
+    // MARK: - Reference Symbols
 
     @Test
     func matchesVersion1QMask0ReferenceSymbol() throws {

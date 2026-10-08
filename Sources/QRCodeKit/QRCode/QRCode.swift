@@ -6,12 +6,15 @@
 //
 
 public struct QRCode {
-    public let message: String
+    private let content: QRContent
+    private let configuration: QRConfiguration
+    private let codewordGroups: CodewordGroups
 
     let symbol: QRSymbol
 
-    private let configuration: QRConfiguration
-    private let codewordGroups: CodewordGroups
+    public var message: String {
+        content.payload
+    }
 
     public var version: QRVersion {
         configuration.version
@@ -37,17 +40,27 @@ public struct QRCode {
         _ message: String,
         options: QROptions = QROptions()
     ) throws {
-        guard !message.isEmpty else {
+        try self.init(
+            QRContent.text(message),
+            options: options
+        )
+    }
+
+    public init(
+        _ content: QRContent,
+        options: QROptions = QROptions()
+    ) throws {
+        guard !content.payload.isEmpty else {
             throw QRCodeError.emptyMessage
         }
 
         let configuration = try QRConfigurationResolver.resolve(
-            for: message,
+            for: content.payload,
             options: options
         )
 
         let dataCodewords = DataEncoder.encode(
-            message,
+            content.payload,
             using: configuration
         )
 
@@ -73,9 +86,9 @@ public struct QRCode {
             requestedMask: options.mask
         )
 
-        self.message = message
-        self.symbol = symbol
+        self.content = content
         self.configuration = configuration
         self.codewordGroups = codewordGroups
+        self.symbol = symbol
     }
 }
