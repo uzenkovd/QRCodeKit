@@ -41,8 +41,8 @@ struct QRContentTests {
         let content = QRContent.url(url)
 
         #expect(
-            content.payload ==
-            "https://example.com/search?q=swift&page=2#results"
+            content.payload
+                == "https://example.com/search?q=swift&page=2#results"
         )
     }
 
@@ -55,8 +55,47 @@ struct QRContentTests {
         let content = QRContent.url(url)
 
         #expect(
-            content.payload ==
-            "https://example.com/search?q=hello%20world"
+            content.payload
+                == "https://example.com/search?q=hello%20world"
         )
+    }
+
+    // MARK: - phone(_:)
+
+    @Test
+    func createsPhoneContent() throws {
+        let content = try QRContent.phone("+380501234567")
+
+        #expect(content.payload == "tel:+380501234567")
+    }
+
+    @Test(arguments: [
+        "+123",
+        "+123456789012345"
+    ])
+    func acceptsPhoneNumberBoundaryLengths(_ number: String) throws {
+        let content = try QRContent.phone(number)
+
+        #expect(content.payload == "tel:\(number)")
+    }
+
+    @Test(arguments: [
+        "",
+        "+",
+        "+12",
+        "380501234567",
+        "Hello",
+        "+0123456789",
+        "+380 50 123 45 67",
+        "+1-201-555-0123",
+        "+1234567890123456",
+        "++380501234567",
+        "+38050abc4567",
+        "+٣٨٠٥٠١٢٣٤٥٦٧"
+    ])
+    func rejectsInvalidPhoneNumbers(_ number: String) {
+        #expect(throws: QRContentError.self) {
+            try QRContent.phone(number)
+        }
     }
 }

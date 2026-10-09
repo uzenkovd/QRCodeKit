@@ -34,3 +34,30 @@ public extension QRContent {
         QRContent(payload: url.absoluteString)
     }
 }
+
+// MARK: - Phone
+
+public extension QRContent {
+    static func phone(
+        _ number: String
+    ) throws -> QRContent {
+        guard isValidPhoneNumber(number) else {
+            throw QRContentError.invalidPhoneNumber
+        }
+
+        return QRContent(payload: "tel:\(number)")
+    }
+}
+
+// MARK: - Validation
+
+private extension QRContent {
+    static func isValidPhoneNumber(_ number: String) -> Bool {
+        let digits = number.dropFirst()
+
+        return number.first == "+"
+            && (3...15).contains(digits.count)
+            && digits.first != "0"
+            && digits.allSatisfy { $0 >= "0" && $0 <= "9" }
+    }
+}
