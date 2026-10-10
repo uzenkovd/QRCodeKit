@@ -7,4 +7,6 @@
 
 public enum QRContentError: Error {
     case invalidPhoneNumber
+    case invalidEmailAddress
+    case invalidEmailSubject
 }
