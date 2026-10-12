@@ -12,4 +12,7 @@ public enum QRContentError: Error {
     case invalidEmailSubject
 
     case invalidGeolocation
+
+    case invalidWiFiSSID
+    case invalidWiFiCredential
 }
