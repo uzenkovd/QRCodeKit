@@ -24,16 +24,22 @@ public extension QRContent {
             throw QRContentError.invalidWiFiSSID
         }
 
-        let (type, credential) = try resolveWiFiSecurity(security)
+        let configuration = try resolveWiFiSecurity(security)
 
-        var payload = "WIFI:T:\(type);S:\(escapeWiFiField(ssid));"
+        var payload = "WIFI:T:\(configuration.type);"
 
-        if let credential {
-            payload += "P:\(escapeWiFiField(credential));"
+        if configuration.transitionDisable {
+            payload += "R:1;"
         }
+
+        payload += "S:\(escapeWiFiField(ssid));"
 
         if hidden {
             payload += "H:true;"
+        }
+
+        if let credential = configuration.credential {
+            payload += "P:\(escapeWiFiField(credential));"
         }
 
         payload += ";"
@@ -47,31 +53,35 @@ public extension QRContent {
 private extension QRContent {
     static func resolveWiFiSecurity(
         _ security: WiFiSecurity
-    ) throws -> (type: String, credential: String?) {
+    ) throws -> (
+        type: String,
+        credential: String?,
+        transitionDisable: Bool
+    ) {
         switch security {
         case .open:
-            return ("nopass", nil)
+            return ("nopass", nil, false)
 
         case .wep(let key):
             guard isValidWEPKey(key) else {
                 throw QRContentError.invalidWiFiCredential
             }
 
-            return ("WEP", key)
+            return ("WEP", key, false)
 
         case .wpa(let password):
             guard isValidWPACredential(password) else {
                 throw QRContentError.invalidWiFiCredential
             }
 
-            return ("WPA", password)
+            return ("WPA", password, false)
 
         case .wpa3(let password):
             guard isValidSAEPassword(password) else {
                 throw QRContentError.invalidWiFiCredential
             }
 
-            return ("SAE", password)
+            return ("WPA", password, true)
         }
     }
 

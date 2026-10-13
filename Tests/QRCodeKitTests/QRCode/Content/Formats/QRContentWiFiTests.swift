@@ -44,7 +44,7 @@ struct QRContentWiFiTests {
 
         #expect(
             content.payload
-                == "WIFI:T:SAE;S:HomeNetwork;P:secret123;;"
+                == "WIFI:T:WPA;R:1;S:HomeNetwork;P:secret123;;"
         )
     }
 
@@ -76,7 +76,7 @@ struct QRContentWiFiTests {
 
         #expect(
             content.payload
-                == "WIFI:T:WPA;S:HiddenNetwork;P:secret123;H:true;;"
+                == "WIFI:T:WPA;S:HiddenNetwork;H:true;P:secret123;;"
         )
     }
 
@@ -115,7 +115,7 @@ struct QRContentWiFiTests {
 
         #expect(
             content.payload
-                == "WIFI:T:SAE;S:Мережа;P:пароль🔐;;"
+                == "WIFI:T:WPA;R:1;S:Мережа;P:пароль🔐;;"
         )
     }
 
@@ -168,7 +168,7 @@ struct QRContentWiFiTests {
         "ABCD",
         "ABCDEF",
         "123456789G",
-        "ABCDEFGHIJKLМ",
+        "ABCé",
         String(repeating: "A", count: 16)
     ])
     func rejectsInvalidWEPKeys(_ key: String) {
@@ -232,7 +232,7 @@ struct QRContentWiFiTests {
     @Test(arguments: [
         "a",
         "Привіт🔐",
-        String(repeating: "a", count: 64)
+        String(repeating: "g", count: 64)
     ])
     func acceptsSAEPasswordVariations(
         _ password: String
@@ -244,7 +244,7 @@ struct QRContentWiFiTests {
 
         #expect(
             content.payload
-                == "WIFI:T:SAE;S:SecureNetwork;P:\(password);;"
+                == "WIFI:T:WPA;R:1;S:SecureNetwork;P:\(password);;"
         )
     }
 

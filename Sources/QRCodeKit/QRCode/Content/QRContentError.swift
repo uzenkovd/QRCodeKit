@@ -15,4 +15,7 @@ public enum QRContentError: Error {
 
     case invalidWiFiSSID
     case invalidWiFiCredential
+
+    case invalidVCardName
+    case invalidVCardField
 }
