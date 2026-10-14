@@ -200,7 +200,7 @@ struct QRCodeTests {
         )
 
         let snapshot = Self.binarySnapshot(
-            of: qrCode.symbol.matrix
+            of: qrCode.matrix
         )
 
         #expect(snapshot == Self.version1QMask0ReferenceSnapshot)
@@ -221,7 +221,7 @@ struct QRCodeTests {
         )
 
         let snapshot = Self.binarySnapshot(
-            of: qrCode.symbol.matrix
+            of: qrCode.matrix
         )
 
         #expect(snapshot == Self.version7QMask3ReferenceSnapshot)

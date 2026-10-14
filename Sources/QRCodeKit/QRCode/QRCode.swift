@@ -8,32 +8,10 @@
 public struct QRCode {
     private let content: QRContent
     private let configuration: QRConfiguration
-    private let codewordGroups: CodewordGroups
+    private let symbol: QRSymbol
 
-    let symbol: QRSymbol
-
-    public var message: String {
-        content.payload
-    }
-
-    public var version: QRVersion {
-        configuration.version
-    }
-
-    public var encodingMode: EncodingMode {
-        configuration.encodingMode
-    }
-
-    public var errorCorrectionLevel: ErrorCorrectionLevel {
-        configuration.errorCorrectionLevel
-    }
-
-    public var mask: QRMask {
-        symbol.mask
-    }
-
-    public var size: Int {
-        symbol.size
+    var matrix: QRMatrix {
+        symbol.matrix
     }
 
     public init(
@@ -88,7 +66,34 @@ public struct QRCode {
 
         self.content = content
         self.configuration = configuration
-        self.codewordGroups = codewordGroups
         self.symbol = symbol
+    }
+}
+
+// MARK: - Public Properties
+
+public extension QRCode {
+    var message: String {
+        content.payload
+    }
+
+    var version: QRVersion {
+        configuration.version
+    }
+
+    var encodingMode: EncodingMode {
+        configuration.encodingMode
+    }
+
+    var errorCorrectionLevel: ErrorCorrectionLevel {
+        configuration.errorCorrectionLevel
+    }
+
+    var mask: QRMask {
+        symbol.mask
+    }
+
+    var size: Int {
+        symbol.size
     }
 }
