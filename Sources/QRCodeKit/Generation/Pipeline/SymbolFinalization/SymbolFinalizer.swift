@@ -1,13 +1,13 @@
 //
-//  DataMasker.swift
+//  SymbolFinalizer.swift
 //  QRCodeKit
 //
 //  Created by Dmytro Uzenkov on 01.10.2026.
 //
 
-enum DataMasker {
-    static func apply(
-        to matrix: QRMatrix,
+enum SymbolFinalizer {
+    static func finalize(
+        _ matrix: QRMatrix,
         version: QRVersion,
         errorCorrectionLevel: ErrorCorrectionLevel,
         requestedMask: QRMask?
@@ -33,8 +33,8 @@ enum DataMasker {
             selectedMask = bestCandidate.mask
         }
 
-        finalize(
-            &symbolMatrix,
+        placeInformation(
+            in: &symbolMatrix,
             version: version,
             level: errorCorrectionLevel,
             mask: selectedMask
@@ -49,7 +49,7 @@ enum DataMasker {
 
 // MARK: - Automatic Mask Selection
 
-private extension DataMasker {
+private extension SymbolFinalizer {
     struct Candidate {
         let matrix: QRMatrix
         let mask: QRMask
@@ -101,11 +101,11 @@ private extension DataMasker {
     }
 }
 
-// MARK: - Matrix Finalization
+// MARK: - Information Placement
 
-private extension DataMasker {
-    static func finalize(
-        _ matrix: inout QRMatrix,
+private extension SymbolFinalizer {
+    static func placeInformation(
+        in matrix: inout QRMatrix,
         version: QRVersion,
         level: ErrorCorrectionLevel,
         mask: QRMask

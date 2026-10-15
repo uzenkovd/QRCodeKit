@@ -57,8 +57,8 @@ public struct QRCode {
             version: configuration.version
         )
 
-        let symbol = DataMasker.apply(
-            to: matrix,
+        let symbol = SymbolFinalizer.finalize(
+            matrix,
             version: configuration.version,
             errorCorrectionLevel: configuration.errorCorrectionLevel,
             requestedMask: options.mask

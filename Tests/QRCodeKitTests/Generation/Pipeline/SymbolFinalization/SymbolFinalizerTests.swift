@@ -1,5 +1,5 @@
 //
-//  DataMaskerTests.swift
+//  SymbolFinalizerTests.swift
 //  QRCodeKit
 //
 //  Created by Dmytro Uzenkov on 01.10.2026.
@@ -9,11 +9,11 @@ import Testing
 @testable import QRCodeKit
 
 @Suite
-struct DataMaskerTests {
+struct SymbolFinalizerTests {
     // MARK: - Requested Mask
 
     @Test(arguments: QRMask.allCases)
-    func applyRequestedMaskCorrectly(
+    func finalizesSymbolWithRequestedMask(
         mask: QRMask
     ) {
         let matrix = Self.makeHelloWorldMatrix()
@@ -25,8 +25,8 @@ struct DataMaskerTests {
             mask: mask
         )
 
-        let symbol = DataMasker.apply(
-            to: matrix,
+        let symbol = SymbolFinalizer.finalize(
+            matrix,
             version: .v1,
             errorCorrectionLevel: .Q,
             requestedMask: mask
@@ -68,8 +68,8 @@ struct DataMaskerTests {
             mask: .pattern6
         )
 
-        let symbol = DataMasker.apply(
-            to: matrix,
+        let symbol = SymbolFinalizer.finalize(
+            matrix,
             version: .v1,
             errorCorrectionLevel: .Q,
             requestedMask: nil
@@ -118,8 +118,8 @@ struct DataMaskerTests {
             mask: .pattern0
         )
 
-        let symbol = DataMasker.apply(
-            to: matrix,
+        let symbol = SymbolFinalizer.finalize(
+            matrix,
             version: .v1,
             errorCorrectionLevel: .M,
             requestedMask: nil
@@ -145,8 +145,8 @@ struct DataMaskerTests {
             mask: .pattern3
         )
 
-        let symbol = DataMasker.apply(
-            to: matrix,
+        let symbol = SymbolFinalizer.finalize(
+            matrix,
             version: .v7,
             errorCorrectionLevel: .L,
             requestedMask: .pattern3
@@ -159,7 +159,7 @@ struct DataMaskerTests {
 
 // MARK: - "HELLO WORLD" Candidate Test Cases
 
-private extension DataMaskerTests {
+private extension SymbolFinalizerTests {
     typealias CandidatePenaltyTestCase = (
         mask: QRMask,
         expectedBreakdown: MaskPenaltyScorer.PenaltyBreakdown
@@ -243,7 +243,7 @@ private extension DataMaskerTests {
 
 // MARK: - Test Matrices
 
-private extension DataMaskerTests {
+private extension SymbolFinalizerTests {
     static let helloWorldDataCodewords: [UInt8] = [
         0x20, 0x5B, 0x0B, 0x78, 0xD1, 0x72, 0xDC,
         0x4D, 0x43, 0x40, 0xEC, 0x11, 0xEC
@@ -324,7 +324,7 @@ private extension DataMaskerTests {
 
 // MARK: - Matrix Finalization
 
-private extension DataMaskerTests {
+private extension SymbolFinalizerTests {
     static func makeFinalizedMatrix(
         from matrix: QRMatrix,
         version: QRVersion,
