@@ -8,6 +8,7 @@
 public enum QRTextRenderer {
     public enum Mode: Sendable {
         case debug
+        case blocks
     }
 
     public static func render(
@@ -28,6 +29,9 @@ extension QRTextRenderer {
         switch mode {
         case .debug:
             return renderDebug(matrix)
+
+        case .blocks:
+            return renderBlocks(matrix)
         }
     }
 }
