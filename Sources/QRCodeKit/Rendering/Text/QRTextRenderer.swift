@@ -9,6 +9,7 @@ public enum QRTextRenderer {
     public enum Mode: Sendable {
         case debug
         case blocks
+        case compact
     }
 
     public static func render(
@@ -32,6 +33,15 @@ extension QRTextRenderer {
 
         case .blocks:
             return renderBlocks(matrix)
+
+        case .compact:
+            return renderCompact(matrix)
         }
     }
+}
+
+// MARK: - Rendering Defaults
+
+extension QRTextRenderer {
+    static let defaultQuietZoneWidth = 4
 }

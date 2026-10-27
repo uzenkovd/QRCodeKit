@@ -60,8 +60,6 @@ private extension QRTextRenderer {
     static let darkBlock = "░░"
     static let lightBlock = "██"
 
-    static let defaultQuietZoneWidth = 4
-
     static func blockCharacters(
         for module: QRModule
     ) -> String {
