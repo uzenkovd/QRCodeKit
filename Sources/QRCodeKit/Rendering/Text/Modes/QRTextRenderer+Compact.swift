@@ -10,44 +10,24 @@ extension QRTextRenderer {
         _ matrix: QRMatrix,
         quietZoneWidth: Int = defaultQuietZoneWidth
     ) -> String {
-        precondition(
-            quietZoneWidth >= 0,
-            "Quiet zone width must be nonnegative"
+        let grid = QRRenderGrid(
+            matrix: matrix,
+            quietZoneWidth: quietZoneWidth
         )
-
-        let paddedSize = matrix.size + quietZoneWidth * 2
-        let matrixRange = 0..<matrix.size
-
-        func color(
-            atRow paddedRow: Int,
-            column paddedColumn: Int
-        ) -> QRModuleColor {
-            let row = paddedRow - quietZoneWidth
-            let column = paddedColumn - quietZoneWidth
-
-            guard
-                matrixRange.contains(row),
-                matrixRange.contains(column)
-            else {
-                return .light
-            }
-
-            return moduleColor(for: matrix[row, column])
-        }
 
         var rows: [String] = []
 
-        for upperRow in stride(from: 0, to: paddedSize, by: 2) {
+        for upperRow in stride(from: 0, to: grid.size, by: 2) {
             let lowerRow = upperRow + 1
 
             var renderedRow = String()
 
-            for column in 0..<paddedSize {
-                let upperColor = color(atRow: upperRow, column: column)
+            for column in 0..<grid.size {
+                let upperColor = grid[upperRow, column]
 
-                // The last row of an odd-height symbol has no lower half
-                let lowerColor = lowerRow < paddedSize
-                    ? color(atRow: lowerRow, column: column)
+                // The last row of an odd-height grid has no lower half.
+                let lowerColor = lowerRow < grid.size
+                    ? grid[lowerRow, column]
                     : nil
 
                 renderedRow.append(
@@ -65,32 +45,6 @@ extension QRTextRenderer {
     }
 }
 
-// MARK: - Module Resolution
-
-private extension QRTextRenderer {
-    static func moduleColor(
-        for module: QRModule
-    ) -> QRModuleColor {
-        switch module {
-        case .data(color: .light),
-             .function(pattern: _, color: .light),
-             .information(type: _, color: .light):
-            return .light
-
-        case .data(color: .dark),
-             .function(pattern: _, color: .dark),
-             .information(type: _, color: .dark),
-             .darkModule:
-            return .dark
-
-        case .reserved, .unset:
-            preconditionFailure(
-                "Compact rendering requires a finalized matrix"
-            )
-        }
-    }
-}
-
 // MARK: - Rendering Support
 
 private extension QRTextRenderer {
@@ -99,7 +53,9 @@ private extension QRTextRenderer {
     static let lowerHalfBlock: Character = "\u{2584}" // ▄ LOWER HALF BLOCK
     static let emptyBlock: Character = " "
 
-    /// Light halves are drawn, dark and missing halves are left blank.
+    /// Glyphs draw light modules and leave dark ones blank,
+    /// so the output assumes a dark background.
+    /// A `nil` lower half marks the last row of an odd-height grid.
     static func compactCharacter(
         upper: QRModuleColor,
         lower: QRModuleColor?

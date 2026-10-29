@@ -16,7 +16,7 @@ struct QRTextRendererCompactTests {
     func rendersHalfBlockCombinations() throws {
         // Columns cycle through (light, light), (light, dark),
         // (dark, light) and (dark, dark) in the first two rows.
-        let matrix = Self.makeMatrix(version: .v1) { row, column in
+        let matrix = QRMatrix.filled(version: .v1) { row, column in
             switch row {
             case 0: column % 4 < 2 ? .light : .dark
             case 1: column.isMultiple(of: 2) ? .light : .dark
@@ -47,7 +47,7 @@ struct QRTextRendererCompactTests {
         let version = QRVersion.v1
         let lastIndex = version.size - 1
 
-        let matrix = Self.makeMatrix(version: version) { row, column in
+        let matrix = QRMatrix.filled(version: version) { row, column in
             row == lastIndex && column.isMultiple(of: 2) ? .light : .dark
         }
 
@@ -69,51 +69,13 @@ struct QRTextRendererCompactTests {
         #expect(lastRow == expectedLastRow)
     }
 
-    @Test(
-        arguments: [
-            (QRModule.data(color: .light), QRModuleColor.light),
-            (.data(color: .dark), .dark),
-            (.function(pattern: .finder, color: .light), .light),
-            (.function(pattern: .finder, color: .dark), .dark),
-            (.function(pattern: .separator, color: .light), .light),
-            (.function(pattern: .alignment, color: .dark), .dark),
-            (.function(pattern: .timing, color: .light), .light),
-            (.function(pattern: .timing, color: .dark), .dark),
-            (.information(type: .format, color: .light), .light),
-            (.information(type: .format, color: .dark), .dark),
-            (.information(type: .version, color: .light), .light),
-            (.information(type: .version, color: .dark), .dark),
-            (.darkModule, .dark)
-        ]
-    )
-    func resolvesModuleColor(
-        module: QRModule,
-        expectedColor: QRModuleColor
-    ) throws {
-        var matrix = Self.makeMatrix(version: .v1) { _, _ in .light }
-        matrix[0, 0] = module
-
-        let result = QRTextRenderer.renderCompact(
-            matrix,
-            quietZoneWidth: 0
-        )
-
-        let firstCharacter = try #require(result.first)
-
-        // The lower half is always light, so only the upper half varies.
-        let expectedCharacter: Character =
-            expectedColor == .light ? "█" : "▄"
-
-        #expect(firstCharacter == expectedCharacter)
-    }
-
     // MARK: - Quiet Zone
 
     @Test(arguments: [0, 1, 2, 3, 4])
     func rendersQuietZone(
         width: Int
     ) throws {
-        let matrix = Self.makeMatrix(version: .v1) { _, _ in .dark }
+        let matrix = QRMatrix.filled(version: .v1) { _, _ in .dark }
         let paddedSize = matrix.size + width * 2
         let matrixRange = width..<(width + matrix.size)
 
@@ -130,7 +92,7 @@ struct QRTextRendererCompactTests {
             }
         }
 
-        // An odd-height canvas leaves one undrawn lower half.
+        // An odd-height grid leaves one undrawn lower half.
         try #require(modules.count == paddedSize + 1)
 
         #expect(Array(modules.prefix(paddedSize)) == expectedModules)
@@ -177,27 +139,6 @@ struct QRTextRendererCompactTests {
         )
 
         #expect(result == Self.version1QMask0CompactReferenceSnapshot)
-    }
-}
-
-// MARK: - Matrix Support
-
-private extension QRTextRendererCompactTests {
-    static func makeMatrix(
-        version: QRVersion,
-        color: (_ row: Int, _ column: Int) -> QRModuleColor
-    ) -> QRMatrix {
-        var matrix = QRMatrix(version: version)
-
-        for row in 0..<matrix.size {
-            for column in 0..<matrix.size {
-                matrix[row, column] = .data(
-                    color: color(row, column)
-                )
-            }
-        }
-
-        return matrix
     }
 }
 
