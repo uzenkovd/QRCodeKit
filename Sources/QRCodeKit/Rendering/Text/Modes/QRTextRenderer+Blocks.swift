@@ -10,44 +10,23 @@ extension QRTextRenderer {
         _ matrix: QRMatrix,
         quietZoneWidth: Int = defaultQuietZoneWidth
     ) -> String {
-        precondition(
-            quietZoneWidth >= 0,
-            "Quiet zone width must be nonnegative"
-        )
-
-        let padding = String(
-            repeating: lightBlock,
-            count: quietZoneWidth
-        )
-
-        let quietZoneRow = String(
-            repeating: lightBlock,
-            count: matrix.size + quietZoneWidth * 2
+        let grid = QRRenderGrid(
+            matrix: matrix,
+            quietZoneWidth: quietZoneWidth
         )
 
         var rows: [String] = []
 
-        for _ in 0..<quietZoneWidth {
-            rows.append(quietZoneRow)
-        }
+        for row in 0..<grid.size {
+            var renderedRow = String()
 
-        for row in 0..<matrix.size {
-            var renderedRow = padding
-
-            for column in 0..<matrix.size {
-                let module = matrix[row, column]
-
+            for column in 0..<grid.size {
                 renderedRow.append(
-                    blockCharacters(for: module)
+                    blockCharacters(for: grid[row, column])
                 )
             }
 
-            renderedRow.append(padding)
             rows.append(renderedRow)
-        }
-
-        for _ in 0..<quietZoneWidth {
-            rows.append(quietZoneRow)
         }
 
         return rows.joined(separator: "\n")
@@ -57,29 +36,15 @@ extension QRTextRenderer {
 // MARK: - Rendering Support
 
 private extension QRTextRenderer {
-    static let darkBlock = "░░"
     static let lightBlock = "██"
+    static let darkBlock = "░░"
 
     static func blockCharacters(
-        for module: QRModule
+        for color: QRModuleColor
     ) -> String {
-        switch module {
-        case .data(color: .light),
-             .function(pattern: _, color: .light),
-             .information(type: _, color: .light):
-            return lightBlock
-
-        case .data(color: .dark),
-             .function(pattern: _, color: .dark),
-             .information(type: _, color: .dark),
-             .darkModule:
-            return darkBlock
-
-        case .reserved:
-            return "RR"
-
-        case .unset:
-            return "??"
+        switch color {
+        case .light: lightBlock
+        case .dark: darkBlock
         }
     }
 }
