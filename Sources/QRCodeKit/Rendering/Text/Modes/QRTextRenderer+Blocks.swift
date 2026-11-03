@@ -7,29 +7,13 @@
 
 extension QRTextRenderer {
     static func renderBlocks(
-        _ matrix: QRMatrix,
-        quietZoneWidth: Int = defaultQuietZoneWidth
+        _ grid: QRRenderGrid
     ) -> String {
-        let grid = QRRenderGrid(
-            matrix: matrix,
-            quietZoneWidth: quietZoneWidth
-        )
-
-        var rows: [String] = []
-
-        for row in 0..<grid.size {
-            var renderedRow = String()
-
-            for column in 0..<grid.size {
-                renderedRow.append(
-                    blockCharacters(for: grid[row, column])
-                )
+        regularLines(of: grid)
+            .map { colors in
+                colors.map(blockCharacters(for:)).joined()
             }
-
-            rows.append(renderedRow)
-        }
-
-        return rows.joined(separator: "\n")
+            .joined(separator: "\n")
     }
 }
 

@@ -7,41 +7,17 @@
 
 extension QRTextRenderer {
     static func renderCompact(
-        _ matrix: QRMatrix,
-        quietZoneWidth: Int = defaultQuietZoneWidth
+        _ grid: QRRenderGrid
     ) -> String {
-        let grid = QRRenderGrid(
-            matrix: matrix,
-            quietZoneWidth: quietZoneWidth
-        )
-
-        var rows: [String] = []
-
-        for upperRow in stride(from: 0, to: grid.size, by: 2) {
-            let lowerRow = upperRow + 1
-
-            var renderedRow = String()
-
-            for column in 0..<grid.size {
-                let upperColor = grid[upperRow, column]
-
-                // The last row of an odd-height grid has no lower half.
-                let lowerColor = lowerRow < grid.size
-                    ? grid[lowerRow, column]
-                    : nil
-
-                renderedRow.append(
-                    compactCharacter(
-                        upper: upperColor,
-                        lower: lowerColor
-                    )
+        compactLines(of: grid)
+            .map { cells in
+                String(
+                    cells.map {
+                        compactCharacter(upper: $0.upper, lower: $0.lower)
+                    }
                 )
             }
-
-            rows.append(renderedRow)
-        }
-
-        return rows.joined(separator: "\n")
+            .joined(separator: "\n")
     }
 }
 

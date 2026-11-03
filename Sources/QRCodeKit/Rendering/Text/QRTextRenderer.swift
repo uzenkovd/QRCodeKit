@@ -32,11 +32,20 @@ extension QRTextRenderer {
             return renderDebug(matrix)
 
         case .blocks:
-            return renderBlocks(matrix)
+            return renderBlocks(grid(for: matrix))
 
         case .compact:
-            return renderCompact(matrix)
+            return renderCompact(grid(for: matrix))
         }
+    }
+
+    private static func grid(
+        for matrix: QRMatrix
+    ) -> QRRenderGrid {
+        QRRenderGrid(
+            matrix: matrix,
+            quietZoneWidth: defaultQuietZoneWidth
+        )
     }
 }
 

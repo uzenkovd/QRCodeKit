@@ -9,22 +9,20 @@ extension QRTextRenderer {
     static func renderANSIRegular(
         _ grid: QRRenderGrid
     ) -> String {
-        var rows: [String] = []
+        regularLines(of: grid)
+            .map { colors in
+                var line = ANSITextLine()
 
-        for row in 0..<grid.size {
-            var line = ANSITextLine()
+                for color in colors {
+                    line.append(
+                        moduleSpaces,
+                        background: .module(color)
+                    )
+                }
 
-            for column in 0..<grid.size {
-                line.append(
-                    moduleSpaces,
-                    background: .module(grid[row, column])
-                )
+                return line.string
             }
-
-            rows.append(line.string)
-        }
-
-        return rows.joined(separator: "\n")
+            .joined(separator: "\n")
     }
 }
 
