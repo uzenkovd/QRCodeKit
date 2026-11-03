@@ -18,10 +18,12 @@ struct QRTextRendererBlocksTests {
             column.isMultiple(of: 2) ? .light : .dark
         }
 
-        let result = QRTextRenderer.renderBlocks(
-            matrix,
+        let grid = QRRenderGrid(
+            matrix: matrix,
             quietZoneWidth: 0
         )
+
+        let result = QRTextRenderer.renderBlocks(grid)
 
         let firstRow = try #require(
             result.split(separator: "\n").first
@@ -42,10 +44,12 @@ struct QRTextRendererBlocksTests {
     ) {
         let matrix = QRMatrix.filled(version: .v1) { _, _ in .dark }
 
-        let result = QRTextRenderer.renderBlocks(
-            matrix,
+        let grid = QRRenderGrid(
+            matrix: matrix,
             quietZoneWidth: width
         )
+
+        let result = QRTextRenderer.renderBlocks(grid)
 
         let rows = result.split(
             separator: "\n",
@@ -93,10 +97,12 @@ struct QRTextRendererBlocksTests {
             mode: .blocks
         )
 
-        let expected = QRTextRenderer.renderBlocks(
-            qrCode.matrix,
+        let grid = QRRenderGrid(
+            matrix: qrCode.matrix,
             quietZoneWidth: 4
         )
+
+        let expected = QRTextRenderer.renderBlocks(grid)
 
         let rows = result.split(
             separator: "\n",
@@ -145,10 +151,12 @@ struct QRTextRendererBlocksTests {
             options: options
         )
 
-        let result = QRTextRenderer.renderBlocks(
-            qrCode.matrix,
+        let grid = QRRenderGrid(
+            matrix: qrCode.matrix,
             quietZoneWidth: 0
         )
+
+        let result = QRTextRenderer.renderBlocks(grid)
 
         #expect(
             result == Self.version1QMask0BlocksReferenceSnapshot

@@ -24,10 +24,12 @@ struct QRTextRendererCompactTests {
             }
         }
 
-        let result = QRTextRenderer.renderCompact(
-            matrix,
+        let grid = QRRenderGrid(
+            matrix: matrix,
             quietZoneWidth: 0
         )
+
+        let result = QRTextRenderer.renderCompact(grid)
 
         let firstRow = try #require(
             result.split(separator: "\n").first
@@ -51,10 +53,12 @@ struct QRTextRendererCompactTests {
             row == lastIndex && column.isMultiple(of: 2) ? .light : .dark
         }
 
-        let result = QRTextRenderer.renderCompact(
-            matrix,
+        let grid = QRRenderGrid(
+            matrix: matrix,
             quietZoneWidth: 0
         )
+
+        let result = QRTextRenderer.renderCompact(grid)
 
         let lastRow = try #require(
             result.split(separator: "\n").last
@@ -79,10 +83,12 @@ struct QRTextRendererCompactTests {
         let paddedSize = matrix.size + width * 2
         let matrixRange = width..<(width + matrix.size)
 
-        let result = QRTextRenderer.renderCompact(
-            matrix,
+        let grid = QRRenderGrid(
+            matrix: matrix,
             quietZoneWidth: width
         )
+
+        let result = QRTextRenderer.renderCompact(grid)
 
         let modules = try Self.unpackCompact(result)
 
@@ -111,10 +117,12 @@ struct QRTextRendererCompactTests {
             mode: .compact
         )
 
-        let expected = QRTextRenderer.renderCompact(
-            qrCode.matrix,
+        let grid = QRRenderGrid(
+            matrix: qrCode.matrix,
             quietZoneWidth: 4
         )
+
+        let expected = QRTextRenderer.renderCompact(grid)
 
         #expect(result == expected)
     }
@@ -133,10 +141,12 @@ struct QRTextRendererCompactTests {
             options: options
         )
 
-        let result = QRTextRenderer.renderCompact(
-            qrCode.matrix,
+        let grid = QRRenderGrid(
+            matrix: qrCode.matrix,
             quietZoneWidth: 1
         )
+
+        let result = QRTextRenderer.renderCompact(grid)
 
         #expect(result == Self.version1QMask0CompactReferenceSnapshot)
     }

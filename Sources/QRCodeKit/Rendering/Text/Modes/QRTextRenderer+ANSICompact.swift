@@ -9,37 +9,26 @@ extension QRTextRenderer {
     static func renderANSICompact(
         _ grid: QRRenderGrid
     ) -> String {
-        var rows: [String] = []
+        compactLines(of: grid)
+            .map { cells in
+                var line = ANSITextLine()
 
-        for upperRow in stride(from: 0, to: grid.size, by: 2) {
-            let lowerRow = upperRow + 1
+                for cell in cells {
+                    let encoded = compactCell(
+                        upper: cell.upper,
+                        lower: cell.lower
+                    )
 
-            var line = ANSITextLine()
+                    line.append(
+                        encoded.glyphs,
+                        foreground: encoded.foreground,
+                        background: encoded.background
+                    )
+                }
 
-            for column in 0..<grid.size {
-                let upperColor = grid[upperRow, column]
-
-                // The last row of an odd-height grid has no lower half.
-                let lowerColor = lowerRow < grid.size
-                    ? grid[lowerRow, column]
-                    : nil
-
-                let cell = compactCell(
-                    upper: upperColor,
-                    lower: lowerColor
-                )
-
-                line.append(
-                    cell.glyphs,
-                    foreground: cell.foreground,
-                    background: cell.background
-                )
+                return line.string
             }
-
-            rows.append(line.string)
-        }
-
-        return rows.joined(separator: "\n")
+            .joined(separator: "\n")
     }
 }
 
