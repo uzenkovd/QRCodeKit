@@ -29,7 +29,7 @@ extension QRTextRenderer {
     ) -> String {
         switch mode {
         case .debug:
-            return renderDebug(matrix)
+            return QRStructureRenderer.render(matrix)
 
         case .blocks:
             return renderBlocks(grid(for: matrix))
