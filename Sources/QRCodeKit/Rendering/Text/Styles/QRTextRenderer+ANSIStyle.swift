@@ -1,38 +1,57 @@
 //
-//  QRTextRenderer+ANSICompact.swift
+//  QRTextRenderer+ANSIStyle.swift
 //  QRCodeKit
 //
-//  Created by Dmytro Uzenkov on 01.11.2026.
+//  Created by Dmytro Uzenkov on 03.11.2026.
 //
 
 extension QRTextRenderer {
-    static func renderANSICompact(
-        _ grid: QRRenderGrid
+    static func ansiRegularLine(
+        _ colors: [QRModuleColor]
     ) -> String {
-        compactLines(of: grid)
-            .map { cells in
-                var line = ANSITextLine()
+        var line = ANSITextLine()
 
-                for cell in cells {
-                    let encoded = compactCell(
-                        upper: cell.upper,
-                        lower: cell.lower
-                    )
+        for color in colors {
+            line.append(
+                moduleSpaces,
+                background: .module(color)
+            )
+        }
 
-                    line.append(
-                        encoded.glyphs,
-                        foreground: encoded.foreground,
-                        background: encoded.background
-                    )
-                }
+        return line.string
+    }
 
-                return line.string
-            }
-            .joined(separator: "\n")
+    static func ansiCompactLine(
+        _ cells: [CompactCellColors]
+    ) -> String {
+        var line = ANSITextLine()
+
+        for cell in cells {
+            let encoded = compactCell(
+                upper: cell.upper,
+                lower: cell.lower
+            )
+
+            line.append(
+                encoded.glyphs,
+                foreground: encoded.foreground,
+                background: encoded.background
+            )
+        }
+
+        return line.string
     }
 }
 
-// MARK: - Rendering Support
+// MARK: - Regular Glyphs
+
+private extension QRTextRenderer {
+    /// A module is two spaces filled with its color as background,
+    /// so no glyph depends on the terminal font.
+    static let moduleSpaces = "  "
+}
+
+// MARK: - Compact Glyphs
 
 private extension QRTextRenderer {
     typealias CompactCell = (

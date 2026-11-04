@@ -1,27 +1,45 @@
 //
-//  QRTextRenderer+Compact.swift
+//  QRTextRenderer+PlainStyle.swift
 //  QRCodeKit
 //
-//  Created by Dmytro Uzenkov on 27.10.2026.
+//  Created by Dmytro Uzenkov on 03.11.2026.
 //
 
 extension QRTextRenderer {
-    static func renderCompact(
-        _ grid: QRRenderGrid
+    static func plainRegularLine(
+        _ colors: [QRModuleColor]
     ) -> String {
-        compactLines(of: grid)
-            .map { cells in
-                String(
-                    cells.map {
-                        compactCharacter(upper: $0.upper, lower: $0.lower)
-                    }
-                )
+        colors.map(regularCharacters(for:)).joined()
+    }
+
+    static func plainCompactLine(
+        _ cells: [CompactCellColors]
+    ) -> String {
+        String(
+            cells.map {
+                compactCharacter(upper: $0.upper, lower: $0.lower)
             }
-            .joined(separator: "\n")
+        )
     }
 }
 
-// MARK: - Rendering Support
+// MARK: - Regular Glyphs
+
+private extension QRTextRenderer {
+    static let lightBlock = "██"
+    static let darkBlock = "░░"
+
+    static func regularCharacters(
+        for color: QRModuleColor
+    ) -> String {
+        switch color {
+        case .light: lightBlock
+        case .dark: darkBlock
+        }
+    }
+}
+
+// MARK: - Compact Glyphs
 
 private extension QRTextRenderer {
     static let fullBlock: Character = "\u{2588}"      // █ FULL BLOCK

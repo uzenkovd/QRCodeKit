@@ -49,6 +49,42 @@ extension QRTextRenderer {
     }
 }
 
+// MARK: - Mode Rendering
+
+extension QRTextRenderer {
+    static func renderBlocks(
+        _ grid: QRRenderGrid
+    ) -> String {
+        regularLines(of: grid)
+            .map(plainRegularLine)
+            .joined(separator: "\n")
+    }
+
+    static func renderCompact(
+        _ grid: QRRenderGrid
+    ) -> String {
+        compactLines(of: grid)
+            .map(plainCompactLine)
+            .joined(separator: "\n")
+    }
+
+    static func renderANSIRegular(
+        _ grid: QRRenderGrid
+    ) -> String {
+        regularLines(of: grid)
+            .map(ansiRegularLine)
+            .joined(separator: "\n")
+    }
+
+    static func renderANSICompact(
+        _ grid: QRRenderGrid
+    ) -> String {
+        compactLines(of: grid)
+            .map(ansiCompactLine)
+            .joined(separator: "\n")
+    }
+}
+
 // MARK: - Rendering Defaults
 
 extension QRTextRenderer {
