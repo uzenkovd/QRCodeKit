@@ -1,5 +1,5 @@
 //
-//  QRTextRendererDebugTests.swift
+//  QRStructureRendererTests.swift
 //  QRCodeKit
 //
 //  Created by Dmytro Uzenkov on 19.10.2026.
@@ -9,7 +9,7 @@ import Testing
 @testable import QRCodeKit
 
 @Suite
-struct QRTextRendererDebugTests {
+struct QRStructureRendererTests {
     // MARK: - Module Representation
 
     @Test
@@ -35,7 +35,7 @@ struct QRTextRendererDebugTests {
             matrix[0, column] = module
         }
 
-        let result = QRTextRenderer.render(matrix, mode: .debug)
+        let result = QRStructureRenderer.render(matrix)
 
         let firstRow = try #require(
             result.split(separator: "\n").first
@@ -67,7 +67,7 @@ struct QRTextRendererDebugTests {
             matrix[0, column] = module
         }
 
-        let result = QRTextRenderer.render(matrix, mode: .debug)
+        let result = QRStructureRenderer.render(matrix)
 
         let firstRow = try #require(
             result.split(separator: "\n").first
@@ -95,7 +95,7 @@ struct QRTextRendererDebugTests {
         matrix[lastIndex, 0] = .reserved(.version)
         matrix[lastIndex, lastIndex] = .darkModule
 
-        let result = QRTextRenderer.render(matrix, mode: .debug)
+        let result = QRStructureRenderer.render(matrix)
 
         let rows = result
             .split(separator: "\n")
@@ -117,7 +117,7 @@ struct QRTextRendererDebugTests {
     ) {
         let matrix = QRMatrix(version: version)
 
-        let result = QRTextRenderer.render(matrix, mode: .debug)
+        let result = QRStructureRenderer.render(matrix)
 
         let rows = result.split(
             separator: "\n",
@@ -137,7 +137,7 @@ struct QRTextRendererDebugTests {
     // MARK: - QRCode Rendering
 
     @Test
-    func matchesVersion1DebugReference() throws {
+    func matchesVersion1Reference() throws {
         let options = QROptions(
             version: .v1,
             encodingMode: .alphanumeric,
@@ -150,12 +150,9 @@ struct QRTextRendererDebugTests {
             options: options
         )
 
-        let result = QRTextRenderer.render(
-            qrCode,
-            mode: .debug
-        )
+        let result = QRStructureRenderer.render(qrCode)
 
-        #expect(result == Self.version1QMask0DebugReferenceSnapshot)
+        #expect(result == Self.version1QMask0ReferenceSnapshot)
     }
 
     @Test
@@ -172,10 +169,7 @@ struct QRTextRendererDebugTests {
             options: options
         )
 
-        let result = QRTextRenderer.render(
-            qrCode,
-            mode: .debug
-        )
+        let result = QRStructureRenderer.render(qrCode)
 
         let rows = result
             .split(separator: "\n")
@@ -198,8 +192,8 @@ struct QRTextRendererDebugTests {
 
 // MARK: - Reference Snapshots
 
-private extension QRTextRendererDebugTests {
-    static let version1QMask0DebugReferenceSnapshot = """
+private extension QRStructureRendererTests {
+    static let version1QMask0ReferenceSnapshot = """
         F F F F F F F S I 1 0 0 0 S F F F F F F F
         F F F F F F F S I 0 0 1 0 S F F F F F F F
         F F F F F F F S I 0 0 1 1 S F F F F F F F

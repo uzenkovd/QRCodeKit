@@ -1,12 +1,40 @@
 //
-//  QRTextRenderer+Debug.swift
+//  QRStructureRenderer.swift
 //  QRCodeKit
 //
 //  Created by Dmytro Uzenkov on 19.10.2026.
 //
 
-extension QRTextRenderer {
-    static func renderDebug(
+/// Renders the structure of a QR code as text: one character per module,
+/// showing which part of the symbol the module belongs to.
+///
+/// The output is a diagnostic view and cannot be scanned.
+/// To render a scannable code, use ``QRTextRenderer``.
+public enum QRStructureRenderer {
+    /// Returns one line per row of the symbol, with modules separated by spaces.
+    ///
+    /// Modules are shown as:
+    /// - `0` and `1`: light and dark modules of data
+    ///   and error correction codewords;
+    /// - `F`, `S`, `A` and `T`: finder, separator, alignment
+    ///   and timing patterns;
+    /// - `D`: the dark module;
+    /// - `I` and `V`: format and version information.
+    public static func render(
+        _ qrCode: QRCode
+    ) -> String {
+        render(qrCode.matrix)
+    }
+}
+
+// MARK: - Matrix Rendering
+
+extension QRStructureRenderer {
+    /// Renders a matrix at any stage of generation.
+    ///
+    /// Unfinished matrices may contain reserved modules, shown as `R`,
+    /// and unset modules, shown as `?`.
+    static func render(
         _ matrix: QRMatrix
     ) -> String {
         var rows: [String] = []
@@ -22,7 +50,7 @@ extension QRTextRenderer {
                 }
 
                 renderedRow.append(
-                    debugCharacter(for: module)
+                    character(for: module)
                 )
             }
 
@@ -31,8 +59,12 @@ extension QRTextRenderer {
 
         return rows.joined(separator: "\n")
     }
+}
 
-    private static func debugCharacter(
+// MARK: - Module Characters
+
+private extension QRStructureRenderer {
+    static func character(
         for module: QRModule
     ) -> Character {
         switch module {
