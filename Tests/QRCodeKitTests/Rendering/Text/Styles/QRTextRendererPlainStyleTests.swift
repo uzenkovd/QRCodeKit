@@ -16,7 +16,7 @@ struct QRTextRendererPlainStyleTests {
             [.light, .dark, .dark]
         )
 
-        #expect(line == "██░░░░")
+        #expect(line == "██" + "  " + "  ")
     }
 
     @Test

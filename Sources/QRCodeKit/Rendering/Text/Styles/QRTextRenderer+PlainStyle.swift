@@ -26,15 +26,15 @@ extension QRTextRenderer {
 // MARK: - Regular Glyphs
 
 private extension QRTextRenderer {
-    static let lightBlock = "██"
-    static let darkBlock = "░░"
+    static let fullBlocks = "██"
+    static let emptyBlocks = "  "
 
     static func regularCharacters(
         for color: QRModuleColor
     ) -> String {
         switch color {
-        case .light: lightBlock
-        case .dark: darkBlock
+        case .light: fullBlocks
+        case .dark: emptyBlocks
         }
     }
 }
