@@ -5,88 +5,88 @@
 //  Created by Dmytro Uzenkov on 16.10.2026.
 //
 
+/// Renders a QR code as text that can be scanned from a screen.
+///
+/// Choose a ``Layout`` and a ``Style`` to fit the destination.
+/// To inspect the structure of a code instead, use ``QRStructureRenderer``.
 public enum QRTextRenderer {
-    public enum Mode: Sendable {
-        case debug
-        case blocks
+    /// How modules are arranged into lines of text.
+    public enum Layout: CaseIterable, Sendable {
+        /// One line per row of modules, two characters per module,
+        /// so modules look roughly square.
+        case regular
+
+        /// One line per two rows of modules, one character per column.
+        ///
+        /// The output takes about a quarter of the space of ``regular``,
+        /// but it relies on half block characters, which some terminals
+        /// draw with small gaps.
         case compact
     }
 
+    /// How modules are written as characters.
+    public enum Style: CaseIterable, Sendable {
+        /// Block characters without escape codes, for any destination
+        /// that shows plain text.
+        ///
+        /// Light modules are drawn in the text color, so the colors
+        /// of the code are correct only on a dark background.
+        case plain
+
+        /// ANSI escape codes that color every module, so the output
+        /// does not depend on the terminal background.
+        ///
+        /// Use it only when writing to a terminal that supports 256 colors.
+        /// Other destinations, such as files or chats, show escape codes as text.
+        case ansi
+    }
+
+    /// The minimum quiet zone width the standard requires, in modules.
+    public static let defaultQuietZoneWidth = 4
+
+    /// Returns the text of a QR code, with lines separated by `\n`
+    /// and no trailing newline.
+    ///
+    /// The default layout and style produce compact text without
+    /// escape codes, so it can be written to any destination.
+    ///
+    /// - Parameters:
+    ///   - qrCode: The QR code to render.
+    ///   - layout: How modules are arranged into lines.
+    ///   - style: How modules are written as characters.
+    ///   - quietZoneWidth: The width of the light margin around
+    ///     the symbol, in modules. The default is ``defaultQuietZoneWidth``.
+    ///     Must not be negative.
     public static func render(
         _ qrCode: QRCode,
-        mode: Mode
+        layout: Layout = .compact,
+        style: Style = .plain,
+        quietZoneWidth: Int = defaultQuietZoneWidth
     ) -> String {
-        render(qrCode.matrix, mode: mode)
+        let grid = QRRenderGrid(
+            matrix: qrCode.matrix,
+            quietZoneWidth: quietZoneWidth
+        )
+
+        return render(grid, layout: layout, style: style)
     }
 }
 
-// MARK: - Matrix Rendering
+// MARK: - Grid Rendering
 
 extension QRTextRenderer {
     static func render(
-        _ matrix: QRMatrix,
-        mode: Mode
+        _ grid: QRRenderGrid,
+        layout: Layout,
+        style: Style
     ) -> String {
-        switch mode {
-        case .debug:
-            return QRStructureRenderer.render(matrix)
-
-        case .blocks:
-            return renderBlocks(grid(for: matrix))
-
-        case .compact:
-            return renderCompact(grid(for: matrix))
+        let lines = switch (layout, style) {
+        case (.regular, .plain): regularLines(of: grid).map(plainRegularLine)
+        case (.compact, .plain): compactLines(of: grid).map(plainCompactLine)
+        case (.regular, .ansi): regularLines(of: grid).map(ansiRegularLine)
+        case (.compact, .ansi): compactLines(of: grid).map(ansiCompactLine)
         }
+
+        return lines.joined(separator: "\n")
     }
-
-    private static func grid(
-        for matrix: QRMatrix
-    ) -> QRRenderGrid {
-        QRRenderGrid(
-            matrix: matrix,
-            quietZoneWidth: defaultQuietZoneWidth
-        )
-    }
-}
-
-// MARK: - Mode Rendering
-
-extension QRTextRenderer {
-    static func renderBlocks(
-        _ grid: QRRenderGrid
-    ) -> String {
-        regularLines(of: grid)
-            .map(plainRegularLine)
-            .joined(separator: "\n")
-    }
-
-    static func renderCompact(
-        _ grid: QRRenderGrid
-    ) -> String {
-        compactLines(of: grid)
-            .map(plainCompactLine)
-            .joined(separator: "\n")
-    }
-
-    static func renderANSIRegular(
-        _ grid: QRRenderGrid
-    ) -> String {
-        regularLines(of: grid)
-            .map(ansiRegularLine)
-            .joined(separator: "\n")
-    }
-
-    static func renderANSICompact(
-        _ grid: QRRenderGrid
-    ) -> String {
-        compactLines(of: grid)
-            .map(ansiCompactLine)
-            .joined(separator: "\n")
-    }
-}
-
-// MARK: - Rendering Defaults
-
-extension QRTextRenderer {
-    static let defaultQuietZoneWidth = 4
 }
