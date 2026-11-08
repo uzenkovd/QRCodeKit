@@ -10,95 +10,61 @@
 ///
 /// The output is a diagnostic view and cannot be scanned.
 enum QRStructureRenderer {
-    /// Returns one line per row of the symbol, with modules separated by spaces.
+    /// Returns a header, the modules with row and column numbers,
+    /// and a legend, separated by blank lines.
     ///
-    /// Modules are shown as:
-    /// - `0` and `1`: light and dark modules of data
-    ///   and error correction codewords;
-    /// - `F`, `S`, `A` and `T`: finder, separator, alignment
-    ///   and timing patterns;
-    /// - `D`: the dark module;
-    /// - `I` and `V`: format and version information.
+    /// Modules are shown as letters for the part of the symbol they
+    /// belong to, uppercase when dark and lowercase when light.
+    /// Modules of data and error correction codewords are `1` when dark
+    /// and `0` when light.
     static func render(
         _ qrCode: QRCode
     ) -> String {
-        render(qrCode.matrix)
+        [
+            header(for: qrCode),
+            render(qrCode.matrix),
+            plainLegend
+        ].joined(separator: "\n\n")
+    }
+}
+
+// MARK: - Header
+
+private extension QRStructureRenderer {
+    static func header(
+        for qrCode: QRCode
+    ) -> String {
+        let version = qrCode.version.rawValue
+        let level = qrCode.errorCorrectionLevel
+        let mask = qrCode.mask.rawValue
+        let mode = qrCode.encodingMode
+        let size = qrCode.size
+
+        return "Version \(version)-\(level), \(mode) mode, "
+            + "mask \(mask), \(size)×\(size) modules"
     }
 }
 
 // MARK: - Matrix Rendering
 
 extension QRStructureRenderer {
-    /// Renders a matrix at any stage of generation.
+    /// Renders the modules of a matrix at any stage of generation,
+    /// without the header and the legend.
     ///
     /// Unfinished matrices may contain reserved modules, shown as `R`,
     /// and unset modules, shown as `?`.
     static func render(
         _ matrix: QRMatrix
     ) -> String {
-        var rows: [String] = []
-
-        for row in 0..<matrix.size {
-            var renderedRow = String()
-
-            for column in 0..<matrix.size {
-                let module = matrix[row, column]
-
-                if column > 0 {
-                    renderedRow.append(" ")
-                }
-
-                renderedRow.append(
-                    character(for: module)
-                )
-            }
-
-            rows.append(renderedRow)
-        }
-
-        return rows.joined(separator: "\n")
+        plainGrid(of: matrix)
     }
-}
 
-// MARK: - Module Characters
-
-private extension QRStructureRenderer {
-    static func character(
-        for module: QRModule
-    ) -> Character {
-        switch module {
-        case .data(color: .light):
-            return "0"
-
-        case .data(color: .dark):
-            return "1"
-
-        case .function(pattern: .finder, color: _):
-            return "F"
-
-        case .function(pattern: .separator, color: _):
-            return "S"
-
-        case .function(pattern: .alignment, color: _):
-            return "A"
-
-        case .function(pattern: .timing, color: _):
-            return "T"
-
-        case .darkModule:
-            return "D"
-
-        case .information(type: .format, color: _):
-            return "I"
-
-        case .information(type: .version, color: _):
-            return "V"
-
-        case .reserved:
-            return "R"
-
-        case .unset:
-            return "?"
+    static func modules(
+        inRow row: Int,
+        of matrix: QRMatrix
+    ) -> [QRModule] {
+        (0..<matrix.size).map { column in
+            matrix[row, column]
         }
     }
 }

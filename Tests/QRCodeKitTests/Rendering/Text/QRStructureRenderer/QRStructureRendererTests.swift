@@ -10,73 +10,7 @@ import Testing
 
 @Suite
 struct QRStructureRendererTests {
-    // MARK: - Module Representation
-
-    @Test
-    func rendersModuleTypes() throws {
-        var matrix = QRMatrix(version: .v1)
-
-        let modules: [QRModule] = [
-            .data(color: .light),
-            .data(color: .dark),
-            .function(pattern: .finder, color: .dark),
-            .function(pattern: .separator, color: .light),
-            .function(pattern: .alignment, color: .dark),
-            .function(pattern: .timing, color: .light),
-            .darkModule,
-            .information(type: .format, color: .dark),
-            .information(type: .version, color: .light),
-            .reserved(.format),
-            .reserved(.version),
-            .unset
-        ]
-
-        for (column, module) in modules.enumerated() {
-            matrix[0, column] = module
-        }
-
-        let result = QRStructureRenderer.render(matrix)
-
-        let firstRow = try #require(
-            result.split(separator: "\n").first
-        )
-
-        #expect(firstRow == "0 1 F S A T D I V R R ? ? ? ? ? ? ? ? ? ?")
-    }
-
-    @Test
-    func ignoresStructuralModuleColors() throws {
-        var matrix = QRMatrix(version: .v1)
-
-        let modules: [QRModule] = [
-            .function(pattern: .finder, color: .light),
-            .function(pattern: .finder, color: .dark),
-            .function(pattern: .separator, color: .light),
-            .function(pattern: .separator, color: .dark),
-            .function(pattern: .alignment, color: .light),
-            .function(pattern: .alignment, color: .dark),
-            .function(pattern: .timing, color: .light),
-            .function(pattern: .timing, color: .dark),
-            .information(type: .format, color: .light),
-            .information(type: .format, color: .dark),
-            .information(type: .version, color: .light),
-            .information(type: .version, color: .dark)
-        ]
-
-        for (column, module) in modules.enumerated() {
-            matrix[0, column] = module
-        }
-
-        let result = QRStructureRenderer.render(matrix)
-
-        let firstRow = try #require(
-            result.split(separator: "\n").first
-        )
-
-        #expect(firstRow == "F F S S A A T T I I V V ? ? ? ? ? ? ? ? ?")
-    }
-
-    // MARK: - Output Layout
+    // MARK: - Matrix Rendering
 
     @Test
     func preservesModulePositions() throws {
@@ -96,19 +30,16 @@ struct QRStructureRendererTests {
         matrix[lastIndex, lastIndex] = .darkModule
 
         let result = QRStructureRenderer.render(matrix)
+        let modules = Self.modules(in: result, size: matrix.size)
 
-        let rows = result
-            .split(separator: "\n")
-            .map { $0.split(separator: " ") }
+        try #require(modules.count == matrix.size)
+        try #require(modules.allSatisfy { $0.count == matrix.size })
 
-        try #require(rows.count == matrix.size)
-        try #require(rows.allSatisfy { $0.count == matrix.size })
-
-        #expect(rows[0][0] == "1")
-        #expect(rows[0][lastIndex] == "F")
-        #expect(rows[10][7] == "I")
-        #expect(rows[lastIndex][0] == "R")
-        #expect(rows[lastIndex][lastIndex] == "D")
+        #expect(modules[0][0] == "1")
+        #expect(modules[0][lastIndex] == "F")
+        #expect(modules[10][7] == "i")
+        #expect(modules[lastIndex][0] == "R")
+        #expect(modules[lastIndex][lastIndex] == "D")
     }
 
     @Test(arguments: QRVersion.allCases)
@@ -118,19 +49,12 @@ struct QRStructureRendererTests {
         let matrix = QRMatrix(version: version)
 
         let result = QRStructureRenderer.render(matrix)
+        let modules = Self.modules(in: result, size: matrix.size)
 
-        let rows = result.split(
-            separator: "\n",
-            omittingEmptySubsequences: false
-        )
-
-        let expectedRow = Array(
-            repeating: "?",
-            count: matrix.size
-        ).joined(separator: " ")
-
-        #expect(rows.count == matrix.size)
-        #expect(rows.allSatisfy { $0 == expectedRow })
+        #expect(modules.count == matrix.size)
+        #expect(modules.allSatisfy { row in
+            row.count == matrix.size && row.allSatisfy { $0 == "?" }
+        })
         #expect(!result.hasSuffix("\n"))
     }
 
@@ -152,7 +76,7 @@ struct QRStructureRendererTests {
 
         let result = QRStructureRenderer.render(qrCode)
 
-        #expect(result == Self.version1QMask0ReferenceSnapshot)
+        #expect(result == Self.version1Reference)
     }
 
     @Test
@@ -169,51 +93,79 @@ struct QRStructureRendererTests {
             options: options
         )
 
-        let result = QRStructureRenderer.render(qrCode)
+        let result = QRStructureRenderer.render(qrCode.matrix)
+        let modules = Self.modules(in: result, size: qrCode.size)
 
-        let rows = result
-            .split(separator: "\n")
-            .map { $0.split(separator: " ") }
-
-        try #require(rows.count == qrCode.size)
-        try #require(rows.allSatisfy { $0.count == qrCode.size })
+        try #require(modules.count == qrCode.size)
+        try #require(modules.allSatisfy { $0.count == qrCode.size })
 
         let versionInformationCoordinate = qrCode.size - 11
 
-        #expect(rows[0][versionInformationCoordinate] == "V")
-        #expect(rows[versionInformationCoordinate][0] == "V")
+        #expect(modules[0][versionInformationCoordinate].lowercased() == "v")
+        #expect(modules[versionInformationCoordinate][0].lowercased() == "v")
 
-        #expect(rows[22][22] == "A")
+        #expect(modules[22][22] == "A")
 
-        #expect(!result.contains("R"))
-        #expect(!result.contains("?"))
+        #expect(!modules.joined().contains("R"))
+        #expect(!modules.joined().contains("?"))
+    }
+}
+
+// MARK: - Parsing Support
+
+private extension QRStructureRendererTests {
+    /// Removes the column ruler, the borders and the row labels
+    /// and splits every row into the characters of its modules.
+    static func modules(
+        in rendered: String,
+        size: Int
+    ) -> [[Substring]] {
+        let labelWidth = String(size - 1).count
+
+        return rendered
+            .split(separator: "\n", omittingEmptySubsequences: false)
+            .dropFirst(labelWidth + 1)
+            .dropLast()
+            .map { $0.dropFirst(labelWidth + 3).dropLast(2).split(separator: " ") }
     }
 }
 
 // MARK: - Reference Snapshots
 
 private extension QRStructureRendererTests {
-    static let version1QMask0ReferenceSnapshot = """
-        F F F F F F F S I 1 0 0 0 S F F F F F F F
-        F F F F F F F S I 0 0 1 0 S F F F F F F F
-        F F F F F F F S I 0 0 1 1 S F F F F F F F
-        F F F F F F F S I 0 0 0 0 S F F F F F F F
-        F F F F F F F S I 0 1 0 0 S F F F F F F F
-        F F F F F F F S I 0 1 0 0 S F F F F F F F
-        F F F F F F F S T T T T T S F F F F F F F
-        S S S S S S S S I 0 0 0 0 S S S S S S S S
-        I I I I I I T I I 0 0 0 1 I I I I I I I I
-        0 1 0 0 0 0 T 0 1 1 1 1 0 0 0 0 1 0 0 0 1
-        0 0 1 1 0 1 T 1 0 1 1 0 0 0 1 0 1 1 0 0 0
-        0 1 1 0 1 1 T 1 0 0 1 1 0 1 0 1 0 1 1 1 0
-        1 0 0 0 1 0 T 0 1 0 1 1 1 0 1 1 1 0 1 0 1
-        S S S S S S S S D 1 0 1 0 0 1 0 0 0 1 0 1
-        F F F F F F F S I 0 1 0 0 0 0 1 0 1 1 0 0
-        F F F F F F F S I 1 0 1 1 0 1 1 0 1 0 0 0
-        F F F F F F F S I 0 1 0 0 0 1 1 1 1 1 1 1
-        F F F F F F F S I 1 0 1 0 1 0 1 0 0 0 1 0
-        F F F F F F F S I 0 0 1 0 1 1 1 0 1 0 0 1
-        F F F F F F F S I 0 1 1 1 1 0 0 0 1 0 1 1
-        F F F F F F F S I 0 0 1 0 1 1 1 0 0 0 0 1
+    static let version1Reference = """
+        Version 1-Q, alphanumeric mode, mask 0, 21×21 modules
+
+                                 1                   2
+             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0
+           ┌───────────────────────────────────────────┐
+         0 │ F F F F F F F s I 1 0 0 0 s F F F F F F F │
+         1 │ F f f f f f F s I 0 0 1 0 s F f f f f f F │
+         2 │ F f F F F f F s I 0 0 1 1 s F f F F F f F │
+         3 │ F f F F F f F s I 0 0 0 0 s F f F F F f F │
+         4 │ F f F F F f F s I 0 1 0 0 s F f F F F f F │
+         5 │ F f f f f f F s i 0 1 0 0 s F f f f f f F │
+         6 │ F F F F F F F s T t T t T s F F F F F F F │
+         7 │ s s s s s s s s I 0 0 0 0 s s s s s s s s │
+         8 │ i I I i I i T I i 0 0 0 1 i I i I I I I I │
+         9 │ 0 1 0 0 0 0 t 0 1 1 1 1 0 0 0 0 1 0 0 0 1 │
+        10 │ 0 0 1 1 0 1 T 1 0 1 1 0 0 0 1 0 1 1 0 0 0 │
+        11 │ 0 1 1 0 1 1 t 1 0 0 1 1 0 1 0 1 0 1 1 1 0 │
+        12 │ 1 0 0 0 1 0 T 0 1 0 1 1 1 0 1 1 1 0 1 0 1 │
+        13 │ s s s s s s s s D 1 0 1 0 0 1 0 0 0 1 0 1 │
+        14 │ F F F F F F F s I 0 1 0 0 0 0 1 0 1 1 0 0 │
+        15 │ F f f f f f F s i 1 0 1 1 0 1 1 0 1 0 0 0 │
+        16 │ F f F F F f F s I 0 1 0 0 0 1 1 1 1 1 1 1 │
+        17 │ F f F F F f F s i 1 0 1 0 1 0 1 0 0 0 1 0 │
+        18 │ F f F F F f F s I 0 0 1 0 1 1 1 0 1 0 0 1 │
+        19 │ F f f f f f F s I 0 1 1 1 1 0 0 0 1 0 1 1 │
+        20 │ F F F F F F F s i 0 0 1 0 1 1 1 0 0 0 0 1 │
+           └───────────────────────────────────────────┘
+
+        Dark and light modules:
+        F f  finder pattern      A a  alignment pattern
+        S s  separator           T t  timing pattern
+        I i  format information  V v  version information
+        D    dark module         1 0  data and error correction
         """
 }
