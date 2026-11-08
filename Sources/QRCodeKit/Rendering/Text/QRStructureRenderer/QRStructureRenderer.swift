@@ -9,8 +9,7 @@
 /// showing which part of the symbol the module belongs to.
 ///
 /// The output is a diagnostic view and cannot be scanned.
-/// To render a scannable code, use ``QRTextRenderer``.
-public enum QRStructureRenderer {
+enum QRStructureRenderer {
     /// Returns one line per row of the symbol, with modules separated by spaces.
     ///
     /// Modules are shown as:
@@ -20,7 +19,7 @@ public enum QRStructureRenderer {
     ///   and timing patterns;
     /// - `D`: the dark module;
     /// - `I` and `V`: format and version information.
-    public static func render(
+    static func render(
         _ qrCode: QRCode
     ) -> String {
         render(qrCode.matrix)
