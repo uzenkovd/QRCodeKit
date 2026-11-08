@@ -8,7 +8,6 @@
 /// Renders a QR code as text that can be scanned from a screen.
 ///
 /// Choose a ``Layout`` and a ``Style`` to fit the destination.
-/// To inspect the structure of a code instead, use ``QRStructureRenderer``.
 public enum QRTextRenderer {
     /// How modules are arranged into lines of text.
     public enum Layout: CaseIterable, Sendable {
