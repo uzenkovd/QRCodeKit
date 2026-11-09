@@ -5,7 +5,7 @@
 //  Created by Dmytro Uzenkov on 11.08.2026.
 //
 
-public enum QRVersion: Int, Sendable, CaseIterable, Hashable {
+public enum QRVersion: Int, CaseIterable, Hashable, Sendable {
     case v1 = 1
     case v2
     case v3
@@ -55,22 +55,13 @@ public enum QRVersion: Int, Sendable, CaseIterable, Hashable {
     }
 }
 
-// MARK: - Strideable
+// MARK: - Comparable
 
-extension QRVersion: Strideable {
-    public func advanced(by n: Int) -> QRVersion {
-        guard let version = QRVersion(
-            rawValue: rawValue + n
-        ) else {
-            preconditionFailure(
-                "Advanced QR version is out of bounds"
-            )
-        }
-
-        return version
-    }
-
-    public func distance(to other: QRVersion) -> Int {
-        other.rawValue - rawValue
+extension QRVersion: Comparable {
+    public static func < (
+        lhs: QRVersion,
+        rhs: QRVersion
+    ) -> Bool {
+        lhs.rawValue < rhs.rawValue
     }
 }
