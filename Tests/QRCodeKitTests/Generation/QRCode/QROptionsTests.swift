@@ -6,14 +6,14 @@
 //
 
 import Testing
-@testable import QRCodeKit
+import QRCodeKit
 
 @Suite
 struct QROptionsTests {
-    // MARK: - init(version:encodingMode:errorCorrectionLevel:mask:)
+    // MARK: - Initialization
 
     @Test
-    func initializesWithDefaultOptions() {
+    func leavesAllOptionsUnsetByDefault() {
         let options = QROptions()
 
         #expect(options.version == nil)
@@ -23,20 +23,7 @@ struct QROptionsTests {
     }
 
     @Test
-    func initializesWithPartialOptions() {
-        let options = QROptions(
-            version: .v5,
-            errorCorrectionLevel: .Q
-        )
-
-        #expect(options.version == .v5)
-        #expect(options.encodingMode == nil)
-        #expect(options.errorCorrectionLevel == .Q)
-        #expect(options.mask == nil)
-    }
-
-    @Test
-    func initializesWithAllOptions() {
+    func storesSpecifiedOptions() {
         let options = QROptions(
             version: .v10,
             encodingMode: .byte,
@@ -48,5 +35,57 @@ struct QROptionsTests {
         #expect(options.encodingMode == .byte)
         #expect(options.errorCorrectionLevel == .H)
         #expect(options.mask == .pattern6)
+    }
+
+    // MARK: - Mutation
+
+    @Test
+    func allowsChangingOptionsAfterInitialization() {
+        var options = QROptions()
+
+        options.version = .v10
+        options.encodingMode = .byte
+        options.errorCorrectionLevel = .H
+        options.mask = .pattern6
+
+        #expect(options == QROptions(
+            version: .v10,
+            encodingMode: .byte,
+            errorCorrectionLevel: .H,
+            mask: .pattern6
+        ))
+    }
+
+    // MARK: - Equality
+
+    @Test
+    func equalsOptionsWithSameValues() {
+        let options = QROptions(version: .v2, mask: .pattern3)
+
+        #expect(options == QROptions(version: .v2, mask: .pattern3))
+    }
+
+    @Test(arguments: [
+        QROptions(version: .v2),
+        QROptions(encodingMode: .byte),
+        QROptions(errorCorrectionLevel: .H),
+        QROptions(mask: .pattern3)
+    ])
+    func differsFromOptionsWithAnyDifferentValue(
+        _ options: QROptions
+    ) {
+        #expect(options != QROptions())
+    }
+
+    // MARK: - Hashing
+
+    @Test
+    func hashesEqualOptionsEqually() {
+        let options: Set = [
+            QROptions(version: .v2, mask: .pattern3),
+            QROptions(version: .v2, mask: .pattern3)
+        ]
+
+        #expect(options.count == 1)
     }
 }

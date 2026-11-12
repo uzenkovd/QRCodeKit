@@ -10,7 +10,24 @@ import Testing
 
 @Suite
 struct QRCodeTests {
-    // MARK: - String Initialization
+    // MARK: - Initialization
+
+    @Test
+    func preservesMessage() throws {
+        let qrCode = try QRCode("HELLO WORLD")
+
+        #expect(qrCode.message == "HELLO WORLD")
+    }
+
+    @Test
+    func producesSameCodeFromTextContentAndString() throws {
+        let contentQRCode = try QRCode(.text("HELLO WORLD"))
+        let stringQRCode = try QRCode("HELLO WORLD")
+
+        #expect(contentQRCode == stringQRCode)
+    }
+
+    // MARK: - Validation
 
     @Test
     func rejectsEmptyMessage() {
@@ -20,9 +37,39 @@ struct QRCodeTests {
     }
 
     @Test
+    func rejectsEmptyContent() {
+        #expect(throws: QRCodeError.emptyMessage) {
+            try QRCode(.text(""))
+        }
+    }
+
+    @Test
     func rejectsUnsupportedMessage() {
         #expect(throws: QRCodeError.unsupportedMessage) {
             try QRCode("🙂𠜎")
+        }
+    }
+
+    @Test
+    func rejectsWrongEncodingMode() {
+        let options = QROptions(encodingMode: .numeric)
+
+        #expect(throws: QRCodeError.wrongEncodingModeForMessage) {
+            try QRCode("HELLO", options: options)
+        }
+    }
+
+    @Test
+    func rejectsMessageThatDoesNotFitEncodingMode() {
+        let maximumByteCapacity = 2953
+        let message = String(
+            repeating: "A",
+            count: maximumByteCapacity + 1
+        )
+        let options = QROptions(encodingMode: .byte)
+
+        #expect(throws: QRCodeError.messageDoesNotFitEncodingMode) {
+            try QRCode(message, options: options)
         }
     }
 
@@ -39,91 +86,15 @@ struct QRCodeTests {
         }
     }
 
-    // MARK: - QRContent Initialization
-
     @Test
-    func initializesFromPlainTextContent() throws {
-        let content = QRContent.text("HELLO WORLD")
-
-        let qrCode = try QRCode(content)
-
-        #expect(qrCode.message == content.payload)
-    }
-
-    @Test
-    func rejectsEmptyPlainTextContent() {
-        #expect(throws: QRCodeError.emptyMessage) {
-            try QRCode(
-                .text("")
-            )
-        }
-    }
-
-    // MARK: - Encoding Mode
-
-    @Test
-    func rejectsWrongEncodingMode() {
-        let options = QROptions(
-            encodingMode: .numeric
-        )
-
-        #expect(throws: QRCodeError.wrongEncodingModeForMessage) {
-            try QRCode("HELLO", options: options)
-        }
-    }
-
-    @Test
-    func rejectsMessageThatDoesNotFitEncodingMode() {
-        let maximumByteCapacity = 2953
-        let message = String(
-            repeating: "A",
-            count: maximumByteCapacity + 1
-        )
-        let options = QROptions(
-            encodingMode: .byte
-        )
-
-        #expect(throws: QRCodeError.messageDoesNotFitEncodingMode) {
-            try QRCode(
-                message,
-                options: options
-            )
-        }
-    }
-
-    // MARK: - Version and Error Correction
-
-    @Test
-    func rejectsMessageThatDoesNotFitQRConfiguration() {
+    func rejectsMessageThatDoesNotFitVersionAndErrorCorrectionLevel() {
         let options = QROptions(
             version: .v1,
             errorCorrectionLevel: .H
         )
 
         #expect(throws: QRCodeError.messageDoesNotFitQRConfiguration) {
-            try QRCode(
-                "HELLO WORLD",
-                options: options
-            )
-        }
-    }
-
-    @Test
-    func rejectsMessageThatDoesNotFitErrorCorrectionLevel() {
-        let maximumHNumericCapacity = 3057
-        let message = String(
-            repeating: "1",
-            count: maximumHNumericCapacity + 1
-        )
-        let options = QROptions(
-            errorCorrectionLevel: .H
-        )
-
-        #expect(throws: QRCodeError.messageDoesNotFitErrorCorrectionLevel) {
-            try QRCode(
-                message,
-                options: options
-            )
+            try QRCode("HELLO WORLD", options: options)
         }
     }
 
@@ -134,15 +105,24 @@ struct QRCodeTests {
             repeating: "1",
             count: maximumV1LNumericCapacity + 1
         )
-        let options = QROptions(
-            version: .v1
-        )
+        let options = QROptions(version: .v1)
 
         #expect(throws: QRCodeError.messageDoesNotFitVersion) {
-            try QRCode(
-                message,
-                options: options
-            )
+            try QRCode(message, options: options)
+        }
+    }
+
+    @Test
+    func rejectsMessageThatDoesNotFitErrorCorrectionLevel() {
+        let maximumHNumericCapacity = 3057
+        let message = String(
+            repeating: "1",
+            count: maximumHNumericCapacity + 1
+        )
+        let options = QROptions(errorCorrectionLevel: .H)
+
+        #expect(throws: QRCodeError.messageDoesNotFitErrorCorrectionLevel) {
+            try QRCode(message, options: options)
         }
     }
 
@@ -150,36 +130,36 @@ struct QRCodeTests {
 
     @Test
     func usesSpecifiedOptions() throws {
-        let message = "HELLO WORLD"
         let options = QROptions(
-            version: .v1,
-            encodingMode: .alphanumeric,
-            errorCorrectionLevel: .Q,
+            version: .v2,
+            encodingMode: .byte,
+            errorCorrectionLevel: .L,
             mask: .pattern3
         )
 
-        let qrCode = try QRCode(
-            message,
-            options: options
-        )
+        let qrCode = try QRCode("HELLO WORLD", options: options)
 
-        #expect(qrCode.message == message)
-        #expect(qrCode.version == .v1)
-        #expect(qrCode.encodingMode == .alphanumeric)
-        #expect(qrCode.errorCorrectionLevel == .Q)
+        #expect(qrCode.version == .v2)
+        #expect(qrCode.encodingMode == .byte)
+        #expect(qrCode.errorCorrectionLevel == .L)
         #expect(qrCode.mask == .pattern3)
-        #expect(qrCode.size == 21)
     }
 
     // MARK: - Automatic Selection
 
     @Test
-    func selectsConfigurationAndMaskAutomatically() throws {
+    func selectsConfigurationAutomatically() throws {
         let qrCode = try QRCode("HELLO WORLD")
 
         #expect(qrCode.version == .v1)
         #expect(qrCode.encodingMode == .alphanumeric)
         #expect(qrCode.errorCorrectionLevel == .Q)
+    }
+
+    @Test
+    func selectsMaskAutomatically() throws {
+        let qrCode = try QRCode("HELLO WORLD")
+
         #expect(qrCode.mask == .pattern6)
     }
 
@@ -194,14 +174,8 @@ struct QRCodeTests {
             mask: .pattern0
         )
 
-        let qrCode = try QRCode(
-            "HELLO WORLD",
-            options: options
-        )
-
-        let snapshot = Self.binarySnapshot(
-            of: qrCode.matrix
-        )
+        let qrCode = try QRCode("HELLO WORLD", options: options)
+        let snapshot = Self.binarySnapshot(of: qrCode.matrix)
 
         #expect(snapshot == Self.version1QMask0ReferenceSnapshot)
     }
@@ -215,16 +189,50 @@ struct QRCodeTests {
             mask: .pattern3
         )
 
-        let qrCode = try QRCode(
-            "HELLO WORLD",
-            options: options
-        )
-
-        let snapshot = Self.binarySnapshot(
-            of: qrCode.matrix
-        )
+        let qrCode = try QRCode("HELLO WORLD", options: options)
+        let snapshot = Self.binarySnapshot(of: qrCode.matrix)
 
         #expect(snapshot == Self.version7QMask3ReferenceSnapshot)
+    }
+
+    // MARK: - Equality
+
+    @Test
+    func equalsCodeWithSameMessageAndOptions() throws {
+        let qrCode = try QRCode("HELLO WORLD")
+        let sameQRCode = try QRCode("HELLO WORLD")
+
+        #expect(qrCode == sameQRCode)
+    }
+
+    @Test
+    func equalsCodeResolvedToSameConfiguration() throws {
+        let qrCode = try QRCode("HELLO WORLD")
+        let explicitQRCode = try QRCode(
+            "HELLO WORLD",
+            options: QROptions(version: .v1)
+        )
+
+        #expect(qrCode == explicitQRCode)
+    }
+
+    @Test
+    func differsFromCodeWithDifferentMessage() throws {
+        let qrCode = try QRCode("HELLO WORLD")
+        let otherQRCode = try QRCode("HELLO SWIFT")
+
+        #expect(qrCode != otherQRCode)
+    }
+
+    @Test
+    func differsFromCodeWithDifferentConfiguration() throws {
+        let qrCode = try QRCode("HELLO WORLD")
+        let otherQRCode = try QRCode(
+            "HELLO WORLD",
+            options: QROptions(errorCorrectionLevel: .L)
+        )
+
+        #expect(qrCode != otherQRCode)
     }
 }
 
@@ -336,10 +344,10 @@ private extension QRCodeTests {
         case let .function(_, color),
              let .information(_, color),
              let .data(color):
-            return color == .dark ? "1" : "0"
+            color == .dark ? "1" : "0"
 
         case .darkModule:
-            return "1"
+            "1"
 
         case .unset, .reserved:
             preconditionFailure(

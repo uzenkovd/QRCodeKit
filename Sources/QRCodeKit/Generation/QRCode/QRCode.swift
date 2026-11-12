@@ -5,7 +5,7 @@
 //  Created by Dmytro Uzenkov on 10.08.2026.
 //
 
-public struct QRCode {
+public struct QRCode: Equatable, Sendable {
     private let content: QRContent
     private let configuration: QRConfiguration
     private let symbol: QRSymbol

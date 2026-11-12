@@ -5,7 +5,9 @@
 //  Created by Dmytro Uzenkov on 04.10.2026.
 //
 
-struct QRSymbol {
+/// A finalized QR code matrix: masked, with format
+/// and version information in place.
+struct QRSymbol: Equatable {
     let matrix: QRMatrix
     let mask: QRMask
 
