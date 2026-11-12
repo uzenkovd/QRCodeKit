@@ -7,7 +7,7 @@
 
 import Foundation
 
-public enum WiFiSecurity: Sendable, Hashable {
+public enum WiFiSecurity: Hashable, Sendable {
     case open
     case wep(key: String)
     case wpa(password: String)

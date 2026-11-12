@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct VCardContact: Sendable, Hashable {
+public struct VCardContact: Hashable, Sendable {
     public let formattedName: String
     public let givenName: String
     public let familyName: String
