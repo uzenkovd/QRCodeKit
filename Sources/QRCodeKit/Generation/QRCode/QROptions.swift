@@ -5,7 +5,7 @@
 //  Created by Dmytro Uzenkov on 11.08.2026.
 //
 
-public struct QROptions {
+public struct QROptions: Hashable, Sendable {
     public var version: QRVersion?
     public var encodingMode: EncodingMode?
     public var errorCorrectionLevel: ErrorCorrectionLevel?
