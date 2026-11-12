@@ -5,7 +5,7 @@
 //  Created by Dmytro Uzenkov on 11.08.2026.
 //
 
-public enum EncodingMode: CaseIterable, Sendable {
+public enum EncodingMode: CaseIterable, Hashable, Sendable {
     case numeric
     case alphanumeric
     case kanji

@@ -5,7 +5,7 @@
 //  Created by Dmytro Uzenkov on 08.10.2026.
 //
 
-public struct QRContent: Sendable, Hashable {
+public struct QRContent: Hashable, Sendable {
     public let payload: String
 
     init(payload: String) {
