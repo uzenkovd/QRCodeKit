@@ -10,365 +10,253 @@ import Testing
 
 @Suite
 struct MaskPenaltyScorerTests {
-    // MARK: - Reserved Information Modules
+    // MARK: - Penalty
 
     @Test
-    func scoreReservedInformationModulesAsLight() {
-        var matrix = Self.makeCheckerboardMatrix()
+    func sumsAllRulesOverRowsAndColumns() {
+        let matrix = Self.makeMatrix { _, _ in .light }
 
-        let expectedBreakdown = MaskPenaltyScorer.penaltyBreakdown(
-            for: matrix
-        )
+        let penalty = MaskPenaltyScorer.penalty(for: matrix)
 
-        matrix[0, 1] = .reserved(.format)
-        matrix[1, 0] = .reserved(.version)
+        // 42 runs of 21 modules, 400 blocks, 10 steps of 5%
+        #expect(penalty == 42 * 19 + 400 * 3 + 10 * 10)
+    }
 
-        let breakdown = MaskPenaltyScorer.penaltyBreakdown(
-            for: matrix
-        )
+    @Test
+    func scoresFinderLikePatternInRow() {
+        let line = Self.colors(Self.finderLikeLine)
+        let matrix = Self.makeMatrix { row, column in
+            row == 10 ? line[column] : Self.checkerboardColor(row, column)
+        }
 
-        #expect(breakdown == expectedBreakdown)
+        let penalty = MaskPenaltyScorer.penalty(for: matrix)
+
+        #expect(penalty == 40)
+    }
+
+    @Test
+    func scoresFinderLikePatternInColumn() {
+        let line = Self.colors(Self.finderLikeLine)
+        let matrix = Self.makeMatrix { row, column in
+            column == 10 ? line[row] : Self.checkerboardColor(row, column)
+        }
+
+        let penalty = MaskPenaltyScorer.penalty(for: matrix)
+
+        #expect(penalty == 40)
     }
 
     // MARK: - Consecutive Modules
 
-    @Test
-    func returnZeroForAlternatingModules() {
-        let matrix = Self.makeCheckerboardMatrix()
-
-        let breakdown = MaskPenaltyScorer.penaltyBreakdown(
-            for: matrix
+    @Test(arguments: [
+        ("11110", 0),
+        ("11111", 3),
+        ("111111", 4),
+        ("0000000", 5)
+    ] as [(String, Int)])
+    func scoresRunsOfFiveOrMoreModules(
+        line: String,
+        expectedPenalty: Int
+    ) {
+        let penalty = MaskPenaltyScorer.consecutiveModulesPenalty(
+            in: Self.colors(line)
         )
 
-        #expect(breakdown.consecutiveModules == 0)
+        #expect(penalty == expectedPenalty)
     }
 
     @Test
-    func scoreConsecutiveModulesInRows() {
-        let matrix = Self.makeMatrix(
-            withRow: "000011111000000101010"
+    func scoresEachRunSeparately() {
+        let penalty = MaskPenaltyScorer.consecutiveModulesPenalty(
+            in: Self.colors("11111000000")
         )
 
-        let breakdown = MaskPenaltyScorer.penaltyBreakdown(
-            for: matrix
-        )
-
-        #expect(breakdown.consecutiveModules == 7)
-    }
-
-    @Test
-    func scoreConsecutiveModulesInColumns() {
-        let matrix = Self.makeMatrix(
-            withColumn: "000011111000000101010"
-        )
-
-        let breakdown = MaskPenaltyScorer.penaltyBreakdown(
-            for: matrix
-        )
-
-        #expect(breakdown.consecutiveModules == 7)
+        #expect(penalty == 3 + 4)
     }
 
     // MARK: - Same-Color Blocks
 
     @Test
-    func returnZeroForMixedColorBlocks() {
-        let matrix = Self.makeCheckerboardMatrix()
-
-        let breakdown = MaskPenaltyScorer.penaltyBreakdown(
-            for: matrix
+    func scoresSingleBlock() {
+        let penalty = MaskPenaltyScorer.sameColorBlocksPenalty(
+            in: Self.rows(["110", "110", "001"])
         )
 
-        #expect(breakdown.sameColorBlocks == 0)
+        #expect(penalty == 3)
+    }
+
+    @Test(arguments: [
+        ["11", "10"],
+        ["11", "01"],
+        ["10", "11"],
+        ["01", "11"]
+    ])
+    func scoresNothingForBlockWithOneDifferentModule(
+        rows: [String]
+    ) {
+        let penalty = MaskPenaltyScorer.sameColorBlocksPenalty(
+            in: Self.rows(rows)
+        )
+
+        #expect(penalty == 0)
     }
 
     @Test
-    func scoreSingleSameColorBlock() {
-        var matrix = Self.makeCheckerboardMatrix()
-
-        Self.fillSquare(
-            ofSize: 2,
-            with: .dark,
-            atRow: 0,
-            column: 0,
-            in: &matrix
+    func scoresOverlappingBlocksSeparately() {
+        let penalty = MaskPenaltyScorer.sameColorBlocksPenalty(
+            in: Self.rows(["000", "000", "000"])
         )
 
-        let breakdown = MaskPenaltyScorer.penaltyBreakdown(
-            for: matrix
-        )
-
-        #expect(breakdown.sameColorBlocks == 3)
+        #expect(penalty == 4 * 3)
     }
 
     @Test
-    func scoreOverlappingSameColorBlocks() {
-        var matrix = Self.makeCheckerboardMatrix()
-        let startCoordinate = matrix.size - 3
-
-        Self.fillSquare(
-            ofSize: 3,
-            with: .light,
-            atRow: startCoordinate,
-            column: startCoordinate,
-            in: &matrix
+    func scoresBlocksInNonSquareGrid() {
+        let penalty = MaskPenaltyScorer.sameColorBlocksPenalty(
+            in: Self.rows(["1111", "1111"])
         )
 
-        let breakdown = MaskPenaltyScorer.penaltyBreakdown(
-            for: matrix
-        )
-
-        #expect(breakdown.sameColorBlocks == 12)
+        #expect(penalty == 3 * 3)
     }
 
     // MARK: - Finder-Like Patterns
 
     @Test(arguments: [
-        "000010111010101010101",
-        "010101010110111010000"
+        "00001011101",
+        "10111010000",
+        "000010111010000",
+        "0000110111010000"
     ])
-    func scoreFinderLikePatternWithRequiredLightModules(
-        pattern: String
+    func scoresPatternWithLightAreaOnce(
+        line: String
     ) {
-        let matrix = Self.makeMatrix(withRow: pattern)
-
-        let breakdown = MaskPenaltyScorer.penaltyBreakdown(
-            for: matrix
+        let penalty = MaskPenaltyScorer.finderLikePatternsPenalty(
+            in: Self.colors(line)
         )
 
-        #expect(breakdown.finderLikePatterns == 40)
+        #expect(penalty == 40)
+    }
+
+    @Test(arguments: [
+        "0001011101000",
+        "00000000110011111100110000000000",
+        "10111"
+    ])
+    func scoresNothingWithoutPatternAndLightArea(
+        line: String
+    ) {
+        let penalty = MaskPenaltyScorer.finderLikePatternsPenalty(
+            in: Self.colors(line)
+        )
+
+        #expect(penalty == 0)
     }
 
     @Test
-    func scoreFinderLikePatternOnceWithLightModulesOnBothSides() {
-        let matrix = Self.makeMatrix(
-            withRow: "000010111010000101010"
+    func scoresEachPatternSeparately() {
+        let penalty = MaskPenaltyScorer.finderLikePatternsPenalty(
+            in: Self.colors("0000101110100001011101")
         )
 
-        let breakdown = MaskPenaltyScorer.penaltyBreakdown(
-            for: matrix
-        )
-
-        #expect(breakdown.finderLikePatterns == 40)
-        #expect(MaskPenaltyScorer.score(for: matrix) == 40)
+        #expect(penalty == 2 * 40)
     }
 
     @Test
-    func ignoreFinderLikeCoreWithoutRequiredLightModules() {
-        let matrix = Self.makeMatrix(
-            withRow: "010101010111011010101"
+    func doesNotTreatModulesPastLineAsLight() {
+        let penalty = MaskPenaltyScorer.finderLikePatternsPenalty(
+            in: Self.colors("1011101")
         )
 
-        let breakdown = MaskPenaltyScorer.penaltyBreakdown(
-            for: matrix
-        )
-
-        #expect(breakdown.finderLikePatterns == 0)
-    }
-
-    @Test
-    func ignoreScaledFinderLikePattern() {
-        let matrix = Self.makeMatrix(
-            withRow: "0000000011001111110011010",
-            version: .v2
-        )
-
-        let breakdown = MaskPenaltyScorer.penaltyBreakdown(
-            for: matrix
-        )
-
-        #expect(breakdown.finderLikePatterns == 0)
-    }
-
-    @Test
-    func scoreDistinctFinderLikePatternsIndependently() {
-        let matrix = Self.makeMatrix(
-            withRow: "00001011101000010111010000101",
-            version: .v3
-        )
-
-        let breakdown = MaskPenaltyScorer.penaltyBreakdown(
-            for: matrix
-        )
-
-        #expect(breakdown.finderLikePatterns == 80)
-    }
-
-    @Test
-    func scoreFinderLikePatternInColumns() {
-        let matrix = Self.makeMatrix(
-            withColumn: "000010111010000101010"
-        )
-
-        let breakdown = MaskPenaltyScorer.penaltyBreakdown(
-            for: matrix
-        )
-
-        #expect(breakdown.finderLikePatterns == 40)
+        #expect(penalty == 0)
     }
 
     // MARK: - Dark Module Balance
 
-    @Test(arguments: darkModuleBalanceTestCases)
-    func scoreDarkModuleBalance(
+    @Test(arguments: [
+        (0, 100),
+        (40, 20),
+        (45, 10),
+        (46, 0),
+        (54, 0),
+        (55, 10),
+        (60, 20),
+        (100, 100)
+    ] as [(Int, Int)])
+    func scoresEachFullFivePercentDeviationFromHalf(
         darkModuleCount: Int,
         expectedPenalty: Int
     ) {
-        let matrix = Self.makeMatrix(
-            withDarkModuleCount: darkModuleCount
+        let penalty = MaskPenaltyScorer.darkModuleBalancePenalty(
+            in: Self.rows(withDarkModuleCount: darkModuleCount)
         )
 
-        let breakdown = MaskPenaltyScorer.penaltyBreakdown(
-            for: matrix
-        )
-
-        #expect(breakdown.darkModuleBalance == expectedPenalty)
+        #expect(penalty == expectedPenalty)
     }
 }
 
-// MARK: - Dark Module Balance Test Cases
+// MARK: - Test Data
 
 private extension MaskPenaltyScorerTests {
-    typealias DarkModuleBalanceTestCase = (
-        darkModuleCount: Int,
-        expectedPenalty: Int
-    )
+    /// A symbol-wide line with one finder-like pattern
+    /// and no runs of five or more modules.
+    static let finderLikeLine = "010000101110100001010"
 
-    static let darkModuleBalanceTestCases: [DarkModuleBalanceTestCase] = [
-        (0, 100),
-        (198, 10),
-        (199, 0),
-        (221, 0),
-        (242, 0),
-        (243, 10),
-        (441, 100)
-    ]
-}
+    static func colors(
+        _ pattern: String
+    ) -> [QRModuleColor] {
+        pattern.map { character in
+            switch character {
+            case "0":
+                .light
 
-// MARK: - Test Matrices
+            case "1":
+                .dark
 
-private extension MaskPenaltyScorerTests {
-    static func makeCheckerboardMatrix(
-        version: QRVersion = .min
+            default:
+                preconditionFailure(
+                    "Test patterns can only contain 0 and 1"
+                )
+            }
+        }
+    }
+
+    static func rows(
+        _ patterns: [String]
+    ) -> [[QRModuleColor]] {
+        patterns.map(colors)
+    }
+
+    /// A 10×10 grid, so each dark module is 1% of the grid.
+    static func rows(
+        withDarkModuleCount darkModuleCount: Int
+    ) -> [[QRModuleColor]] {
+        let size = 10
+
+        return (0..<size).map { row in
+            (0..<size).map { column in
+                row * size + column < darkModuleCount ? .dark : .light
+            }
+        }
+    }
+
+    static func checkerboardColor(
+        _ row: Int,
+        _ column: Int
+    ) -> QRModuleColor {
+        (row + column).isMultiple(of: 2) ? .dark : .light
+    }
+
+    static func makeMatrix(
+        color: (_ row: Int, _ column: Int) -> QRModuleColor
     ) -> QRMatrix {
-        var matrix = QRMatrix(version: version)
+        var matrix = QRMatrix(version: .min)
 
         for row in 0..<matrix.size {
             for column in 0..<matrix.size {
-                let sum = row + column
-                let color: QRModuleColor =
-                    sum.isMultiple(of: 2) ? .dark : .light
-
-                matrix[row, column] = .data(color: color)
+                matrix[row, column] = .data(color: color(row, column))
             }
         }
 
         return matrix
-    }
-
-    static func makeMatrix(
-        withRow pattern: String,
-        version: QRVersion = .min
-    ) -> QRMatrix {
-        var matrix = makeCheckerboardMatrix(
-            version: version
-        )
-
-        precondition(
-            pattern.count == matrix.size,
-            "Test row pattern must match the matrix size"
-        )
-
-        let row = matrix.size / 2
-
-        for (column, character) in pattern.enumerated() {
-            matrix[row, column] = .data(
-                color: color(for: character)
-            )
-        }
-
-        return matrix
-    }
-
-    static func makeMatrix(
-        withColumn pattern: String,
-        version: QRVersion = .min
-    ) -> QRMatrix {
-        var matrix = makeCheckerboardMatrix(
-            version: version
-        )
-
-        precondition(
-            pattern.count == matrix.size,
-            "Test column pattern must match the matrix size"
-        )
-
-        let column = matrix.size / 2
-
-        for (row, character) in pattern.enumerated() {
-            matrix[row, column] = .data(
-                color: color(for: character)
-            )
-        }
-
-        return matrix
-    }
-
-    static func makeMatrix(
-        withDarkModuleCount darkModuleCount: Int,
-        version: QRVersion = .min
-    ) -> QRMatrix {
-        var matrix = QRMatrix(version: version)
-
-        let size = matrix.size
-        let totalModuleCount = size * size
-
-        precondition(
-            (0...totalModuleCount).contains(darkModuleCount),
-            "Test dark module count must be within the matrix capacity"
-        )
-
-        for row in 0..<size {
-            for column in 0..<size {
-                let moduleIndex = row * size + column
-                let color: QRModuleColor =
-                    moduleIndex < darkModuleCount ? .dark : .light
-
-                matrix[row, column] = .data(color: color)
-            }
-        }
-
-        return matrix
-    }
-
-    static func fillSquare(
-        ofSize size: Int,
-        with color: QRModuleColor,
-        atRow startRow: Int,
-        column startColumn: Int,
-        in matrix: inout QRMatrix
-    ) {
-        for row in startRow..<(startRow + size) {
-            for column in startColumn..<(startColumn + size) {
-                matrix[row, column] = .data(color: color)
-            }
-        }
-    }
-
-    static func color(
-        for character: Character
-    ) -> QRModuleColor {
-        switch character {
-        case "0":
-            return .light
-
-        case "1":
-            return .dark
-
-        default:
-            preconditionFailure(
-                "Test patterns can only contain 0 and 1"
-            )
-        }
     }
 }

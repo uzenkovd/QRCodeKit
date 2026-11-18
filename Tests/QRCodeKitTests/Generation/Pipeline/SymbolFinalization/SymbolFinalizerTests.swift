@@ -41,7 +41,7 @@ struct SymbolFinalizerTests {
     @Test(arguments: helloWorldCandidatePenaltyTestCases)
     func scoreHelloWorldMaskCandidateBeforeInformationPlacement(
         mask: QRMask,
-        expectedBreakdown: MaskPenaltyScorer.PenaltyBreakdown
+        expectedPenalty: Int
     ) {
         var matrix = Self.makeHelloWorldMatrix()
 
@@ -50,11 +50,11 @@ struct SymbolFinalizerTests {
             to: &matrix
         )
 
-        let breakdown = MaskPenaltyScorer.penaltyBreakdown(
+        let penalty = MaskPenaltyScorer.penalty(
             for: matrix
         )
 
-        #expect(breakdown == expectedBreakdown)
+        #expect(penalty == expectedPenalty)
     }
 
     @Test
@@ -91,7 +91,7 @@ struct SymbolFinalizerTests {
                 to: &candidateMatrix
             )
 
-            return MaskPenaltyScorer.score(
+            return MaskPenaltyScorer.penalty(
                 for: candidateMatrix
             )
         }
@@ -162,82 +162,18 @@ struct SymbolFinalizerTests {
 private extension SymbolFinalizerTests {
     typealias CandidatePenaltyTestCase = (
         mask: QRMask,
-        expectedBreakdown: MaskPenaltyScorer.PenaltyBreakdown
+        expectedPenalty: Int
     )
 
     static let helloWorldCandidatePenaltyTestCases: [CandidatePenaltyTestCase] = [
-        (
-            .pattern0,
-            .init(
-                consecutiveModules: 200,
-                sameColorBlocks: 204,
-                finderLikePatterns: 320,
-                darkModuleBalance: 10
-            )
-        ),
-        (
-            .pattern1,
-            .init(
-                consecutiveModules: 192,
-                sameColorBlocks: 186,
-                finderLikePatterns: 120,
-                darkModuleBalance: 0
-            )
-        ),
-        (
-            .pattern2,
-            .init(
-                consecutiveModules: 220,
-                sameColorBlocks: 198,
-                finderLikePatterns: 200,
-                darkModuleBalance: 10
-            )
-        ),
-        (
-            .pattern3,
-            .init(
-                consecutiveModules: 189,
-                sameColorBlocks: 204,
-                finderLikePatterns: 160,
-                darkModuleBalance: 0
-            )
-        ),
-        (
-            .pattern4,
-            .init(
-                consecutiveModules: 219,
-                sameColorBlocks: 216,
-                finderLikePatterns: 320,
-                darkModuleBalance: 0
-            )
-        ),
-        (
-            .pattern5,
-            .init(
-                consecutiveModules: 209,
-                sameColorBlocks: 195,
-                finderLikePatterns: 160,
-                darkModuleBalance: 0
-            )
-        ),
-        (
-            .pattern6,
-            .init(
-                consecutiveModules: 196,
-                sameColorBlocks: 156,
-                finderLikePatterns: 80,
-                darkModuleBalance: 0
-            )
-        ),
-        (
-            .pattern7,
-            .init(
-                consecutiveModules: 220,
-                sameColorBlocks: 234,
-                finderLikePatterns: 360,
-                darkModuleBalance: 0
-            )
-        )
+        (.pattern0, 734),
+        (.pattern1, 498),
+        (.pattern2, 628),
+        (.pattern3, 553),
+        (.pattern4, 755),
+        (.pattern5, 564),
+        (.pattern6, 432),
+        (.pattern7, 814)
     ]
 }
 

@@ -89,7 +89,7 @@ private extension SymbolFinalizer {
             to: &candidateMatrix
         )
 
-        let penalty = MaskPenaltyScorer.score(
+        let penalty = MaskPenaltyScorer.penalty(
             for: candidateMatrix
         )
 
