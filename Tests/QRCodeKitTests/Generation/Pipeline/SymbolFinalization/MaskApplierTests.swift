@@ -10,84 +10,66 @@ import Testing
 
 @Suite
 struct MaskApplierTests {
-    @Test
-    func invertDataModulesAtMatchingPositions() {
-        var matrix = QRMatrix(version: .min)
+    @Test(arguments: QRMask.allCases)
+    func invertsDataModulesWhereMaskConditionHolds(
+        mask: QRMask
+    ) {
+        var matrix = Self.makeMatrix { row, column in
+            .data(color: Self.checkerboardColor(row, column))
+        }
 
-        matrix[1, 3] = .data(color: .light)
-        matrix[2, 0] = .data(color: .dark)
-        matrix[3, 1] = .data(color: .light)
-        matrix[4, 2] = .data(color: .dark)
+        let expectedMatrix = Self.makeMatrix { row, column in
+            let color = Self.checkerboardColor(row, column)
+            let isInverted = mask.shouldInvert(atRow: row, column: column)
 
-        var expectedMatrix = matrix
-        expectedMatrix[1, 3] = .data(color: .dark)
-        expectedMatrix[2, 0] = .data(color: .light)
+            return .data(color: isInverted ? color.inverted : color)
+        }
 
-        MaskApplier.apply(.pattern2, to: &matrix)
+        MaskApplier.apply(mask, to: &matrix)
 
         #expect(matrix == expectedMatrix)
     }
 
-    @Test
-    func leaveNonDataModulesUnchanged() {
-        var matrix = QRMatrix(version: .min)
-
-        matrix[0, 2] = .reserved(.format)
-        matrix[0, 4] = .reserved(.version)
-
-        matrix[0, 6] = .function(
-            pattern: .finder,
-            color: .light
-        )
-        matrix[0, 8] = .function(
-            pattern: .separator,
-            color: .light
-        )
-        matrix[0, 10] = .function(
-            pattern: .alignment,
-            color: .light
-        )
-        matrix[0, 12] = .function(
-            pattern: .timing,
-            color: .dark
-        )
-
-        matrix[0, 14] = .darkModule
-
-        matrix[0, 16] = .information(
-            type: .format,
-            color: .light
-        )
-        matrix[0, 18] = .information(
-            type: .version,
-            color: .dark
-        )
-
-        let expectedMatrix = matrix
+    @Test(arguments: [
+        QRModule.unset,
+        .reserved(.format),
+        .function(pattern: .finder, color: .dark),
+        .darkModule,
+        .information(type: .version, color: .light)
+    ])
+    func leavesNonDataModulesUnchanged(
+        module: QRModule
+    ) {
+        var matrix = Self.makeMatrix { _, _ in module }
+        let originalMatrix = matrix
 
         MaskApplier.apply(.pattern0, to: &matrix)
 
-        #expect(matrix == expectedMatrix)
+        #expect(matrix == originalMatrix)
+    }
+}
+
+// MARK: - Test Data
+
+private extension MaskApplierTests {
+    static func checkerboardColor(
+        _ row: Int,
+        _ column: Int
+    ) -> QRModuleColor {
+        (row + column).isMultiple(of: 2) ? .dark : .light
     }
 
-    @Test
-    func restoreDataModulesAfterApplyingSameMaskTwice() {
+    static func makeMatrix(
+        module: (_ row: Int, _ column: Int) -> QRModule
+    ) -> QRMatrix {
         var matrix = QRMatrix(version: .min)
 
-        matrix[0, 2] = .data(color: .light)
-        matrix[1, 0] = .data(color: .dark)
+        for row in 0..<matrix.size {
+            for column in 0..<matrix.size {
+                matrix[row, column] = module(row, column)
+            }
+        }
 
-        let originalMatrix = matrix
-
-        var expectedMaskedMatrix = matrix
-        expectedMaskedMatrix[0, 2] = .data(color: .dark)
-
-        MaskApplier.apply(.pattern7, to: &matrix)
-
-        #expect(matrix == expectedMaskedMatrix)
-
-        MaskApplier.apply(.pattern7, to: &matrix)
-
-        #expect(matrix == originalMatrix)
+        return matrix
     }
 }
