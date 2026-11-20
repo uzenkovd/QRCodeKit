@@ -10,40 +10,63 @@ import Testing
 
 @Suite
 struct MaskPenaltyScorerTests {
+    // MARK: - Mask Penalty
+
+    @Test
+    func sumsAllRules() {
+        let penalty = MaskPenalty(
+            consecutiveModules: 1,
+            sameColorBlocks: 20,
+            finderLikePatterns: 300,
+            darkModuleBalance: 4000
+        )
+
+        #expect(penalty.total == 4321)
+    }
+
     // MARK: - Penalty
 
     @Test
-    func sumsAllRulesOverRowsAndColumns() {
-        let matrix = Self.makeMatrix { _, _ in .light }
+    func scoresAnnexIExampleSymbol() {
+        let matrix = QRMatrix.filled(version: AnnexIExample.version) { row, column in
+            AnnexIExample.moduleColors[row][column]
+        }
+        let symbol = QRSymbol(matrix: matrix, mask: AnnexIExample.mask)
 
-        let penalty = MaskPenaltyScorer.penalty(for: matrix)
+        let penalty = MaskPenaltyScorer.penalty(for: symbol)
 
-        // 42 runs of 21 modules, 400 blocks, 10 steps of 5%
-        #expect(penalty == 42 * 19 + 400 * 3 + 10 * 10)
+        #expect(
+            penalty == MaskPenalty(
+                consecutiveModules: 206,
+                sameColorBlocks: 111,
+                finderLikePatterns: 0,
+                darkModuleBalance: 0
+            )
+        )
     }
 
     @Test
     func scoresFinderLikePatternInRow() {
         let line = Self.colors(Self.finderLikeLine)
-        let matrix = Self.makeMatrix { row, column in
-            row == 10 ? line[column] : Self.checkerboardColor(row, column)
+        let symbol = Self.makeSymbol { row, column in
+            row == 10 ? line[column] : Self.symbolColor(row, column)
         }
 
-        let penalty = MaskPenaltyScorer.penalty(for: matrix)
+        let penalty = MaskPenaltyScorer.penalty(for: symbol)
 
-        #expect(penalty == 40)
+        #expect(penalty.finderLikePatterns == 40)
     }
 
     @Test
     func scoresFinderLikePatternInColumn() {
         let line = Self.colors(Self.finderLikeLine)
-        let matrix = Self.makeMatrix { row, column in
-            column == 10 ? line[row] : Self.checkerboardColor(row, column)
+        let symbol = Self.makeSymbol { row, column in
+            column == 10 ? line[row] : Self.symbolColor(row, column)
         }
 
-        let penalty = MaskPenaltyScorer.penalty(for: matrix)
+        let penalty = MaskPenaltyScorer.penalty(for: symbol)
 
-        #expect(penalty == 40)
+        #expect(penalty.finderLikePatterns == 40)
     }
 
     // MARK: - Consecutive Modules
@@ -138,7 +161,8 @@ struct MaskPenaltyScorerTests {
     }
 
     @Test(arguments: [
-        "0001011101000",
+        "100010111010001",
+        "110111011",
         "00000000110011111100110000000000",
         "10111"
     ])
@@ -161,13 +185,18 @@ struct MaskPenaltyScorerTests {
         #expect(penalty == 2 * 40)
     }
 
-    @Test
-    func doesNotTreatModulesPastLineAsLight() {
+    @Test(arguments: [
+        "1011101",
+        "01011101"
+    ])
+    func treatsModulesPastLineAsLight(
+        line: String
+    ) {
         let penalty = MaskPenaltyScorer.finderLikePatternsPenalty(
-            in: Self.colors("1011101")
+            in: Self.colors(line)
         )
 
-        #expect(penalty == 0)
+        #expect(penalty == 40)
     }
 
     // MARK: - Dark Module Balance
@@ -197,8 +226,7 @@ struct MaskPenaltyScorerTests {
 // MARK: - Test Data
 
 private extension MaskPenaltyScorerTests {
-    /// A symbol-wide line with one finder-like pattern
-    /// and no runs of five or more modules.
+    /// A symbol-wide line with one finder-like pattern.
     static let finderLikeLine = "010000101110100001010"
 
     static func colors(
@@ -239,24 +267,36 @@ private extension MaskPenaltyScorerTests {
         }
     }
 
-    static func checkerboardColor(
+    /// A version 1 symbol reduced to its three finder patterns
+    /// and their separators, on a checkerboard.
+    static func symbolColor(
         _ row: Int,
         _ column: Int
     ) -> QRModuleColor {
-        (row + column).isMultiple(of: 2) ? .dark : .light
-    }
+        let finderPatternCenters = [(3, 3), (3, 17), (17, 3)]
 
-    static func makeMatrix(
-        color: (_ row: Int, _ column: Int) -> QRModuleColor
-    ) -> QRMatrix {
-        var matrix = QRMatrix(version: .min)
+        for (centerRow, centerColumn) in finderPatternCenters {
+            let distance = max(
+                abs(row - centerRow),
+                abs(column - centerColumn)
+            )
 
-        for row in 0..<matrix.size {
-            for column in 0..<matrix.size {
-                matrix[row, column] = .data(color: color(row, column))
+            if distance <= 4 {
+                return distance == 2 || distance == 4 ? .light : .dark
             }
         }
 
-        return matrix
+        return (row + column).isMultiple(of: 2) ? .dark : .light
+    }
+
+    /// A version 1 symbol with the given colors. The mask
+    /// does not affect the penalty, so any one will do.
+    static func makeSymbol(
+        color: (_ row: Int, _ column: Int) -> QRModuleColor
+    ) -> QRSymbol {
+        QRSymbol(
+            matrix: .filled(version: .v1, color: color),
+            mask: .pattern0
+        )
     }
 }
