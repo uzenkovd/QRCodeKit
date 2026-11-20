@@ -158,9 +158,15 @@ struct QRCodeTests {
 
     @Test
     func selectsMaskAutomatically() throws {
-        let qrCode = try QRCode("HELLO WORLD")
+        let options = QROptions(
+            version: AnnexIExample.version,
+            encodingMode: AnnexIExample.encodingMode,
+            errorCorrectionLevel: AnnexIExample.errorCorrectionLevel
+        )
 
-        #expect(qrCode.mask == .pattern6)
+        let qrCode = try QRCode(AnnexIExample.message, options: options)
+
+        #expect(qrCode.mask == AnnexIExample.mask)
     }
 
     // MARK: - Reference Symbols

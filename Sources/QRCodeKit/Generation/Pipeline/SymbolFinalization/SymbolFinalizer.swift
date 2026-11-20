@@ -5,120 +5,87 @@
 //  Created by Dmytro Uzenkov on 01.10.2026.
 //
 
+/// Turns a matrix with placed data into a symbol: masks the data
+/// and places format and version information.
 enum SymbolFinalizer {
+    /// Builds the symbol with the requested mask or, when none
+    /// is requested, with the mask that gives the lowest penalty.
     static func finalize(
         _ matrix: QRMatrix,
         version: QRVersion,
         errorCorrectionLevel: ErrorCorrectionLevel,
         requestedMask: QRMask?
     ) -> QRSymbol {
-        let selectedMask: QRMask
-        var symbolMatrix: QRMatrix
+        var matrix = matrix
+
+        // Version information does not depend on the mask,
+        // so all candidate symbols share it
+        VersionInformationArea.place(in: &matrix, version: version)
 
         if let requestedMask {
-            symbolMatrix = matrix
-
-            MaskApplier.apply(
-                requestedMask,
-                to: &symbolMatrix
-            )
-
-            selectedMask = requestedMask
-        } else {
-            let bestCandidate = selectBestCandidate(
-                for: matrix
-            )
-
-            symbolMatrix = bestCandidate.matrix
-            selectedMask = bestCandidate.mask
-        }
-
-        placeInformation(
-            in: &symbolMatrix,
-            version: version,
-            level: errorCorrectionLevel,
-            mask: selectedMask
-        )
-
-        return QRSymbol(
-            matrix: symbolMatrix,
-            mask: selectedMask
-        )
-    }
-}
-
-// MARK: - Automatic Mask Selection
-
-private extension SymbolFinalizer {
-    struct Candidate {
-        let matrix: QRMatrix
-        let mask: QRMask
-        let penalty: Int
-    }
-
-    static func selectBestCandidate(
-        for matrix: QRMatrix
-    ) -> Candidate {
-        var bestCandidate = makeCandidate(
-            from: matrix,
-            mask: .pattern0
-        )
-
-        for mask in QRMask.allCases.dropFirst() {
-            let candidate = makeCandidate(
+            return makeSymbol(
                 from: matrix,
-                mask: mask
+                mask: requestedMask,
+                errorCorrectionLevel: errorCorrectionLevel
             )
-
-            if candidate.penalty < bestCandidate.penalty {
-                bestCandidate = candidate
-            }
         }
 
-        return bestCandidate
-    }
-
-    static func makeCandidate(
-        from matrix: QRMatrix,
-        mask: QRMask
-    ) -> Candidate {
-        var candidateMatrix = matrix
-
-        MaskApplier.apply(
-            mask,
-            to: &candidateMatrix
-        )
-
-        let penalty = MaskPenaltyScorer.penalty(
-            for: candidateMatrix
-        )
-
-        return Candidate(
-            matrix: candidateMatrix,
-            mask: mask,
-            penalty: penalty
+        return makeSymbolWithLowestPenalty(
+            from: matrix,
+            errorCorrectionLevel: errorCorrectionLevel
         )
     }
 }
 
-// MARK: - Information Placement
+// MARK: - Symbol Construction
 
 private extension SymbolFinalizer {
-    static func placeInformation(
-        in matrix: inout QRMatrix,
-        version: QRVersion,
-        level: ErrorCorrectionLevel,
-        mask: QRMask
-    ) {
+    static func makeSymbol(
+        from matrix: QRMatrix,
+        mask: QRMask,
+        errorCorrectionLevel: ErrorCorrectionLevel
+    ) -> QRSymbol {
+        var matrix = matrix
+
+        MaskApplier.apply(mask, to: &matrix)
         FormatInformationArea.place(
             in: &matrix,
-            errorCorrectionLevel: level,
+            errorCorrectionLevel: errorCorrectionLevel,
             mask: mask
         )
 
-        VersionInformationArea.place(
-            in: &matrix,
-            version: version
-        )
+        return QRSymbol(matrix: matrix, mask: mask)
+    }
+}
+
+// MARK: - Mask Selection
+
+private extension SymbolFinalizer {
+    /// Tries every mask and keeps the symbol with the lowest penalty.
+    /// Ties go to the lower mask number.
+    static func makeSymbolWithLowestPenalty(
+        from matrix: QRMatrix,
+        errorCorrectionLevel: ErrorCorrectionLevel
+    ) -> QRSymbol {
+        let candidates = QRMask.allCases.map { mask in
+            let symbol = makeSymbol(
+                from: matrix,
+                mask: mask,
+                errorCorrectionLevel: errorCorrectionLevel
+            )
+
+            return (
+                symbol: symbol,
+                penalty: MaskPenaltyScorer.penalty(for: symbol).total
+            )
+        }
+
+        let best = candidates.min {
+            ($0.penalty, $0.symbol.mask.rawValue)
+                < ($1.penalty, $1.symbol.mask.rawValue)
+        }
+
+        // Never nil: QRMask.allCases is not empty
+        return best!.symbol
     }
 }

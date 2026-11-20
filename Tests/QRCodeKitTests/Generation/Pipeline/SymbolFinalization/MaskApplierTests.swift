@@ -31,12 +31,12 @@ struct MaskApplierTests {
     }
 
     @Test(arguments: [
-        QRModule.unset,
+        .unset,
         .reserved(.format),
         .function(pattern: .finder, color: .dark),
         .darkModule,
         .information(type: .version, color: .light)
-    ])
+    ] as [QRModule])
     func leavesNonDataModulesUnchanged(
         module: QRModule
     ) {

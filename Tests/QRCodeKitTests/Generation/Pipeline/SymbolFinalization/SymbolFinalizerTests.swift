@@ -12,111 +12,53 @@ import Testing
 struct SymbolFinalizerTests {
     // MARK: - Requested Mask
 
-    @Test(arguments: QRMask.allCases)
-    func finalizesSymbolWithRequestedMask(
-        mask: QRMask
+    /// The penalties of the Annex I example under every mask. They pin
+    /// down each candidate symbol and show why mask 2 is selected.
+    @Test(arguments: [
+        (.pattern0, MaskPenalty(155, 102, 80, 0)),
+        (.pattern1, MaskPenalty(180, 153, 40, 0)),
+        (.pattern2, MaskPenalty(206, 111, 0, 0)),
+        (.pattern3, MaskPenalty(187, 105, 40, 0)),
+        (.pattern4, MaskPenalty(196, 174, 40, 0)),
+        (.pattern5, MaskPenalty(220, 177, 80, 0)),
+        (.pattern6, MaskPenalty(191, 108, 80, 0)),
+        (.pattern7, MaskPenalty(176, 150, 0, 0))
+    ] as [(QRMask, MaskPenalty)])
+    func buildsSymbolWithRequestedMask(
+        mask: QRMask,
+        expectedPenalty: MaskPenalty
     ) {
-        let matrix = Self.makeHelloWorldMatrix()
-
-        let expectedMatrix = Self.makeFinalizedMatrix(
-            from: matrix,
-            version: .v1,
-            level: .Q,
-            mask: mask
-        )
-
         let symbol = SymbolFinalizer.finalize(
-            matrix,
-            version: .v1,
-            errorCorrectionLevel: .Q,
+            Self.makeMatrix(codewords: AnnexIExample.codewords),
+            version: AnnexIExample.version,
+            errorCorrectionLevel: AnnexIExample.errorCorrectionLevel,
             requestedMask: mask
         )
 
         #expect(symbol.mask == mask)
-        #expect(symbol.matrix == expectedMatrix)
+        #expect(MaskPenaltyScorer.penalty(for: symbol) == expectedPenalty)
     }
 
     // MARK: - Automatic Mask Selection
 
-    @Test(arguments: helloWorldCandidatePenaltyTestCases)
-    func scoreHelloWorldMaskCandidateBeforeInformationPlacement(
-        mask: QRMask,
-        expectedPenalty: Int
-    ) {
-        var matrix = Self.makeHelloWorldMatrix()
-
-        MaskApplier.apply(
-            mask,
-            to: &matrix
-        )
-
-        let penalty = MaskPenaltyScorer.penalty(
-            for: matrix
-        )
-
-        #expect(penalty == expectedPenalty)
-    }
-
     @Test
-    func selectLowestPenaltyMaskForHelloWorld() {
-        let matrix = Self.makeHelloWorldMatrix()
-
-        let expectedMatrix = Self.makeFinalizedMatrix(
-            from: matrix,
-            version: .v1,
-            level: .Q,
-            mask: .pattern6
-        )
-
+    func selectsMaskWithLowestPenalty() {
         let symbol = SymbolFinalizer.finalize(
-            matrix,
-            version: .v1,
-            errorCorrectionLevel: .Q,
+            Self.makeMatrix(codewords: AnnexIExample.codewords),
+            version: AnnexIExample.version,
+            errorCorrectionLevel: AnnexIExample.errorCorrectionLevel,
             requestedMask: nil
         )
 
-        #expect(symbol.mask == .pattern6)
-        #expect(symbol.matrix == expectedMatrix)
+        #expect(symbol.mask == AnnexIExample.mask)
+        #expect(symbol.moduleColors == AnnexIExample.moduleColors)
     }
 
     @Test
-    func preferFirstMaskWhenMinimumPenaltiesAreEqual() {
-        let originalMatrix = Self.makeMaskSelectionTieMatrix()
-
-        let penalties = QRMask.allCases.map { mask in
-            var candidateMatrix = originalMatrix
-
-            MaskApplier.apply(
-                mask,
-                to: &candidateMatrix
-            )
-
-            return MaskPenaltyScorer.penalty(
-                for: candidateMatrix
-            )
-        }
-
-        let expectedPenalties = [
-            394, // pattern0
-            572, // pattern1
-            765, // pattern2
-            621, // pattern3
-            530, // pattern4
-            539, // pattern5
-            394, // pattern6
-            599  // pattern7
-        ]
-
-        #expect(penalties == expectedPenalties)
-
-        let matrix = originalMatrix
-
-        let expectedMatrix = Self.makeFinalizedMatrix(
-            from: matrix,
-            version: .v1,
-            level: .M,
-            mask: .pattern0
-        )
+    func selectsLowerMaskOnTie() {
+        let matrix = Self.makeMatrix(codewords: Self.tieCodewords)
+        let mask3Penalty = Self.totalPenalty(of: matrix, mask: .pattern3)
+        let mask4Penalty = Self.totalPenalty(of: matrix, mask: .pattern4)
 
         let symbol = SymbolFinalizer.finalize(
             matrix,
@@ -125,166 +67,86 @@ struct SymbolFinalizerTests {
             requestedMask: nil
         )
 
-        #expect(symbol.mask == .pattern0)
-        #expect(symbol.matrix == expectedMatrix)
+        #expect(mask3Penalty == mask4Penalty)
+        #expect(symbol.mask == .pattern3)
     }
 
-    // MARK: - Matrix Finalization
-
     @Test
-    func placeVersionInformationForVersion7() {
-        let matrix = Self.makeZeroDataMatrix(
+    func buildsSameSymbolWhetherMaskIsSelectedOrRequested() {
+        let codewordCount = ErrorCorrectionBlocks.layout(
             for: .v7,
             level: .L
+        ).totalCodewordCount
+        let matrix = Self.makeMatrix(
+            codewords: Array(repeating: 0, count: codewordCount),
+            version: .v7
         )
 
-        let expectedMatrix = Self.makeFinalizedMatrix(
-            from: matrix,
-            version: .v7,
-            level: .L,
-            mask: .pattern3
-        )
-
-        let symbol = SymbolFinalizer.finalize(
+        let selectedSymbol = SymbolFinalizer.finalize(
             matrix,
             version: .v7,
             errorCorrectionLevel: .L,
-            requestedMask: .pattern3
+            requestedMask: nil
+        )
+        let requestedSymbol = SymbolFinalizer.finalize(
+            matrix,
+            version: .v7,
+            errorCorrectionLevel: .L,
+            requestedMask: selectedSymbol.mask
         )
 
-        #expect(symbol.mask == .pattern3)
-        #expect(symbol.matrix == expectedMatrix)
+        #expect(selectedSymbol == requestedSymbol)
     }
 }
 
-// MARK: - "HELLO WORLD" Candidate Test Cases
+// MARK: - Test Data
 
 private extension SymbolFinalizerTests {
-    typealias CandidatePenaltyTestCase = (
-        mask: QRMask,
-        expectedPenalty: Int
-    )
+    /// Version 1 codewords for which, at level M, masks 3 and 4
+    /// share the lowest penalty.
+    static let tieCodewords = Array(
+        repeating: [0x0D, 0x55] as [UInt8],
+        count: 13
+    ).flatMap { $0 }
 
-    static let helloWorldCandidatePenaltyTestCases: [CandidatePenaltyTestCase] = [
-        (.pattern0, 734),
-        (.pattern1, 498),
-        (.pattern2, 628),
-        (.pattern3, 553),
-        (.pattern4, 755),
-        (.pattern5, 564),
-        (.pattern6, 432),
-        (.pattern7, 814)
-    ]
-}
-
-// MARK: - Test Matrices
-
-private extension SymbolFinalizerTests {
-    static let helloWorldDataCodewords: [UInt8] = [
-        0x20, 0x5B, 0x0B, 0x78, 0xD1, 0x72, 0xDC,
-        0x4D, 0x43, 0x40, 0xEC, 0x11, 0xEC
-    ]
-
-    static let helloWorldErrorCorrectionCodewords: [UInt8] = [
-        0xA8, 0x48, 0x16, 0x52, 0xD9, 0x36, 0x9C,
-        0x00, 0x2E, 0x0F, 0xB4, 0x7A, 0x10
-    ]
-
-    static func makeHelloWorldMatrix() -> QRMatrix {
-        let codewordCount =
-            helloWorldDataCodewords.count
-            + helloWorldErrorCorrectionCodewords.count
-
-        var bits = BitBuffer(minimumCapacity: codewordCount * 8)
-
-        bits.append(contentsOf: helloWorldDataCodewords)
-        bits.append(contentsOf: helloWorldErrorCorrectionCodewords)
-
-        return ModulePlacer.place(
-            bits,
-            version: .v1
-        )
-    }
-
-    static func makeMaskSelectionTieMatrix() -> QRMatrix {
-        let repetitionCount = 13
-
-        var bits = BitBuffer(
-            minimumCapacity: repetitionCount * 2 * 8
-        )
-
-        for _ in 0..<repetitionCount {
-            bits.append(UInt8(0x00))
-            bits.append(UInt8(0x24))
-        }
-
-        return ModulePlacer.place(
-            bits,
-            version: .v1
-        )
-    }
-
-    static func makeZeroDataMatrix(
-        for version: QRVersion,
-        level: ErrorCorrectionLevel
+    static func makeMatrix(
+        codewords: [UInt8],
+        version: QRVersion = .v1
     ) -> QRMatrix {
-        let codewordCount = ErrorCorrectionBlocks.layout(
-            for: version,
-            level: level
-        ).totalCodewordCount
+        var bits = BitBuffer(minimumCapacity: codewords.count * 8)
+        bits.append(contentsOf: codewords)
 
-        let remainderBitCount = RemainderBits.bitCount(
-            for: version
-        )
-
-        let bitCount = codewordCount * 8 + remainderBitCount
-        var bits = BitBuffer(minimumCapacity: bitCount)
-
-        for _ in 0..<codewordCount {
-            bits.append(UInt8(0))
-        }
-
-        if remainderBitCount > 0 {
-            bits.append(
-                0,
-                bitCount: remainderBitCount
-            )
-        }
-
-        return ModulePlacer.place(
-            bits,
-            version: version
-        )
+        return ModulePlacer.place(bits, version: version)
     }
-}
 
-// MARK: - Matrix Finalization
-
-private extension SymbolFinalizerTests {
-    static func makeFinalizedMatrix(
-        from matrix: QRMatrix,
-        version: QRVersion,
-        level: ErrorCorrectionLevel,
+    static func totalPenalty(
+        of matrix: QRMatrix,
         mask: QRMask
-    ) -> QRMatrix {
-        var finalizedMatrix = matrix
-
-        MaskApplier.apply(
-            mask,
-            to: &finalizedMatrix
+    ) -> Int {
+        let symbol = SymbolFinalizer.finalize(
+            matrix,
+            version: .v1,
+            errorCorrectionLevel: .M,
+            requestedMask: mask
         )
 
-        FormatInformationArea.place(
-            in: &finalizedMatrix,
-            errorCorrectionLevel: level,
-            mask: mask
-        )
+        return MaskPenaltyScorer.penalty(for: symbol).total
+    }
+}
 
-        VersionInformationArea.place(
-            in: &finalizedMatrix,
-            version: version
+private extension MaskPenalty {
+    /// Takes the rules in order, to keep penalty tables compact.
+    init(
+        _ consecutiveModules: Int,
+        _ sameColorBlocks: Int,
+        _ finderLikePatterns: Int,
+        _ darkModuleBalance: Int
+    ) {
+        self.init(
+            consecutiveModules: consecutiveModules,
+            sameColorBlocks: sameColorBlocks,
+            finderLikePatterns: finderLikePatterns,
+            darkModuleBalance: darkModuleBalance
         )
-
-        return finalizedMatrix
     }
 }

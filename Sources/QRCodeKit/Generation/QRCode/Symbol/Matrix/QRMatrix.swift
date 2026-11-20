@@ -5,6 +5,7 @@
 //  Created by Dmytro Uzenkov on 16.09.2026.
 //
 
+/// A square grid of modules, filled in step by step as a symbol is built.
 struct QRMatrix: Equatable {
     let size: Int
 
@@ -30,6 +31,15 @@ struct QRMatrix: Equatable {
         set {
             modules[index(row, column)] = newValue
         }
+    }
+}
+
+// MARK: - Completeness
+
+extension QRMatrix {
+    /// Whether every module is filled in: none is unset or still reserved.
+    var isComplete: Bool {
+        modules.allSatisfy { $0.color != nil }
     }
 }
 

@@ -5,13 +5,32 @@
 //  Created by Dmytro Uzenkov on 28.09.2026.
 //
 
+/// The penalty of a masked symbol under each rule of the QR code standard.
+struct MaskPenalty: Equatable {
+    let consecutiveModules: Int
+    let sameColorBlocks: Int
+    let finderLikePatterns: Int
+    let darkModuleBalance: Int
+
+    /// The sum of all rules, by which masks are compared.
+    var total: Int {
+        consecutiveModules
+            + sameColorBlocks
+            + finderLikePatterns
+            + darkModuleBalance
+    }
+}
+
 /// Rates a masked symbol by the penalty rules of the QR code standard.
 /// The lower the penalty, the better the mask.
 enum MaskPenaltyScorer {
+    /// Returns the penalty of the symbol under each of the four rules.
+    /// Rules 1 and 3 apply to every row and column, rules 2 and 4
+    /// to the whole symbol.
     static func penalty(
-        for matrix: QRMatrix
-    ) -> Int {
-        let rows = moduleColors(of: matrix)
+        for symbol: QRSymbol
+    ) -> MaskPenalty {
+        let rows = symbol.moduleColors
         let columns = rows.indices.map { column in
             rows.map { $0[column] }
         }
@@ -24,12 +43,15 @@ enum MaskPenaltyScorer {
         let finderLikePatterns = lines
             .map(finderLikePatternsPenalty(in:))
             .reduce(0, +)
+            - finderPatternsPenalty
         let darkModuleBalance = darkModuleBalancePenalty(in: rows)
 
-        return consecutiveModules
-            + sameColorBlocks
-            + finderLikePatterns
-            + darkModuleBalance
+        return MaskPenalty(
+            consecutiveModules: consecutiveModules,
+            sameColorBlocks: sameColorBlocks,
+            finderLikePatterns: finderLikePatterns,
+            darkModuleBalance: darkModuleBalance
+        )
     }
 }
 
@@ -81,9 +103,9 @@ extension MaskPenaltyScorer {
                 let bottomLeft = rows[row + 1][column]
                 let bottomRight = rows[row + 1][column + 1]
 
-                if topLeft == topRight &&
-                    topLeft == bottomLeft &&
-                    topLeft == bottomRight {
+                if topLeft == topRight
+                    && topLeft == bottomLeft
+                    && topLeft == bottomRight {
                     penalty += 3
                 }
             }
@@ -101,8 +123,15 @@ extension MaskPenaltyScorer {
         .dark, .light, .dark, .dark, .dark, .light, .dark
     ]
 
+    /// The rule 3 penalty that the three finder patterns score in every
+    /// symbol. Each of their three central rows and three central columns
+    /// is a finder-like pattern next to the quiet zone. The penalty is
+    /// left out so that only patterns in other areas are penalized.
+    private static let finderPatternsPenalty = 3 * 6 * 40
+
     /// Scores 40 points for each `1011101` pattern (1 is dark)
     /// with four light modules before or after it.
+    /// Modules past the line belong to the light quiet zone.
     static func finderLikePatternsPenalty(
         in line: [QRModuleColor]
     ) -> Int {
@@ -124,8 +153,8 @@ extension MaskPenaltyScorer {
             let leadingArea = (start - lightAreaWidth)..<start
             let trailingArea = end..<(end + lightAreaWidth)
 
-            if isLightArea(leadingArea, in: line) ||
-                isLightArea(trailingArea, in: line) {
+            if isLightArea(leadingArea, in: line)
+                || isLightArea(trailingArea, in: line) {
                 penalty += 40
             }
         }
@@ -133,17 +162,13 @@ extension MaskPenaltyScorer {
         return penalty
     }
 
-    /// Returns whether every module in the area is light.
-    /// An area that extends past the line is not light.
+    /// Returns whether every module of the area that lies within the line
+    /// is light. Modules past the line belong to the light quiet zone.
     private static func isLightArea(
         _ area: Range<Int>,
         in line: [QRModuleColor]
     ) -> Bool {
-        guard area.lowerBound >= 0, area.upperBound <= line.count else {
-            return false
-        }
-
-        return line[area].allSatisfy { $0 == .light }
+        line[area.clamped(to: line.indices)].allSatisfy { $0 == .light }
     }
 }
 
@@ -165,31 +190,5 @@ extension MaskPenaltyScorer {
             / totalModuleCount
 
         return fivePercentStepCount * 10
-    }
-}
-
-// MARK: - Module Colors
-
-private extension MaskPenaltyScorer {
-    static func moduleColors(
-        of matrix: QRMatrix
-    ) -> [[QRModuleColor]] {
-        (0..<matrix.size).map { row in
-            (0..<matrix.size).map { column in
-                color(of: matrix[row, column])
-            }
-        }
-    }
-
-    static func color(
-        of module: QRModule
-    ) -> QRModuleColor {
-        guard let color = module.color else {
-            preconditionFailure(
-                "Mask penalties cannot be scored while the matrix contains unset modules"
-            )
-        }
-
-        return color
     }
 }
