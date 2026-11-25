@@ -1,54 +1,54 @@
 //
-//  CharacterCapacities.swift
+//  CharacterCapacityTable.swift
 //  QRCodeKit
 //
 //  Created by Dmytro Uzenkov on 13.08.2026.
 //
 
-private struct CharacterCapacity {
-    let numeric: Int
-    let alphanumeric: Int
-    let byte: Int
-    let kanji: Int
+import QRCodeKit
 
-    init(_ numeric: Int, _ alphanumeric: Int, _ byte: Int, _ kanji: Int) {
-        self.numeric = numeric
-        self.alphanumeric = alphanumeric
-        self.byte = byte
-        self.kanji = kanji
-    }
-}
-
-enum CharacterCapacities {
-    static func maxCapacity(for mode: EncodingMode) -> Int {
-        capacity(
-            for: .max,
-            level: .min,
-            mode: mode
-        )
-    }
-
+/// The number of characters that fit in a symbol of each version,
+/// error correction level and encoding mode, as listed in ISO/IEC 18004.
+/// Tests check the capacity computed from codeword counts against it.
+enum CharacterCapacityTable {
     static func capacity(
         for version: QRVersion,
         level: ErrorCorrectionLevel,
         mode: EncodingMode
     ) -> Int {
         guard let capacities = table[version]?[level] else {
-            preconditionFailure(
-                "Character capacity is missing for \(version) and \(level)"
-            )
+            preconditionFailure("Character capacity is missing for \(version) and \(level)")
         }
 
         switch mode {
         case .numeric:      return capacities.numeric
         case .alphanumeric: return capacities.alphanumeric
-        case .kanji:        return capacities.kanji
         case .byte:         return capacities.byte
+        case .kanji:        return capacities.kanji
         }
     }
 }
 
-private extension CharacterCapacities {
+private extension CharacterCapacityTable {
+    struct CharacterCapacity {
+        let numeric: Int
+        let alphanumeric: Int
+        let byte: Int
+        let kanji: Int
+
+        init(
+            _ numeric: Int,
+            _ alphanumeric: Int,
+            _ byte: Int,
+            _ kanji: Int
+        ) {
+            self.numeric = numeric
+            self.alphanumeric = alphanumeric
+            self.byte = byte
+            self.kanji = kanji
+        }
+    }
+
     static let table: [QRVersion: [ErrorCorrectionLevel: CharacterCapacity]] = [
         .v1: [
             .L: CharacterCapacity(41, 25, 17, 10),

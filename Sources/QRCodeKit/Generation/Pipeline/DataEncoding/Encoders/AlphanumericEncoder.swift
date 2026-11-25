@@ -5,15 +5,13 @@
 //  Created by Dmytro Uzenkov on 14.09.2026.
 //
 
-enum AlphanumericEncoder {
-    static func canEncode(_ message: String) -> Bool {
-        guard !message.isEmpty else {
-            return false
-        }
-
-        return message.allSatisfy {
-            value(for: $0) != nil
-        }
+/// The encoder of alphanumeric mode, which packs each pair of characters
+/// into 11 bits and a final single character into 6 bits.
+enum AlphanumericEncoder: ModeEncoder {
+    static func canEncode(
+        _ message: String
+    ) -> Bool {
+        message.utf8.allSatisfy { values[$0] != nil }
     }
 
     static func characterCount(
@@ -24,99 +22,67 @@ enum AlphanumericEncoder {
             "Message cannot be encoded in alphanumeric mode"
         )
 
-        return message.count
+        return message.utf8.count
+    }
+
+    static func bitCount(
+        forCharacterCount characterCount: Int
+    ) -> Int {
+        let fullGroupCount = characterCount / groupSize
+        let finalGroupLength = characterCount % groupSize
+
+        return fullGroupCount * groupBitCounts[groupSize]
+            + groupBitCounts[finalGroupLength]
     }
 
     static func encode(
         _ message: String
     ) -> BitBuffer {
-        precondition(
-            canEncode(message),
-            "Message cannot be encoded in alphanumeric mode"
-        )
+        let characterCount = characterCount(for: message)
+        let capacity = bitCount(forCharacterCount: characterCount)
 
-        let encodedBitCount = (message.count * 11 + 1) / 2
-        var buffer = BitBuffer(minimumCapacity: encodedBitCount)
+        var buffer = BitBuffer(minimumCapacity: capacity)
 
         var groupValue: UInt32 = 0
-        var groupCharacterCount = 0
+        var groupLength = 0
 
-        for character in message {
-            let value = value(for: character)!
+        for byte in message.utf8 {
+            // Never nil: characterCount(for:) checks that every byte is valid
+            groupValue = groupValue * 45 + values[byte]!
+            groupLength += 1
 
-            groupValue = groupValue * 45 + value
-            groupCharacterCount += 1
-
-            if groupCharacterCount == 2 {
-                buffer.append(groupValue, bitCount: 11)
+            if groupLength == groupSize {
+                buffer.append(groupValue, bitCount: groupBitCounts[groupLength])
 
                 groupValue = 0
-                groupCharacterCount = 0
+                groupLength = 0
             }
         }
 
-        if groupCharacterCount == 1 {
-            buffer.append(groupValue, bitCount: 6)
+        if groupLength > 0 {
+            buffer.append(groupValue, bitCount: groupBitCounts[groupLength])
         }
 
         return buffer
     }
 }
 
-// MARK: - Alphanumeric Table
+// MARK: - Characters
 
 private extension AlphanumericEncoder {
-    static func value(
-        for character: Character
-    ) -> UInt32? {
-        table[character]
-    }
+    static let groupSize = 2
 
-    static let table: [Character: UInt32] = [
-        "0": 0,
-        "1": 1,
-        "2": 2,
-        "3": 3,
-        "4": 4,
-        "5": 5,
-        "6": 6,
-        "7": 7,
-        "8": 8,
-        "9": 9,
-        "A": 10,
-        "B": 11,
-        "C": 12,
-        "D": 13,
-        "E": 14,
-        "F": 15,
-        "G": 16,
-        "H": 17,
-        "I": 18,
-        "J": 19,
-        "K": 20,
-        "L": 21,
-        "M": 22,
-        "N": 23,
-        "O": 24,
-        "P": 25,
-        "Q": 26,
-        "R": 27,
-        "S": 28,
-        "T": 29,
-        "U": 30,
-        "V": 31,
-        "W": 32,
-        "X": 33,
-        "Y": 34,
-        "Z": 35,
-        " ": 36,
-        "$": 37,
-        "%": 38,
-        "*": 39,
-        "+": 40,
-        "-": 41,
-        ".": 42,
-        "/": 43,
-        ":": 44
-    ]
+    /// The number of bits in a group, indexed by its length in characters.
+    static let groupBitCounts = [0, 6, 11]
+
+    /// The characters of alphanumeric mode in the order of their values
+    /// in ISO/IEC 18004.
+    static let characters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:"
+
+    /// The value of each character, keyed by its ASCII byte.
+    static let values: [UInt8: UInt32] = Dictionary(
+        uniqueKeysWithValues: characters.utf8.enumerated().map { index, byte in
+            (byte, UInt32(index))
+        }
+    )
 }

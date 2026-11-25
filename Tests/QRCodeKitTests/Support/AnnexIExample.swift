@@ -25,6 +25,9 @@ enum AnnexIExample {
         0x2C, 0x55
     ]
 
+    /// The data codewords: the first 16 codewords of the final message.
+    static let dataCodewords = Array(codewords.prefix(16))
+
     /// The colors of the finished symbol from Figure I.2, row by row.
     static let moduleColors: [[QRModuleColor]] = snapshot
         .split(separator: "\n")

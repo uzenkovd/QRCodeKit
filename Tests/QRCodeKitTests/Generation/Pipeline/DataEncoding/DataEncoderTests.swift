@@ -10,234 +10,84 @@ import Testing
 
 @Suite
 struct DataEncoderTests {
-    // MARK: - Numeric
+    // MARK: - Standard Example
 
     @Test
-    func encodeNumericVersion1High() {
+    func encodeAnnexIExample() {
         let configuration = QRConfiguration(
-            version: .v1,
-            encodingMode: .numeric,
-            errorCorrectionLevel: .H
+            AnnexIExample.version,
+            AnnexIExample.errorCorrectionLevel,
+            AnnexIExample.encodingMode
         )
 
-        let result = DataEncoder.encode(
-            "1",
-            using: configuration
-        )
+        let codewords = DataEncoder.encode(AnnexIExample.message, using: configuration)
 
-        #expect(result == [
-            0b00010000,
-            0b00000100,
-            0b01000000,
-            0xEC,
-            0x11,
-            0xEC,
-            0x11,
-            0xEC,
-            0x11
-        ])
+        #expect(codewords == AnnexIExample.dataCodewords)
+    }
+
+    // MARK: - Segment
+
+    @Test(arguments: [
+        (.numeric, "1", "0001" + "0000000001" + "0001"),
+        (.alphanumeric, "A", "0010" + "000000001" + "001010"),
+        (.byte, "a", "0100" + "00000001" + "01100001"),
+        (.kanji, "漢", "1000" + "00000001" + "0011100111111")
+    ] as [(EncodingMode, String, String)])
+    func encodeSegmentOfEachMode(
+        mode: EncodingMode,
+        message: String,
+        expectedSegment: String
+    ) {
+        let codewords = DataEncoder.encode(message, using: QRConfiguration(.v1, .H, mode))
+
+        #expect(codewords.bitString.hasPrefix(expectedSegment))
+    }
+
+    @Test(arguments: [
+        (.v9, "0100" + "00000001"),
+        (.v10, "0100" + "0000000000000001")
+    ] as [(QRVersion, String)])
+    func characterCountIndicatorWidensWithVersion(
+        version: QRVersion,
+        expectedIndicators: String
+    ) {
+        let codewords = DataEncoder.encode("a", using: QRConfiguration(version, .H, .byte))
+
+        #expect(codewords.bitString.hasPrefix(expectedIndicators))
     }
 
     @Test
-    func encodeNumericAtExactCapacity() {
-        let message = "1234567890123456789012345678901234"
-        let configuration = QRConfiguration(
-            version: .v1,
-            encodingMode: .numeric,
-            errorCorrectionLevel: .M
-        )
+    func characterCountIndicatorCountsBytesInByteMode() {
+        let codewords = DataEncoder.encode("\r\n", using: QRConfiguration(.v1, .H, .byte))
 
-        let result = DataEncoder.encode(
-            message,
-            using: configuration
-        )
-
-        #expect(result == [
-            0b00010000,
-            0b10001000,
-            0b01111011,
-            0b01110010,
-            0b00110001,
-            0b01010000,
-            0b00110001,
-            0b01011001,
-            0b10101001,
-            0b10111000,
-            0b01010011,
-            0b10101010,
-            0b00110111,
-            0b11011110,
-            0b10000111,
-            0b10110100
-        ])
+        #expect(codewords.bitString.hasPrefix("0100" + "00000010"))
     }
 
-    // MARK: - Alphanumeric
+    // MARK: - Terminator and Padding
 
     @Test
-    func encodeAlphanumericVersion1High() {
-        let configuration = QRConfiguration(
-            version: .v1,
-            encodingMode: .alphanumeric,
-            errorCorrectionLevel: .H
-        )
+    func appendTerminatorAlignmentAndPadCodewords() {
+        let codewords = DataEncoder.encode("1", using: QRConfiguration(.v1, .H, .numeric))
 
-        let result = DataEncoder.encode(
-            "A",
-            using: configuration
-        )
-
-        #expect(result == [
-            0b00100000,
-            0b00001001,
-            0b01000000,
-            0xEC,
-            0x11,
-            0xEC,
-            0x11,
-            0xEC,
-            0x11
-        ])
+        #expect(codewords.prefix(3).bitString == "0001" + "0000000001" + "0001" + "0000" + "00")
+        #expect(codewords.dropFirst(3) == [0xEC, 0x11, 0xEC, 0x11, 0xEC, 0x11])
     }
 
     @Test
-    func encodeAlphanumericWithShortenedTerminator() {
-        let message = "ABCDEFGHIJKLMNOP"
-        let configuration = QRConfiguration(
-            version: .v1,
-            encodingMode: .alphanumeric,
-            errorCorrectionLevel: .Q
-        )
+    func shortenTerminatorAtEndOfCapacity() {
+        let message = "ABCDEFGHIJKLMNOP"  // 101 of the 104 data bits of 1-Q
+        let codewords = DataEncoder.encode(message, using: QRConfiguration(.v1, .Q, .alphanumeric))
+        let dataBits = AlphanumericEncoder.encode(message).bitString
 
-        let result = DataEncoder.encode(
-            message,
-            using: configuration
-        )
-
-        #expect(result == [
-            0b00100000,
-            0b10000001,
-            0b11001101,
-            0b01000101,
-            0b00101010,
-            0b00010101,
-            0b01110000,
-            0b10110011,
-            0b11010111,
-            0b00110010,
-            0b11111101,
-            0b01100010,
-            0b10001000
-        ])
-    }
-
-    // MARK: - Kanji
-
-    @Test
-    func encodeKanjiVersion1High() {
-        let configuration = QRConfiguration(
-            version: .v1,
-            encodingMode: .kanji,
-            errorCorrectionLevel: .H
-        )
-
-        let result = DataEncoder.encode(
-            "漢",
-            using: configuration
-        )
-
-        #expect(result == [
-            0b10000000,
-            0b00010011,
-            0b10011111,
-            0b10000000,
-            0xEC,
-            0x11,
-            0xEC,
-            0x11,
-            0xEC
-        ])
+        #expect(codewords.bitString == "0010" + "000010000" + dataBits + "000")
     }
 
     @Test
-    func encodeKanjiUsesVersionSpecificCharacterCountIndicatorLength() {
-        let configuration = QRConfiguration(
-            version: .v10,
-            encodingMode: .kanji,
-            errorCorrectionLevel: .H
-        )
+    func omitTerminatorAtExactCapacity() {
+        let message = "1234567890123456789012345678901234"  // all 128 data bits of 1-M
+        let codewords = DataEncoder.encode(message, using: QRConfiguration(.v1, .M, .numeric))
+        let dataBits = NumericEncoder.encode(message).bitString
 
-        let result = DataEncoder.encode(
-            "海",
-            using: configuration
-        )
-
-        #expect(result.count == 122)
-        #expect(result.prefix(10) == [
-            0b10000000,
-            0b00000100,
-            0b11011000,
-            0b01100000,
-            0xEC,
-            0x11,
-            0xEC,
-            0x11,
-            0xEC,
-            0x11
-        ])
-    }
-
-    // MARK: - Byte
-
-    @Test
-    func encodeByteVersion1High() {
-        let configuration = QRConfiguration(
-            version: .v1,
-            encodingMode: .byte,
-            errorCorrectionLevel: .H
-        )
-
-        let result = DataEncoder.encode(
-            "a",
-            using: configuration
-        )
-
-        #expect(result == [
-            0b01000000,
-            0b00010110,
-            0b00010000,
-            0xEC,
-            0x11,
-            0xEC,
-            0x11,
-            0xEC,
-            0x11
-        ])
-    }
-
-    @Test
-    func encodeByteUsesByteCountForCharacterCountIndicator() {
-        let configuration = QRConfiguration(
-            version: .v1,
-            encodingMode: .byte,
-            errorCorrectionLevel: .H
-        )
-
-        let result = DataEncoder.encode(
-            "\r\n",
-            using: configuration
-        )
-
-        #expect(result == [
-            0b01000000,
-            0b00100000,
-            0b11010000,
-            0b10100000,
-            0xEC,
-            0x11,
-            0xEC,
-            0x11,
-            0xEC
-        ])
+        #expect(codewords.bitString == "0001" + "0000100010" + dataBits)
     }
 }

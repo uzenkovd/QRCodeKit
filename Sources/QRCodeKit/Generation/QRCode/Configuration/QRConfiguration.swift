@@ -11,11 +11,39 @@ struct QRConfiguration: Equatable {
     let version: QRVersion
     let encodingMode: EncodingMode
     let errorCorrectionLevel: ErrorCorrectionLevel
+}
 
+// MARK: - Capacity
+
+extension QRConfiguration {
+    /// The number of bits in the character count indicator.
+    var characterCountIndicatorBitCount: Int {
+        CharacterCountIndicator.bitCount(for: version, mode: encodingMode)
+    }
+
+    /// The number of bits in the data codewords of the symbol.
+    var dataBitCapacity: Int {
+        errorCorrectionLayout.totalDataCodewordCount * UInt8.bitWidth
+    }
+
+    /// Returns a Boolean value indicating whether a message with the given
+    /// number of characters fits in the data codewords of the symbol.
+    func canFit(
+        characterCount: Int
+    ) -> Bool {
+        let requiredBitCount = EncodingMode.indicatorBitCount
+            + characterCountIndicatorBitCount
+            + encodingMode.encoder.bitCount(forCharacterCount: characterCount)
+
+        return requiredBitCount <= dataBitCapacity
+    }
+}
+
+// MARK: - Error Correction
+
+extension QRConfiguration {
+    /// The division of the symbol's codewords into error correction blocks.
     var errorCorrectionLayout: ErrorCorrectionLayout {
-        ErrorCorrectionBlocks.layout(
-            for: version,
-            level: errorCorrectionLevel
-        )
+        ErrorCorrectionBlocks.layout(for: version, level: errorCorrectionLevel)
     }
 }

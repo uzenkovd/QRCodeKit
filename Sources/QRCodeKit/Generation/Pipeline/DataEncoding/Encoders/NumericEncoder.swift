@@ -5,19 +5,13 @@
 //  Created by Dmytro Uzenkov on 14.09.2026.
 //
 
-enum NumericEncoder {
-    static func canEncode(_ message: String) -> Bool {
-        guard !message.isEmpty else {
-            return false
-        }
-
-        return message.allSatisfy { character in
-            guard let asciiValue = character.asciiValue else {
-                return false
-            }
-
-            return (48...57).contains(asciiValue)
-        }
+/// The encoder of numeric mode, which packs each group of three digits
+/// into 10 bits and a final group of one or two digits into 4 or 7 bits.
+enum NumericEncoder: ModeEncoder {
+    static func canEncode(
+        _ message: String
+    ) -> Bool {
+        message.utf8.allSatisfy(isDigit)
     }
 
     static func characterCount(
@@ -28,49 +22,64 @@ enum NumericEncoder {
             "Message cannot be encoded in numeric mode"
         )
 
-        return message.count
+        return message.utf8.count
+    }
+
+    static func bitCount(
+        forCharacterCount characterCount: Int
+    ) -> Int {
+        let fullGroupCount = characterCount / groupSize
+        let finalGroupLength = characterCount % groupSize
+
+        return fullGroupCount * groupBitCounts[groupSize]
+            + groupBitCounts[finalGroupLength]
     }
 
     static func encode(
         _ message: String
     ) -> BitBuffer {
-        precondition(
-            canEncode(message),
-            "Message cannot be encoded in numeric mode"
-        )
+        let characterCount = characterCount(for: message)
+        let capacity = bitCount(forCharacterCount: characterCount)
 
-        let encodedBitCount = (message.count * 10 + 2) / 3
-        var buffer = BitBuffer(minimumCapacity: encodedBitCount)
+        var buffer = BitBuffer(minimumCapacity: capacity)
 
         var groupValue: UInt32 = 0
-        var digitCount = 0
+        var groupLength = 0
 
-        for character in message {
-            let digit = digitValue(for: character)
+        for byte in message.utf8 {
+            groupValue = groupValue * 10 + UInt32(byte - zero)
+            groupLength += 1
 
-            groupValue = groupValue * 10 + digit
-            digitCount += 1
-
-            if digitCount == 3 {
-                buffer.append(groupValue, bitCount: 10)
+            if groupLength == groupSize {
+                buffer.append(groupValue, bitCount: groupBitCounts[groupLength])
 
                 groupValue = 0
-                digitCount = 0
+                groupLength = 0
             }
         }
 
-        if digitCount == 1 {
-            buffer.append(groupValue, bitCount: 4)
-        } else if digitCount == 2 {
-            buffer.append(groupValue, bitCount: 7)
+        if groupLength > 0 {
+            buffer.append(groupValue, bitCount: groupBitCounts[groupLength])
         }
 
         return buffer
     }
+}
 
-    private static func digitValue(
-        for character: Character
-    ) -> UInt32 {
-        UInt32(character.asciiValue! - 48)
+// MARK: - Digits
+
+private extension NumericEncoder {
+    static let groupSize = 3
+
+    /// The number of bits in a group, indexed by its length in digits.
+    static let groupBitCounts = [0, 4, 7, 10]
+
+    static let zero = UInt8(ascii: "0")
+    static let nine = UInt8(ascii: "9")
+
+    static func isDigit(
+        _ byte: UInt8
+    ) -> Bool {
+        (zero...nine).contains(byte)
     }
 }

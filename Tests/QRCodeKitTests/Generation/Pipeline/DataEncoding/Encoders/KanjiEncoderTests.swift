@@ -13,121 +13,76 @@ struct KanjiEncoderTests {
     // MARK: - canEncode(_:)
 
     @Test
-    func canEncodeSupportedShiftJISCharacters() {
-        #expect(KanjiEncoder.canEncode("漢あア紂"))
+    func canEncodeEmptyMessage() {
+        #expect(KanjiEncoder.canEncode(""))
     }
 
     @Test
-    func cannotEncodeEmptyMessage() {
-        #expect(!KanjiEncoder.canEncode(""))
+    func canEncodeDoubleByteShiftJISCharacters() {
+        #expect(KanjiEncoder.canEncode("漢あア紂"))
     }
 
-    @Test(arguments: [
-        "A",
-        "ｱ",
-        "ｶ",
-        "ﾝ"
-    ])
-    func cannotEncodeSingleByteShiftJISCharacter(
-        character: String
+    @Test(arguments: ["A", "ｱ"])
+    func cannotEncodeSingleByteShiftJISCharacters(
+        message: String
     ) {
-        #expect(!KanjiEncoder.canEncode(character))
+        #expect(!KanjiEncoder.canEncode(message))
     }
 
-    @Test(arguments: [
-        "ї",
-        "é",
-        "€",
-        "🙂",
-        "𠮷"
-    ])
-    func cannotEncodeUnsupportedUnicodeCharacter(
-        character: String
+    @Test(arguments: ["é", "€", "🙂", "𠮷"])
+    func cannotEncodeCharactersOutsideShiftJIS(
+        message: String
     ) {
-        #expect(!KanjiEncoder.canEncode(character))
+        #expect(!KanjiEncoder.canEncode(message))
     }
 
     // MARK: - characterCount(for:)
 
-    @Test
-    func characterCountMatchesCharacterCount() {
-        let count = KanjiEncoder.characterCount(
-            for: "日本語"
-        )
+    @Test(arguments: [
+        ("", 0),
+        ("日本語", 3)
+    ])
+    func characterCountIsCharacterCount(
+        message: String,
+        expectedCount: Int
+    ) {
+        #expect(KanjiEncoder.characterCount(for: message) == expectedCount)
+    }
 
-        #expect(count == 3)
+    // MARK: - bitCount(forCharacterCount:)
+
+    @Test(arguments: 0...3)
+    func bitCountMatchesEncodedBitCount(
+        characterCount: Int
+    ) {
+        let message = String(repeating: "漢", count: characterCount)
+        let encodedBitCount = KanjiEncoder.encode(message).count
+
+        #expect(KanjiEncoder.bitCount(forCharacterCount: characterCount) == encodedBitCount)
     }
 
     // MARK: - encode(_:)
 
+    /// The example from ISO/IEC 18004: 点 (0x935F) and 茗 (0xE4AA),
+    /// one from each range of Shift JIS codes.
     @Test
-    func encodeSingleCharacter() {
-        let result = KanjiEncoder.encode("漢")
+    func encodeStandardExample() {
+        let result = KanjiEncoder.encode("点茗")
 
-        #expect(result.count == 13)
-        #expect(result.bytes == [
-            0b00111001,
-            0b11111000
-        ])
+        #expect(result.bitString == "0110110011111" + "1101010101010")
     }
 
-    @Test
-    func encodeLowerBoundaryOfFirstRange() {
-        let result = KanjiEncoder.encode("\u{3000}") // Shift JIS: 0x8140
-
-        #expect(result.count == 13)
-        #expect(result.bytes == [
-            0b00000000,
-            0b00000000
-        ])
-    }
-
-    @Test
-    func encodeUpperBoundaryOfFirstRange() {
-        let result = KanjiEncoder.encode("滌") // Shift JIS: 0x9FFC
-
-        #expect(result.count == 13)
-        #expect(result.bytes == [
-            0b10111001,
-            0b11100000
-        ])
-    }
-
-    @Test
-    func encodeLowerBoundaryOfSecondRange() {
-        let result = KanjiEncoder.encode("漾") // Shift JIS: 0xE040
-
-        #expect(result.count == 13)
-        #expect(result.bytes == [
-            0b10111010,
-            0b00000000
-        ])
-    }
-
-    @Test
-    func encodeCharactersFromBothRanges() {
-        let result = KanjiEncoder.encode("海紂")
-
-        #expect(result.count == 26)
-        #expect(result.bytes == [
-            0b00110110,
-            0b00011110,
-            0b01100000,
-            0b00000000
-        ])
-    }
-
-    @Test
-    func encodeMultipleCharacters() {
-        let result = KanjiEncoder.encode("日本語")
-
-        #expect(result.count == 39)
-        #expect(result.bytes == [
-            0b01110001,
-            0b11010011,
-            0b11111110,
-            0b11010001,
-            0b11010100
-        ])
+    @Test(arguments: [
+        ("", ""),
+        ("\u{3000}", "0000000000000"),  // 0x8140, start of the first range
+        ("滌", "1011100111100"),         // 0x9FFC, end of the first range
+        ("漾", "1011101000000"),         // 0xE040, start of the second range
+        ("熙", "1111100100100")          // 0xEAA4, last character of the second range
+    ])
+    func encodeRangeBoundaries(
+        message: String,
+        expectedBits: String
+    ) {
+        #expect(KanjiEncoder.encode(message).bitString == expectedBits)
     }
 }
