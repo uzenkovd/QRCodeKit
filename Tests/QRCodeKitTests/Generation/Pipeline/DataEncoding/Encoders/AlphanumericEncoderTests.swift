@@ -13,106 +13,68 @@ struct AlphanumericEncoderTests {
     // MARK: - canEncode(_:)
 
     @Test
-    func canEncodeSupportedCharacters() {
-        #expect(
-            AlphanumericEncoder.canEncode(
-                "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:"
-            )
-        )
+    func canEncodeEmptyMessage() {
+        #expect(AlphanumericEncoder.canEncode(""))
     }
 
     @Test
-    func cannotEncodeEmptyMessage() {
-        #expect(!AlphanumericEncoder.canEncode(""))
+    func canEncodeAllCharacters() {
+        #expect(AlphanumericEncoder.canEncode("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:"))
     }
 
-    @Test
-    func cannotEncodeLowercaseCharacter() {
-        #expect(!AlphanumericEncoder.canEncode("ABCd"))
-    }
-
-    @Test
-    func cannotEncodeNonASCIICharacter() {
-        #expect(!AlphanumericEncoder.canEncode("CAFÉ"))
+    @Test(arguments: ["ABCd", "A_B", "CAFÉ"])
+    func cannotEncodeOtherCharacters(
+        message: String
+    ) {
+        #expect(!AlphanumericEncoder.canEncode(message))
     }
 
     // MARK: - characterCount(for:)
 
-    @Test
-    func characterCountMatchesCharacterCount() {
-        let count = AlphanumericEncoder.characterCount(
-            for: "HELLO WORLD"
-        )
+    @Test(arguments: [
+        ("", 0),
+        ("HELLO WORLD", 11)
+    ])
+    func characterCountIsCharacterCount(
+        message: String,
+        expectedCount: Int
+    ) {
+        #expect(AlphanumericEncoder.characterCount(for: message) == expectedCount)
+    }
 
-        #expect(count == 11)
+    // MARK: - bitCount(forCharacterCount:)
+
+    @Test(arguments: 0...5)
+    func bitCountMatchesEncodedBitCount(
+        characterCount: Int
+    ) {
+        let message = String(repeating: "A", count: characterCount)
+        let encodedBitCount = AlphanumericEncoder.encode(message).count
+
+        #expect(AlphanumericEncoder.bitCount(forCharacterCount: characterCount) == encodedBitCount)
     }
 
     // MARK: - encode(_:)
 
+    /// The example from ISO/IEC 18004: the pairs AC and -4, and the final 2.
     @Test
-    func encodeSingleCharacter() {
-        let result = AlphanumericEncoder.encode("A")
+    func encodeStandardExample() {
+        let result = AlphanumericEncoder.encode("AC-42")
 
-        #expect(result.count == 6)
-        #expect(result.bytes == [0b00101000])
+        #expect(result.bitString == "00111001110" + "11100111001" + "000010")
     }
 
-    @Test
-    func encodeTwoCharacters() {
-        let result = AlphanumericEncoder.encode("AZ")
-
-        #expect(result.count == 11)
-        #expect(result.bytes == [
-            0b00111100,
-            0b10100000
-        ])
-    }
-
-    @Test
-    func encodeThreeCharacters() {
-        let result = AlphanumericEncoder.encode("09A")
-
-        #expect(result.count == 17)
-        #expect(result.bytes == [
-            0b00000001,
-            0b00100101,
-            0b00000000
-        ])
-    }
-
-    @Test
-    func encodeFourCharacters() {
-        let result = AlphanumericEncoder.encode("A1 $")
-
-        #expect(result.count == 22)
-        #expect(result.bytes == [
-            0b00111000,
-            0b01111001,
-            0b11100100
-        ])
-    }
-
-    @Test
-    func encodeMultipleGroupsWithRemainder() {
-        let result = AlphanumericEncoder.encode("Z *./")
-
-        #expect(result.count == 28)
-        #expect(result.bytes == [
-            0b11001001,
-            0b01111100,
-            0b00010110,
-            0b10110000
-        ])
-    }
-
-    @Test
-    func encodeMaximumPair() {
-        let result = AlphanumericEncoder.encode("::")
-
-        #expect(result.count == 11)
-        #expect(result.bytes == [
-            0b11111101,
-            0b00000000
-        ])
+    @Test(arguments: [
+        ("", ""),
+        ("A", "001010"),                                     // final single character
+        ("AZ", "00111100101"),                               // pair
+        ("::", "11111101000"),                               // largest pair value
+        ("Z *./", "11001001011" + "11100000101" + "101011")  // symbols
+    ])
+    func encodePairsOfCharacters(
+        message: String,
+        expectedBits: String
+    ) {
+        #expect(AlphanumericEncoder.encode(message).bitString == expectedBits)
     }
 }

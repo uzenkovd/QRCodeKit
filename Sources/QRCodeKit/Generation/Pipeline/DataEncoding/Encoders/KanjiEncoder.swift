@@ -7,91 +7,116 @@
 
 import Foundation
 
-enum KanjiEncoder {
-    static func canEncode(_ message: String) -> Bool {
-        guard !message.isEmpty else {
-            return false
-        }
-
-        return message.allSatisfy {
-            value(for: $0) != nil
-        }
+/// The encoder of kanji mode, which packs each double-byte Shift JIS
+/// character into 13 bits.
+enum KanjiEncoder: ModeEncoder {
+    static func canEncode(
+        _ message: String
+    ) -> Bool {
+        values(for: message) != nil
     }
 
     static func characterCount(
         for message: String
     ) -> Int {
-        precondition(
-            canEncode(message),
-            "Message cannot be encoded in kanji mode"
-        )
+        validatedValues(for: message).count
+    }
 
-        return message.count
+    static func bitCount(
+        forCharacterCount characterCount: Int
+    ) -> Int {
+        characterCount * bitCountPerCharacter
     }
 
     static func encode(
         _ message: String
     ) -> BitBuffer {
-        precondition(
-            canEncode(message),
-            "Message cannot be encoded in kanji mode"
-        )
+        let values = validatedValues(for: message)
+        let capacity = bitCount(forCharacterCount: values.count)
 
-        let encodedBitCount = message.count * 13
-        var buffer = BitBuffer(minimumCapacity: encodedBitCount)
+        var buffer = BitBuffer(minimumCapacity: capacity)
 
-        for character in message {
-            let value = value(for: character)!
-            buffer.append(UInt32(value), bitCount: 13)
+        for value in values {
+            buffer.append(UInt32(value), bitCount: bitCountPerCharacter)
         }
 
         return buffer
     }
 }
 
-// MARK: - Kanji Value Conversion
+// MARK: - Shift JIS
 
 private extension KanjiEncoder {
-    static let firstShiftJISRange: ClosedRange<UInt16> =
-        0x8140...0x9FFC
-    static let secondShiftJISRange: ClosedRange<UInt16> =
-        0xE040...0xEBBF
+    static let bitCountPerCharacter = 13
 
+    /// The ranges of double-byte Shift JIS codes that kanji mode encodes,
+    /// each with the offset subtracted from its codes.
+    static let codeRanges: [(codes: ClosedRange<UInt16>, offset: UInt16)] = [
+        (0x8140...0x9FFC, 0x8140),
+        (0xE040...0xEBBF, 0xC140)
+    ]
+
+    /// Returns the 13-bit values of the message's characters, or `nil`
+    /// if a character cannot be encoded in kanji mode.
+    static func values(
+        for message: String
+    ) -> [UInt16]? {
+        var values: [UInt16] = []
+
+        for character in message {
+            guard let value = value(for: character) else {
+                return nil
+            }
+
+            values.append(value)
+        }
+
+        return values
+    }
+
+    static func validatedValues(
+        for message: String
+    ) -> [UInt16] {
+        guard let values = values(for: message) else {
+            preconditionFailure("Message cannot be encoded in kanji mode")
+        }
+
+        return values
+    }
+
+    /// Returns the 13-bit value of the character as defined in ISO/IEC 18004,
+    /// or `nil` if the character cannot be encoded in kanji mode.
     static func value(
         for character: Character
     ) -> UInt16? {
-        guard let shiftJIS = shiftJISValue(for: character) else {
+        guard
+            let code = shiftJISCode(for: character),
+            let range = codeRanges.first(where: { $0.codes.contains(code) })
+        else {
             return nil
         }
 
-        let adjustedValue: UInt16
-
-        if firstShiftJISRange.contains(shiftJIS) {
-            adjustedValue = shiftJIS - 0x8140
-        } else if secondShiftJISRange.contains(shiftJIS) {
-            adjustedValue = shiftJIS - 0xC140
-        } else {
-            return nil
-        }
-
-        let highByte = adjustedValue >> 8
-        let lowByte = adjustedValue & 0xFF
+        let adjustedCode = code - range.offset
+        let highByte = adjustedCode >> 8
+        let lowByte = adjustedCode & 0xFF
 
         return highByte * 0xC0 + lowByte
     }
 
-    static func shiftJISValue(
+    /// Returns the double-byte Shift JIS code of the character, or `nil`
+    /// if the character is not in Shift JIS or is encoded in a single byte.
+    static func shiftJISCode(
         for character: Character
     ) -> UInt16? {
-        guard let data = String(character).data(using: .shiftJIS),
-              data.count == 2 else {
+        guard
+            let data = String(character).data(using: .shiftJIS),
+            data.count == 2
+        else {
             return nil
         }
 
         let bytes = [UInt8](data)
-        let highByte = UInt16(bytes[0])
-        let lowByte = UInt16(bytes[1])
 
-        return highByte << 8 | lowByte
+        return UInt16(bytes[0]) << 8 | UInt16(bytes[1])
     }
 }

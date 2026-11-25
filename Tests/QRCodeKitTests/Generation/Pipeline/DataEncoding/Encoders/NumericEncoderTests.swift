@@ -13,133 +13,70 @@ struct NumericEncoderTests {
     // MARK: - canEncode(_:)
 
     @Test
+    func canEncodeEmptyMessage() {
+        #expect(NumericEncoder.canEncode(""))
+    }
+
+    @Test
     func canEncodeDigits() {
         #expect(NumericEncoder.canEncode("0123456789"))
     }
 
-    @Test
-    func cannotEncodeEmptyMessage() {
-        #expect(!NumericEncoder.canEncode(""))
-    }
-
-    @Test
-    func cannotEncodeNonDigitCharacter() {
-        #expect(!NumericEncoder.canEncode("123A"))
-    }
-
-    @Test
-    func cannotEncodeNonASCIIDigits() {
-        #expect(!NumericEncoder.canEncode("١٢٣"))
+    @Test(arguments: ["123A", "12 3", "١٢٣"])
+    func cannotEncodeNonDigitCharacters(
+        message: String
+    ) {
+        #expect(!NumericEncoder.canEncode(message))
     }
 
     // MARK: - characterCount(for:)
 
-    @Test
-    func characterCountMatchesDigitCount() {
-        let count = NumericEncoder.characterCount(
-            for: "0123456789"
-        )
+    @Test(arguments: [
+        ("", 0),
+        ("0123456789", 10)
+    ])
+    func characterCountIsDigitCount(
+        message: String,
+        expectedCount: Int
+    ) {
+        #expect(NumericEncoder.characterCount(for: message) == expectedCount)
+    }
 
-        #expect(count == 10)
+    // MARK: - bitCount(forCharacterCount:)
+
+    @Test(arguments: 0...7)
+    func bitCountMatchesEncodedBitCount(
+        characterCount: Int
+    ) {
+        let message = String(repeating: "9", count: characterCount)
+        let encodedBitCount = NumericEncoder.encode(message).count
+
+        #expect(NumericEncoder.bitCount(forCharacterCount: characterCount) == encodedBitCount)
     }
 
     // MARK: - encode(_:)
 
+    /// The example from ISO/IEC 18004: the groups 012, 345 and 67.
     @Test
-    func encodeSingleDigit() {
-        let result = NumericEncoder.encode("7")
+    func encodeStandardExample() {
+        let result = NumericEncoder.encode("01234567")
 
-        #expect(result.count == 4)
-        #expect(result.bytes == [0b01110000])
+        #expect(result.bitString == "0000001100" + "0101011001" + "1000011")
     }
 
-    @Test
-    func encodeTwoDigits() {
-        let result = NumericEncoder.encode("42")
-
-        #expect(result.count == 7)
-        #expect(result.bytes == [0b01010100])
-    }
-
-    @Test
-    func encodeThreeDigits() {
-        let result = NumericEncoder.encode("123")
-
-        #expect(result.count == 10)
-        #expect(result.bytes == [
-            0b00011110,
-            0b11000000
-        ])
-    }
-
-    @Test
-    func encodeFourDigits() {
-        let result = NumericEncoder.encode("3141")
-
-        #expect(result.count == 14)
-        #expect(result.bytes == [
-            0b01001110,
-            0b10000100
-        ])
-    }
-
-    @Test
-    func encodeFiveDigits() {
-        let result = NumericEncoder.encode("27182")
-
-        #expect(result.count == 17)
-        #expect(result.bytes == [
-            0b01000011,
-            0b11101001,
-            0b00000000
-        ])
-    }
-
-    @Test
-    func encodeSixDigits() {
-        let result = NumericEncoder.encode("654321")
-
-        #expect(result.count == 20)
-        #expect(result.bytes == [
-            0b10100011,
-            0b10010100,
-            0b00010000
-        ])
-    }
-
-    @Test
-    func encodeMultipleGroupsWithRemainder() {
-        let result = NumericEncoder.encode("8675309124")
-
-        #expect(result.count == 34)
-        #expect(result.bytes == [
-            0b11011000,
-            0b11100001,
-            0b00101110,
-            0b01000001,
-            0b00000000
-        ])
-    }
-
-    @Test
-    func encodeMaximumThreeDigitGroup() {
-        let result = NumericEncoder.encode("999")
-
-        #expect(result.count == 10)
-        #expect(result.bytes == [
-            0b11111001,
-            0b11000000
-        ])
-    }
-
-    @Test
-    func encodeLeadingZeros() {
-        let result = NumericEncoder.encode("001")
-
-        #expect(result.count == 10)
-        #expect(result.bytes == [
-            0b00000000,
-            0b01000000
-        ])
+    @Test(arguments: [
+        ("", ""),
+        ("7", "0111"),                    // final group of one digit
+        ("42", "0101010"),                // final group of two digits
+        ("123", "0001111011"),            // full group
+        ("3141", "0100111010" + "0001"),  // full group and one digit
+        ("001", "0000000001"),            // leading zeros
+        ("999", "1111100111")             // largest group value
+    ])
+    func encodeGroupsOfDigits(
+        message: String,
+        expectedBits: String
+    ) {
+        #expect(NumericEncoder.encode(message).bitString == expectedBits)
     }
 }

@@ -5,43 +5,44 @@
 //  Created by Dmytro Uzenkov on 11.08.2026.
 //
 
+/// A method of representing a set of characters as bits in a QR code.
 public enum EncodingMode: CaseIterable, Hashable, Sendable {
+    /// Digits 0–9.
     case numeric
+
+    /// Digits 0–9, uppercase letters A–Z, space and `$ % * + - . / :`.
     case alphanumeric
-    case kanji
+
+    /// ISO/IEC 8859-1 (Latin-1) characters.
     case byte
 
-    static let recommendedOrder: [EncodingMode] = [
-        .numeric,
-        .alphanumeric,
-        .kanji,
-        .byte
-    ]
+    /// Double-byte Shift JIS characters, such as kanji and kana.
+    case kanji
+}
 
+// MARK: - Encoding
+
+extension EncodingMode {
+    /// The number of bits in a mode indicator.
+    static let indicatorBitCount = 4
+
+    /// The value that identifies the mode at the start of a segment.
     var indicator: UInt32 {
         switch self {
         case .numeric:      0b0001
         case .alphanumeric: 0b0010
-        case .kanji:        0b1000
         case .byte:         0b0100
+        case .kanji:        0b1000
         }
     }
 
-    func canEncode(_ message: String) -> Bool {
+    /// The encoder that packs the characters of the mode into data bits.
+    var encoder: any ModeEncoder.Type {
         switch self {
-        case .numeric:      NumericEncoder.canEncode(message)
-        case .alphanumeric: AlphanumericEncoder.canEncode(message)
-        case .kanji:        KanjiEncoder.canEncode(message)
-        case .byte:         ByteEncoder.canEncode(message)
-        }
-    }
-
-    func characterCount(for message: String) -> Int {
-        switch self {
-        case .numeric:      NumericEncoder.characterCount(for: message)
-        case .alphanumeric: AlphanumericEncoder.characterCount(for: message)
-        case .kanji:        KanjiEncoder.characterCount(for: message)
-        case .byte:         ByteEncoder.characterCount(for: message)
+        case .numeric:      NumericEncoder.self
+        case .alphanumeric: AlphanumericEncoder.self
+        case .byte:         ByteEncoder.self
+        case .kanji:        KanjiEncoder.self
         }
     }
 }

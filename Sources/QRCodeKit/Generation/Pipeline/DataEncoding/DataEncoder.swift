@@ -5,115 +5,87 @@
 //  Created by Dmytro Uzenkov on 15.08.2026.
 //
 
+/// The pipeline step that encodes a message into the data codewords
+/// of a symbol: one segment with the message, a terminator, and padding
+/// up to the data capacity.
 enum DataEncoder {
     static func encode(
         _ message: String,
         using configuration: QRConfiguration
     ) -> [UInt8] {
-        let mode = configuration.encodingMode
+        let capacity = configuration.dataBitCapacity
 
-        let modeIndicator = mode.indicator
-        let modeIndicatorBitCount = 4
+        var buffer = BitBuffer(minimumCapacity: capacity)
 
-        let characterCountIndicator = UInt32(
-            mode.characterCount(for: message)
-        )
-        let characterCountIndicatorBitCount =
-            CharacterCountIndicator.bitCount(
-                for: configuration.version,
-                mode: mode
-            )
-
-        let encodedData = encodeData(
-            message,
-            mode: mode
-        )
-
-        let totalDataCodewordCount =
-            configuration.errorCorrectionLayout.totalDataCodewordCount
-        let totalDataBitCount = totalDataCodewordCount * 8
-
-        var currentDataBitCount =
-            modeIndicatorBitCount
-            + characterCountIndicatorBitCount
-            + encodedData.count
+        appendSegment(for: message, using: configuration, to: &buffer)
 
         precondition(
-            currentDataBitCount <= totalDataBitCount,
-            "Encoded data exceeds the selected version and error correction level capacity"
+            buffer.count <= capacity,
+            "Message exceeds the data capacity of the configuration"
         )
 
-        let remainingDataBitCount = totalDataBitCount - currentDataBitCount
-        let terminatorBitCount = min(
-            4,
-            remainingDataBitCount
-        )
-
-        currentDataBitCount += terminatorBitCount
-
-        let byteAlignmentBitCount = (8 - currentDataBitCount % 8) % 8
-
-        currentDataBitCount += byteAlignmentBitCount
-
-        let padCodewordCount = (totalDataBitCount - currentDataBitCount) / 8
-
-        var buffer = BitBuffer(minimumCapacity: totalDataBitCount)
-
-        buffer.append(
-            modeIndicator,
-            bitCount: modeIndicatorBitCount
-        )
-        buffer.append(
-            characterCountIndicator,
-            bitCount: characterCountIndicatorBitCount
-        )
-        buffer.append(contentsOf: encodedData)
-        buffer.append(0, bitCount: terminatorBitCount)
-        buffer.append(0, bitCount: byteAlignmentBitCount)
-
-        appendPadCodewords(
-            count: padCodewordCount,
-            to: &buffer
-        )
-
-        assert(
-            buffer.count == totalDataBitCount,
-            "Encoded data does not match the expected data capacity"
-        )
+        appendTerminator(to: &buffer, capacity: capacity)
+        appendPadding(to: &buffer, capacity: capacity)
 
         return buffer.bytes
     }
 }
 
-// MARK: - Encoding Helpers
+// MARK: - Segment
 
 private extension DataEncoder {
-    static func encodeData(
-        _ message: String,
-        mode: EncodingMode
-    ) -> BitBuffer {
-        switch mode {
-        case .numeric:      NumericEncoder.encode(message)
-        case .alphanumeric: AlphanumericEncoder.encode(message)
-        case .kanji:        KanjiEncoder.encode(message)
-        case .byte:         ByteEncoder.encode(message)
-        }
-    }
-
-    static func appendPadCodewords(
-        count: Int,
+    /// Appends the mode indicator, the character count indicator
+    /// and the data bits of the message.
+    static func appendSegment(
+        for message: String,
+        using configuration: QRConfiguration,
         to buffer: inout BitBuffer
     ) {
-        precondition(
-            buffer.isAligned,
-            "Pad codewords can only be appended to byte-aligned data"
-        )
+        let mode = configuration.encodingMode
+        let characterCount = mode.encoder.characterCount(for: message)
+        let characterCountIndicatorBitCount = configuration.characterCountIndicatorBitCount
 
-        for index in 0..<count {
-            let padCodeword: UInt8 =
-                index.isMultiple(of: 2) ? 0xEC : 0x11
+        buffer.append(mode.indicator, bitCount: EncodingMode.indicatorBitCount)
+        buffer.append(UInt32(characterCount), bitCount: characterCountIndicatorBitCount)
+        buffer.append(contentsOf: mode.encoder.encode(message))
+    }
+}
 
-            buffer.append(padCodeword)
+// MARK: - Terminator and Padding
+
+private extension DataEncoder {
+    /// The number of zero bits in the terminator, which is shortened
+    /// when the data capacity has less room left.
+    static let terminatorBitCount = 4
+
+    /// The pad codewords, which alternate to fill the remaining data capacity.
+    static let padCodewords: [UInt8] = [0xEC, 0x11]
+
+    static func appendTerminator(
+        to buffer: inout BitBuffer,
+        capacity: Int
+    ) {
+        let remainingBitCount = capacity - buffer.count
+        let bitCount = min(terminatorBitCount, remainingBitCount)
+
+        buffer.append(0, bitCount: bitCount)
+    }
+
+    /// Appends zero bits up to the next codeword boundary,
+    /// then pad codewords up to the data capacity.
+    static func appendPadding(
+        to buffer: inout BitBuffer,
+        capacity: Int
+    ) {
+        let alignmentBitCount = (8 - buffer.count % 8) % 8
+
+        buffer.append(0, bitCount: alignmentBitCount)
+
+        let remainingBitCount = capacity - buffer.count
+        let padCodewordCount = remainingBitCount / 8
+
+        for index in 0..<padCodewordCount {
+            buffer.append(padCodewords[index % padCodewords.count])
         }
     }
 }
