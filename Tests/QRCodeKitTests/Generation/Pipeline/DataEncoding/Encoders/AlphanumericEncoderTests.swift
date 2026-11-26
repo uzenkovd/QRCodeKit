@@ -6,6 +6,7 @@
 //
 
 import Testing
+
 @testable import QRCodeKit
 
 @Suite
@@ -33,7 +34,7 @@ struct AlphanumericEncoderTests {
 
     @Test(arguments: [
         ("", 0),
-        ("HELLO WORLD", 11)
+        ("HELLO WORLD", 11),
     ])
     func characterCountIsCharacterCount(
         message: String,
@@ -66,10 +67,10 @@ struct AlphanumericEncoderTests {
 
     @Test(arguments: [
         ("", ""),
-        ("A", "001010"),                                     // final single character
-        ("AZ", "00111100101"),                               // pair
-        ("::", "11111101000"),                               // largest pair value
-        ("Z *./", "11001001011" + "11100000101" + "101011")  // symbols
+        ("A", "001010"),  // final single character
+        ("AZ", "00111100101"),  // pair
+        ("::", "11111101000"),  // largest pair value
+        ("Z *./", "11001001011" + "11100000101" + "101011"),  // symbols
     ])
     func encodePairsOfCharacters(
         message: String,

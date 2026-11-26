@@ -6,6 +6,7 @@
 //
 
 import Testing
+
 @testable import QRCodeKit
 
 @Suite
@@ -18,12 +19,12 @@ struct CodewordGroupsBuilderTests {
         let block1ECCodewords: [UInt8] = [
             127, 161, 234, 156, 78, 202,
             159, 227, 139, 96, 44, 133,
-            157, 213, 19, 248, 1, 177
+            157, 213, 19, 248, 1, 177,
         ]
         let block2ECCodewords: [UInt8] = [
             254, 95, 201, 37, 156, 137,
             35, 219, 11, 192, 88, 23,
-            39, 183, 38, 237, 2, 127
+            39, 183, 38, 237, 2, 127,
         ]
 
         let dataCodewords =
@@ -44,7 +45,7 @@ struct CodewordGroupsBuilderTests {
                 Block(
                     dataCodewords: block2DataCodewords,
                     errorCorrectionCodewords: block2ECCodewords
-                )
+                ),
             ]
         )
 
@@ -71,22 +72,22 @@ struct CodewordGroupsBuilderTests {
         let group1Block1ECCodewords: [UInt8] = [
             25, 217, 173, 177, 165, 233,
             144, 48, 146, 3, 169, 205,
-            25, 97, 12, 115, 108, 175
+            25, 97, 12, 115, 108, 175,
         ]
         let group1Block2ECCodewords: [UInt8] = [
             50, 175, 71, 127, 87, 207,
             61, 96, 57, 6, 79, 135,
-            50, 194, 24, 230, 216, 67
+            50, 194, 24, 230, 216, 67,
         ]
         let group2Block1ECCodewords: [UInt8] = [
             241, 119, 124, 219, 173, 248,
             227, 162, 189, 202, 237, 19,
-            166, 227, 252, 30, 72, 83
+            166, 227, 252, 30, 72, 83,
         ]
         let group2Block2ECCodewords: [UInt8] = [
             170, 180, 91, 57, 122, 182,
             146, 110, 177, 5, 113, 207,
-            149, 146, 77, 40, 224, 196
+            149, 146, 77, 40, 224, 196,
         ]
 
         let dataCodewords =
@@ -111,7 +112,7 @@ struct CodewordGroupsBuilderTests {
                     dataCodewords: group1Block2DataCodewords,
                     errorCorrectionCodewords:
                         group1Block2ECCodewords
-                )
+                ),
             ]
         )
 
@@ -126,7 +127,7 @@ struct CodewordGroupsBuilderTests {
                     dataCodewords: group2Block2DataCodewords,
                     errorCorrectionCodewords:
                         group2Block2ECCodewords
-                )
+                ),
             ]
         )
 

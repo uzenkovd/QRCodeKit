@@ -42,9 +42,9 @@ private extension QRTextRenderer {
 // MARK: - Compact Glyphs
 
 private extension QRTextRenderer {
-    static let fullBlock: Character = "\u{2588}"      // █ FULL BLOCK
-    static let upperHalfBlock: Character = "\u{2580}" // ▀ UPPER HALF BLOCK
-    static let lowerHalfBlock: Character = "\u{2584}" // ▄ LOWER HALF BLOCK
+    static let fullBlock: Character = "\u{2588}"  // █ FULL BLOCK
+    static let upperHalfBlock: Character = "\u{2580}"  // ▀ UPPER HALF BLOCK
+    static let lowerHalfBlock: Character = "\u{2584}"  // ▄ LOWER HALF BLOCK
     static let emptyBlock: Character = " "
 
     /// Glyphs draw light modules and leave dark ones blank,

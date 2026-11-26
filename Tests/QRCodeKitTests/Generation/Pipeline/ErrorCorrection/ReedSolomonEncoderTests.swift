@@ -6,6 +6,7 @@
 //
 
 import Testing
+
 @testable import QRCodeKit
 
 @Suite
@@ -60,11 +61,11 @@ struct ReedSolomonEncoderTests {
     func encodeForKnownQRCodeBlock() {
         let dataCodewords: [UInt8] = [
             32, 91, 11, 120, 209, 114, 220, 77,
-            67, 64, 236, 17, 236, 17, 236, 17
+            67, 64, 236, 17, 236, 17, 236, 17,
         ]
         let expectedErrorCorrectionCodewords: [UInt8] = [
             196, 35, 39, 119, 235,
-            215, 231, 226, 93, 23
+            215, 231, 226, 93, 23,
         ]
 
         let encoder = ReedSolomonEncoder(
@@ -92,7 +93,7 @@ struct ReedSolomonEncoderTests {
         (2, [1, 3, 2]),
         (3, [1, 7, 14, 8]),
         (7, [1, 127, 122, 154, 164, 11, 68, 117]),
-        (10, [1, 216, 194, 159, 111, 199, 94, 95, 113, 157, 193])
+        (10, [1, 216, 194, 159, 111, 199, 94, 95, 113, 157, 193]),
     ])
     func generatorPolynomialForKnownDegrees(
         degree: Int,

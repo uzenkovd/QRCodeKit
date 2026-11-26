@@ -61,8 +61,8 @@ private extension QRTextRenderer {
     )
 
     static let space = " "
-    static let lowerHalfBlock = "\u{2584}" // ▄ LOWER HALF BLOCK
-    static let upperHalfBlock = "\u{2580}" // ▀ UPPER HALF BLOCK
+    static let lowerHalfBlock = "\u{2584}"  // ▄ LOWER HALF BLOCK
+    static let upperHalfBlock = "\u{2580}"  // ▀ UPPER HALF BLOCK
 
     /// Chooses how to draw a pair of modules in one character cell.
     static func compactCell(

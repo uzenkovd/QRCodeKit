@@ -6,6 +6,7 @@
 //
 
 import Testing
+
 @testable import QRCodeKit
 
 @Suite
@@ -165,7 +166,7 @@ private extension FormatInformationAreaTests {
         (.H, .pattern4, 0b000011101100010),
         (.H, .pattern5, 0b000001001010101),
         (.H, .pattern6, 0b000110100001100),
-        (.H, .pattern7, 0b000100000111011)
+        (.H, .pattern7, 0b000100000111011),
     ]
 }
 
@@ -249,7 +250,7 @@ private extension FormatInformationAreaTests {
                 Position(row: formatCoordinate, column: 3),
                 Position(row: formatCoordinate, column: 2),
                 Position(row: formatCoordinate, column: 1),
-                Position(row: formatCoordinate, column: 0)
+                Position(row: formatCoordinate, column: 0),
             ],
             secondCopy: [
                 Position(row: formatCoordinate, column: lastCoordinate),
@@ -266,7 +267,7 @@ private extension FormatInformationAreaTests {
                 Position(row: lastCoordinate - 3, column: formatCoordinate),
                 Position(row: lastCoordinate - 2, column: formatCoordinate),
                 Position(row: lastCoordinate - 1, column: formatCoordinate),
-                Position(row: lastCoordinate, column: formatCoordinate)
+                Position(row: lastCoordinate, column: formatCoordinate),
             ]
         )
     }

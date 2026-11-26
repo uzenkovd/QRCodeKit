@@ -50,7 +50,7 @@ public extension QRContent {
             "BEGIN:VCARD",
             "VERSION:3.0",
             "N:\(escapeVCardText(contact.familyName));\(escapeVCardText(contact.givenName));;;",
-            "FN:\(escapeVCardText(contact.formattedName))"
+            "FN:\(escapeVCardText(contact.formattedName))",
         ]
 
         if let organization = contact.organization {
@@ -75,7 +75,8 @@ public extension QRContent {
 
         lines.append("END:VCARD")
 
-        let payload = lines
+        let payload =
+            lines
             .map { foldVCardLine($0) }
             .joined(separator: "\r\n") + "\r\n"
 
@@ -138,7 +139,8 @@ private extension QRContent {
     }
 
     static func escapeVCardText(_ value: String) -> String {
-        let normalized = value
+        let normalized =
+            value
             .replacingOccurrences(of: "\r\n", with: "\n")
             .replacingOccurrences(of: "\r", with: "\n")
 

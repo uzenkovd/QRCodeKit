@@ -6,6 +6,7 @@
 //
 
 import Testing
+
 @testable import QRCodeKit
 
 @Suite
@@ -57,7 +58,7 @@ struct BitBufferTests {
         let expectedBits = [
             true, false, true, true,
             false, false, true, false,
-            true, false, true, false
+            true, false, true, false,
         ]
 
         buffer.append(0b1011_0010_1010, bitCount: 12)
@@ -75,7 +76,7 @@ struct BitBufferTests {
         (0b101, 5, [0b0010_1000]),
         (0b101, 8, [0b0000_0101]),
         (0b10_1101_1010, 10, [0b1011_0110, 0b1000_0000]),
-        (0xDEAD_BEEF, 32, [0xDE, 0xAD, 0xBE, 0xEF])
+        (0xDEAD_BEEF, 32, [0xDE, 0xAD, 0xBE, 0xEF]),
     ])
     func appendValueToEmptyBuffer(
         value: UInt32,
@@ -128,10 +129,12 @@ struct BitBufferTests {
         #expect(buffer.count == 10)
         #expect(buffer.byteCount == 2)
         #expect(buffer.isAligned == false)
-        #expect(buffer.bytes == [
-            0b1011_0111,
-            0b0100_0000
-        ])
+        #expect(
+            buffer.bytes == [
+                0b1011_0111,
+                0b0100_0000,
+            ]
+        )
     }
 
     @Test
@@ -144,13 +147,15 @@ struct BitBufferTests {
         #expect(buffer.count == 35)
         #expect(buffer.byteCount == 5)
         #expect(buffer.isAligned == false)
-        #expect(buffer.bytes == [
-            0xBB,
-            0xD5,
-            0xB7,
-            0xDD,
-            0xE0
-        ])
+        #expect(
+            buffer.bytes == [
+                0xBB,
+                0xD5,
+                0xB7,
+                0xDD,
+                0xE0,
+            ]
+        )
     }
 
     // MARK: - append(_:) - UInt8
@@ -166,10 +171,12 @@ struct BitBufferTests {
         #expect(buffer.count == 16)
         #expect(buffer.byteCount == 2)
         #expect(buffer.isAligned)
-        #expect(buffer.bytes == [
-            0b1100_1010,
-            0b1010_1100
-        ])
+        #expect(
+            buffer.bytes == [
+                0b1100_1010,
+                0b1010_1100,
+            ]
+        )
     }
 
     @Test
@@ -183,10 +190,12 @@ struct BitBufferTests {
         #expect(buffer.count == 11)
         #expect(buffer.byteCount == 2)
         #expect(buffer.isAligned == false)
-        #expect(buffer.bytes == [
-            0b1011_1001,
-            0b0100_0000
-        ])
+        #expect(
+            buffer.bytes == [
+                0b1011_1001,
+                0b0100_0000,
+            ]
+        )
     }
 
     // MARK: - append(contentsOf:) - Byte Collection
@@ -212,7 +221,7 @@ struct BitBufferTests {
             0b1111_1111,
             0b1010_1100,
             0b0101_0011,
-            0b0000_0000
+            0b0000_0000,
         ]
         let newBytes = sourceBytes[1...2]
 
@@ -222,11 +231,13 @@ struct BitBufferTests {
         #expect(buffer.count == 24)
         #expect(buffer.byteCount == 3)
         #expect(buffer.isAligned)
-        #expect(buffer.bytes == [
-            0b1111_0000,
-            0b1010_1100,
-            0b0101_0011
-        ])
+        #expect(
+            buffer.bytes == [
+                0b1111_0000,
+                0b1010_1100,
+                0b0101_0011,
+            ]
+        )
     }
 
     @Test
@@ -242,10 +253,12 @@ struct BitBufferTests {
         #expect(buffer.count == 15)
         #expect(buffer.byteCount == 2)
         #expect(buffer.isAligned == false)
-        #expect(buffer.bytes == [
-            0b1010_1011,
-            0b1001_0100
-        ])
+        #expect(
+            buffer.bytes == [
+                0b1010_1011,
+                0b1001_0100,
+            ]
+        )
     }
 
     @Test
@@ -253,7 +266,7 @@ struct BitBufferTests {
         var buffer = BitBuffer()
         let newBytes: [UInt8] = [
             0b1100_1010,
-            0b0011_0101
+            0b0011_0101,
         ]
 
         buffer.append(1, bitCount: 1)
@@ -262,11 +275,13 @@ struct BitBufferTests {
         #expect(buffer.count == 17)
         #expect(buffer.byteCount == 3)
         #expect(buffer.isAligned == false)
-        #expect(buffer.bytes == [
-            0b1110_0101,
-            0b0001_1010,
-            0b1000_0000
-        ])
+        #expect(
+            buffer.bytes == [
+                0b1110_0101,
+                0b0001_1010,
+                0b1000_0000,
+            ]
+        )
     }
 
     // MARK: - append(contentsOf:) - BitBuffer
@@ -316,11 +331,13 @@ struct BitBufferTests {
         #expect(buffer.count == 19)
         #expect(buffer.byteCount == 3)
         #expect(buffer.isAligned == false)
-        #expect(buffer.bytes == [
-            0b1011_1001,
-            0b1000_0110,
-            0b1010_0000
-        ])
+        #expect(
+            buffer.bytes == [
+                0b1011_1001,
+                0b1000_0110,
+                0b1010_0000,
+            ]
+        )
     }
 
     @Test
@@ -336,10 +353,12 @@ struct BitBufferTests {
         #expect(buffer.count == 19)
         #expect(buffer.byteCount == 3)
         #expect(buffer.isAligned == false)
-        #expect(buffer.bytes == [
-            0b1011_0111,
-            0b0011_0010,
-            0b1100_0000
-        ])
+        #expect(
+            buffer.bytes == [
+                0b1011_0111,
+                0b0011_0010,
+                0b1100_0000,
+            ]
+        )
     }
 }

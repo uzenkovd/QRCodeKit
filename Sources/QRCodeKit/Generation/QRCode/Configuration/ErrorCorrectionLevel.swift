@@ -5,6 +5,7 @@
 //  Created by Dmytro Uzenkov on 11.08.2026.
 //
 
+// swift-format-ignore: AlwaysUseLowerCamelCase
 public enum ErrorCorrectionLevel: CaseIterable, Hashable, Sendable {
     case L
     case M
@@ -16,7 +17,7 @@ public enum ErrorCorrectionLevel: CaseIterable, Hashable, Sendable {
     public static let max: ErrorCorrectionLevel = .H
 
     static let descendingOrder: [ErrorCorrectionLevel] = [
-        .H, .Q, .M, .L
+        .H, .Q, .M, .L,
     ]
 
     var formatIndicator: UInt32 {

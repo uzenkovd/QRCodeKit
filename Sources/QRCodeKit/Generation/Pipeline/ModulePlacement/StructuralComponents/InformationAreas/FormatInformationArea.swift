@@ -184,7 +184,7 @@ private extension FormatInformationArea {
     ) {
         switch matrix[position.row, position.column] {
         case .reserved(.format),
-             .information(type: .format, color: _):
+            .information(type: .format, color: _):
             matrix[position.row, position.column] = .information(
                 type: .format,
                 color: color

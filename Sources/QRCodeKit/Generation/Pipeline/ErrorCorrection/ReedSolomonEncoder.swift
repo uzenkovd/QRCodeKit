@@ -92,7 +92,7 @@ extension ReedSolomonEncoder {
         for exponent in 0..<degree {
             let factor = Polynomial([
                 .one,
-                GF256(exponent: exponent)
+                GF256(exponent: exponent),
             ])
 
             generator *= factor

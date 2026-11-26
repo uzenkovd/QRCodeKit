@@ -6,18 +6,21 @@
 //
 
 import Testing
+
 @testable import QRCodeKit
 
 @Suite
 struct QRConfigurationResolverTests {
     // MARK: - Encoding Mode
 
-    @Test(arguments: [
-        ("0123456789", .numeric),
-        ("HELLO WORLD", .alphanumeric),
-        ("Café", .byte),
-        ("日本語", .kanji)
-    ] as [(String, EncodingMode)])
+    @Test(
+        arguments: [
+            ("0123456789", .numeric),
+            ("HELLO WORLD", .alphanumeric),
+            ("Café", .byte),
+            ("日本語", .kanji),
+        ] as [(String, EncodingMode)]
+    )
     func usesAutomaticEncodingModeWhenNoneIsRequested(
         message: String,
         expectedMode: EncodingMode

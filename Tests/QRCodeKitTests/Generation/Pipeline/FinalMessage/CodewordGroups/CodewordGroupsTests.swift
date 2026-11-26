@@ -6,6 +6,7 @@
 //
 
 import Testing
+
 @testable import QRCodeKit
 
 @Suite
@@ -21,7 +22,7 @@ struct CodewordGroupsTests {
                 Block(
                     dataCodewords: [4, 5, 6],
                     errorCorrectionCodewords: [9, 10]
-                )
+                ),
             ]
         )
 
@@ -50,7 +51,7 @@ struct CodewordGroupsTests {
                 Block(
                     dataCodewords: [3, 4],
                     errorCorrectionCodewords: [13, 14]
-                )
+                ),
             ]
         )
 
@@ -63,7 +64,7 @@ struct CodewordGroupsTests {
                 Block(
                     dataCodewords: [8, 9, 10],
                     errorCorrectionCodewords: [17, 18]
-                )
+                ),
             ]
         )
 
@@ -79,7 +80,7 @@ struct CodewordGroupsTests {
                     1, 2,
                     3, 4,
                     5, 6, 7,
-                    8, 9, 10
+                    8, 9, 10,
                 ]
         )
         #expect(
@@ -88,7 +89,7 @@ struct CodewordGroupsTests {
                     11, 12,
                     13, 14,
                     15, 16,
-                    17, 18
+                    17, 18,
                 ]
         )
         #expect(groups.totalBlockCount == 4)

@@ -23,7 +23,7 @@ enum QRStructureRenderer {
         [
             header(for: qrCode),
             render(qrCode.matrix),
-            plainLegend
+            plainLegend,
         ].joined(separator: "\n\n")
     }
 }

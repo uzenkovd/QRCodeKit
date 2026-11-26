@@ -79,12 +79,13 @@ extension QRTextRenderer {
         layout: Layout,
         style: Style
     ) -> String {
-        let lines = switch (layout, style) {
-        case (.regular, .plain): regularLines(of: grid).map(plainRegularLine)
-        case (.compact, .plain): compactLines(of: grid).map(plainCompactLine)
-        case (.regular, .ansi): regularLines(of: grid).map(ansiRegularLine)
-        case (.compact, .ansi): compactLines(of: grid).map(ansiCompactLine)
-        }
+        let lines =
+            switch (layout, style) {
+            case (.regular, .plain): regularLines(of: grid).map(plainRegularLine)
+            case (.compact, .plain): compactLines(of: grid).map(plainCompactLine)
+            case (.regular, .ansi): regularLines(of: grid).map(ansiRegularLine)
+            case (.compact, .ansi): compactLines(of: grid).map(ansiCompactLine)
+            }
 
         return lines.joined(separator: "\n")
     }

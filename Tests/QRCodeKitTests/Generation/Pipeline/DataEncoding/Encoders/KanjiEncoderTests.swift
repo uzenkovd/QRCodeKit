@@ -6,6 +6,7 @@
 //
 
 import Testing
+
 @testable import QRCodeKit
 
 @Suite
@@ -40,7 +41,7 @@ struct KanjiEncoderTests {
 
     @Test(arguments: [
         ("", 0),
-        ("日本語", 3)
+        ("日本語", 3),
     ])
     func characterCountIsCharacterCount(
         message: String,
@@ -75,9 +76,9 @@ struct KanjiEncoderTests {
     @Test(arguments: [
         ("", ""),
         ("\u{3000}", "0000000000000"),  // 0x8140, start of the first range
-        ("滌", "1011100111100"),         // 0x9FFC, end of the first range
-        ("漾", "1011101000000"),         // 0xE040, start of the second range
-        ("熙", "1111100100100")          // 0xEAA4, last character of the second range
+        ("滌", "1011100111100"),  // 0x9FFC, end of the first range
+        ("漾", "1011101000000"),  // 0xE040, start of the second range
+        ("熙", "1111100100100"),  // 0xEAA4, last character of the second range
     ])
     func encodeRangeBoundaries(
         message: String,

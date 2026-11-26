@@ -6,6 +6,7 @@
 //
 
 import Testing
+
 @testable import QRCodeKit
 
 @Suite
@@ -36,7 +37,7 @@ struct ByteEncoderTests {
     @Test(arguments: [
         ("", 0),
         ("Café", 4),
-        ("\r\n", 2)  // one Character, two bytes
+        ("\r\n", 2),  // one Character, two bytes
     ])
     func characterCountIsByteCount(
         message: String,
@@ -62,9 +63,9 @@ struct ByteEncoderTests {
     @Test(arguments: [
         ("", ""),
         ("a", "01100001"),
-        ("é", "11101001"),                 // upper half of ISO/IEC 8859-1
-        ("ÿ", "11111111"),                 // last character of ISO/IEC 8859-1
-        ("\r\n", "00001101" + "00001010")  // one Character, two bytes
+        ("é", "11101001"),  // upper half of ISO/IEC 8859-1
+        ("ÿ", "11111111"),  // last character of ISO/IEC 8859-1
+        ("\r\n", "00001101" + "00001010"),  // one Character, two bytes
     ])
     func encodeLatin1Bytes(
         message: String,

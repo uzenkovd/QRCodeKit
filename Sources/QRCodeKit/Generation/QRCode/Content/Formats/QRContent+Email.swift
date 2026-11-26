@@ -31,10 +31,12 @@ public extension QRContent {
         var queryItems: [String] = []
 
         if let subject {
-            guard subject.unicodeScalars.allSatisfy({
-                !CharacterSet.controlCharacters.contains($0)
-                    && !CharacterSet.newlines.contains($0)
-            }) else {
+            guard
+                subject.unicodeScalars.allSatisfy({
+                    !CharacterSet.controlCharacters.contains($0)
+                        && !CharacterSet.newlines.contains($0)
+                })
+            else {
                 throw QRContentError.invalidEmailSubject
             }
 
@@ -44,7 +46,8 @@ public extension QRContent {
         }
 
         if let body {
-            let normalizedBody = body
+            let normalizedBody =
+                body
                 .replacingOccurrences(of: "\r\n", with: "\n")
                 .replacingOccurrences(of: "\r", with: "\n")
                 .replacingOccurrences(of: "\n", with: "\r\n")

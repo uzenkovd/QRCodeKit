@@ -6,6 +6,7 @@
 //
 
 import Testing
+
 @testable import QRCodeKit
 
 @Suite
@@ -30,13 +31,15 @@ struct MaskApplierTests {
         #expect(matrix == expectedMatrix)
     }
 
-    @Test(arguments: [
-        .unset,
-        .reserved(.format),
-        .function(pattern: .finder, color: .dark),
-        .darkModule,
-        .information(type: .version, color: .light)
-    ] as [QRModule])
+    @Test(
+        arguments: [
+            .unset,
+            .reserved(.format),
+            .function(pattern: .finder, color: .dark),
+            .darkModule,
+            .information(type: .version, color: .light),
+        ] as [QRModule]
+    )
     func leavesNonDataModulesUnchanged(
         module: QRModule
     ) {

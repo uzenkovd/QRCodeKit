@@ -23,7 +23,8 @@ extension QRStructureRenderer {
                 + " │"
         }
 
-        return (columnRuler(size: size, indent: indent)
+        return
+            (columnRuler(size: size, indent: indent)
             + [plainBorder(size: size, left: "┌", right: "┐")]
             + rows
             + [plainBorder(size: size, left: "└", right: "┘")])

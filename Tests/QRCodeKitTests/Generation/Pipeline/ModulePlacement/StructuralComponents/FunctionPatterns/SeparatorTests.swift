@@ -6,6 +6,7 @@
 //
 
 import Testing
+
 @testable import QRCodeKit
 
 @Suite
@@ -115,16 +116,16 @@ private extension SeparatorTests {
         let oppositeOffset = matrixSize - separatorLength
 
         let isTopLeft =
-            (row == lastOffset && column < separatorLength) ||
-            (column == lastOffset && row < separatorLength)
+            (row == lastOffset && column < separatorLength)
+            || (column == lastOffset && row < separatorLength)
 
         let isTopRight =
-            (row == lastOffset && column >= oppositeOffset) ||
-            (column == oppositeOffset && row < separatorLength)
+            (row == lastOffset && column >= oppositeOffset)
+            || (column == oppositeOffset && row < separatorLength)
 
         let isBottomLeft =
-            (row == oppositeOffset && column < separatorLength) ||
-            (column == lastOffset && row >= oppositeOffset)
+            (row == oppositeOffset && column < separatorLength)
+            || (column == lastOffset && row >= oppositeOffset)
 
         return isTopLeft || isTopRight || isBottomLeft
     }

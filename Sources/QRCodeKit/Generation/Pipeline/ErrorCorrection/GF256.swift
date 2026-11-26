@@ -125,7 +125,7 @@ private extension GF256 {
     static func makeTables() -> Tables {
         // exponent[e] = αᵉ and log[αᵉ] = e
 
-        var logs = Array<Int?>(
+        var logs = [Int?](
             repeating: nil,
             count: 256
         )

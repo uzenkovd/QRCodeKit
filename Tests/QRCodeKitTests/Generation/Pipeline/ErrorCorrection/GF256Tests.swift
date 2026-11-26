@@ -6,6 +6,7 @@
 //
 
 import Testing
+
 @testable import QRCodeKit
 
 @Suite
@@ -42,7 +43,7 @@ struct GF256Tests {
         (0x85, 128),
         (0xFF, 175),
         (0x1C, 200),
-        (0x8E, 254)
+        (0x8E, 254),
     ])
     func exponentForKnownValues(value: UInt8, exponent: Int) {
         #expect(GF256(value).exponent == exponent)
@@ -59,7 +60,7 @@ struct GF256Tests {
         (128, 0x85),
         (175, 0xFF),
         (200, 0x1C),
-        (254, 0x8E)
+        (254, 0x8E),
     ])
     func valueForKnownExponents(exponent: Int, value: UInt8) {
         #expect(GF256(exponent: exponent).value == value)
@@ -112,7 +113,7 @@ struct GF256Tests {
         (0x05, 0x03, 0x06),
         (0x2A, 0x11, 0x3B),
         (0x80, 0x1D, 0x9D),
-        (0xFF, 0x8E, 0x71)
+        (0xFF, 0x8E, 0x71),
     ])
     func additionForKnownValues(
         lhs: UInt8,
@@ -152,7 +153,7 @@ struct GF256Tests {
         (0x05, 0x03, 0x06),
         (0x2A, 0x11, 0x3B),
         (0x80, 0x1D, 0x9D),
-        (0xFF, 0x8E, 0x71)
+        (0xFF, 0x8E, 0x71),
     ])
     func subtractionForKnownValues(
         lhs: UInt8,
@@ -195,7 +196,7 @@ struct GF256Tests {
         (0xFF, 0x8E, 0xF1),
         (0xCC, 0x85, 0x01),
         (0x1D, 0x3A, 0x98),
-        (0x80, 0x80, 0x13)
+        (0x80, 0x80, 0x13),
     ])
     func multiplicationForKnownValues(
         lhs: UInt8,
@@ -242,7 +243,7 @@ struct GF256Tests {
         (0x2A, 0x11, 0xB5),
         (0x8E, 0x02, 0x47),
         (0xFF, 0x8E, 0xE3),
-        (0xCC, 0x85, 0x8E)
+        (0xCC, 0x85, 0x8E),
     ])
     func divisionForKnownValues(
         lhs: UInt8,

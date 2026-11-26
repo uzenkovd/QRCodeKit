@@ -6,6 +6,7 @@
 //
 
 import Testing
+
 @testable import QRCodeKit
 
 @Suite
@@ -36,12 +37,13 @@ struct MaskPenaltyScorerTests {
         let penalty = MaskPenaltyScorer.penalty(for: symbol)
 
         #expect(
-            penalty == MaskPenalty(
-                consecutiveModules: 206,
-                sameColorBlocks: 111,
-                finderLikePatterns: 0,
-                darkModuleBalance: 0
-            )
+            penalty
+                == MaskPenalty(
+                    consecutiveModules: 206,
+                    sameColorBlocks: 111,
+                    finderLikePatterns: 0,
+                    darkModuleBalance: 0
+                )
         )
     }
 
@@ -71,12 +73,14 @@ struct MaskPenaltyScorerTests {
 
     // MARK: - Consecutive Modules
 
-    @Test(arguments: [
-        ("11110", 0),
-        ("11111", 3),
-        ("111111", 4),
-        ("0000000", 5)
-    ] as [(String, Int)])
+    @Test(
+        arguments: [
+            ("11110", 0),
+            ("11111", 3),
+            ("111111", 4),
+            ("0000000", 5),
+        ] as [(String, Int)]
+    )
     func scoresRunsOfFiveOrMoreModules(
         line: String,
         expectedPenalty: Int
@@ -112,7 +116,7 @@ struct MaskPenaltyScorerTests {
         ["11", "10"],
         ["11", "01"],
         ["10", "11"],
-        ["01", "11"]
+        ["01", "11"],
     ])
     func scoresNothingForBlockWithOneDifferentModule(
         rows: [String]
@@ -148,7 +152,7 @@ struct MaskPenaltyScorerTests {
         "00001011101",
         "10111010000",
         "000010111010000",
-        "0000110111010000"
+        "0000110111010000",
     ])
     func scoresPatternWithLightAreaOnce(
         line: String
@@ -164,7 +168,7 @@ struct MaskPenaltyScorerTests {
         "100010111010001",
         "110111011",
         "00000000110011111100110000000000",
-        "10111"
+        "10111",
     ])
     func scoresNothingWithoutPatternAndLightArea(
         line: String
@@ -187,7 +191,7 @@ struct MaskPenaltyScorerTests {
 
     @Test(arguments: [
         "1011101",
-        "01011101"
+        "01011101",
     ])
     func treatsModulesPastLineAsLight(
         line: String
@@ -201,16 +205,18 @@ struct MaskPenaltyScorerTests {
 
     // MARK: - Dark Module Balance
 
-    @Test(arguments: [
-        (0, 100),
-        (40, 20),
-        (45, 10),
-        (46, 0),
-        (54, 0),
-        (55, 10),
-        (60, 20),
-        (100, 100)
-    ] as [(Int, Int)])
+    @Test(
+        arguments: [
+            (0, 100),
+            (40, 20),
+            (45, 10),
+            (46, 0),
+            (54, 0),
+            (55, 10),
+            (60, 20),
+            (100, 100),
+        ] as [(Int, Int)]
+    )
     func scoresEachFullFivePercentDeviationFromHalf(
         darkModuleCount: Int,
         expectedPenalty: Int

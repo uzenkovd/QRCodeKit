@@ -64,14 +64,14 @@ private extension QRRenderGrid {
     ) -> QRModuleColor {
         switch module {
         case .data(color: .light),
-             .function(pattern: _, color: .light),
-             .information(type: _, color: .light):
+            .function(pattern: _, color: .light),
+            .information(type: _, color: .light):
             return .light
 
         case .data(color: .dark),
-             .function(pattern: _, color: .dark),
-             .information(type: _, color: .dark),
-             .darkModule:
+            .function(pattern: _, color: .dark),
+            .information(type: _, color: .dark),
+            .darkModule:
             return .dark
 
         case .reserved, .unset:

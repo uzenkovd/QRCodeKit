@@ -5,8 +5,8 @@
 //  Created by Dmytro Uzenkov on 28.08.2026.
 //
 
-import Testing
 import QRCodeKit
+import Testing
 
 @Suite
 struct QROptionsTests {
@@ -48,12 +48,15 @@ struct QROptionsTests {
         options.errorCorrectionLevel = .H
         options.mask = .pattern6
 
-        #expect(options == QROptions(
-            version: .v10,
-            encodingMode: .byte,
-            errorCorrectionLevel: .H,
-            mask: .pattern6
-        ))
+        #expect(
+            options
+                == QROptions(
+                    version: .v10,
+                    encodingMode: .byte,
+                    errorCorrectionLevel: .H,
+                    mask: .pattern6
+                )
+        )
     }
 
     // MARK: - Equality
@@ -69,7 +72,7 @@ struct QROptionsTests {
         QROptions(version: .v2),
         QROptions(encodingMode: .byte),
         QROptions(errorCorrectionLevel: .H),
-        QROptions(mask: .pattern3)
+        QROptions(mask: .pattern3),
     ])
     func differsFromOptionsWithAnyDifferentValue(
         _ options: QROptions
@@ -83,7 +86,7 @@ struct QROptionsTests {
     func hashesEqualOptionsEqually() {
         let options: Set = [
             QROptions(version: .v2, mask: .pattern3),
-            QROptions(version: .v2, mask: .pattern3)
+            QROptions(version: .v2, mask: .pattern3),
         ]
 
         #expect(options.count == 1)

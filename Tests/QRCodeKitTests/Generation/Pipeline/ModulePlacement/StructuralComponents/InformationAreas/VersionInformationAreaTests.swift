@@ -6,15 +6,18 @@
 //
 
 import Testing
+
 @testable import QRCodeKit
 
 @Suite
 struct VersionInformationAreaTests {
     // MARK: - Reservation
 
-    @Test(arguments: QRVersion.allCases.filter {
-        $0 < .v7
-    })
+    @Test(
+        arguments: QRVersion.allCases.filter {
+            $0 < .v7
+        }
+    )
     func leaveAllModulesUnsetWhenReservingBeforeVersion7(
         version: QRVersion
     ) {
@@ -29,9 +32,11 @@ struct VersionInformationAreaTests {
         #expect(matrix == expectedMatrix)
     }
 
-    @Test(arguments: QRVersion.allCases.filter {
-        $0 >= .v7
-    })
+    @Test(
+        arguments: QRVersion.allCases.filter {
+            $0 >= .v7
+        }
+    )
     func reserveVersionInformationAreaAtCorrectPositions(
         version: QRVersion
     ) {
@@ -54,9 +59,11 @@ struct VersionInformationAreaTests {
         }
     }
 
-    @Test(arguments: QRVersion.allCases.filter {
-        $0 >= .v7
-    })
+    @Test(
+        arguments: QRVersion.allCases.filter {
+            $0 >= .v7
+        }
+    )
     func leaveOtherModulesUnset(
         version: QRVersion
     ) {
@@ -100,9 +107,11 @@ struct VersionInformationAreaTests {
 
     // MARK: - Placement
 
-    @Test(arguments: QRVersion.allCases.filter {
-        $0 < .v7
-    })
+    @Test(
+        arguments: QRVersion.allCases.filter {
+            $0 < .v7
+        }
+    )
     func leaveAllModulesUnsetWhenPlacingBeforeVersion7(
         version: QRVersion
     ) {
@@ -151,9 +160,9 @@ private extension VersionInformationAreaTests {
     )
 
     static let placementTestCases: [PlacementTestCase] = [
-        (.v7,  0b000111110010010100),
-        (.v8,  0b001000010110111100),
-        (.v9,  0b001001101010011001),
+        (.v7, 0b000111110010010100),
+        (.v8, 0b001000010110111100),
+        (.v9, 0b001001101010011001),
         (.v10, 0b001010010011010011),
         (.v11, 0b001011101111110110),
         (.v12, 0b001100011101100010),
@@ -184,7 +193,7 @@ private extension VersionInformationAreaTests {
         (.v37, 0b100101010000101110),
         (.v38, 0b100110101001100100),
         (.v39, 0b100111010101000001),
-        (.v40, 0b101000110001101001)
+        (.v40, 0b101000110001101001),
     ]
 }
 
@@ -271,7 +280,7 @@ private extension VersionInformationAreaTests {
                 Position(row: 4, column: farStartCoordinate + 2),
                 Position(row: 5, column: farStartCoordinate),
                 Position(row: 5, column: farStartCoordinate + 1),
-                Position(row: 5, column: farStartCoordinate + 2)
+                Position(row: 5, column: farStartCoordinate + 2),
             ],
             bottomLeftCopy: [
                 Position(row: farStartCoordinate, column: 0),
@@ -291,7 +300,7 @@ private extension VersionInformationAreaTests {
                 Position(row: farStartCoordinate + 2, column: 4),
                 Position(row: farStartCoordinate, column: 5),
                 Position(row: farStartCoordinate + 1, column: 5),
-                Position(row: farStartCoordinate + 2, column: 5)
+                Position(row: farStartCoordinate + 2, column: 5),
             ]
         )
     }

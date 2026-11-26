@@ -6,6 +6,7 @@
 //
 
 import Testing
+
 @testable import QRCodeKit
 
 @Suite
@@ -52,7 +53,7 @@ struct QRContentWiFiTests {
         "ABCDE",
         "ABCDEFGHIJKLM",
         "0123456789",
-        String(repeating: "AB", count: 13)
+        String(repeating: "AB", count: 13),
     ])
     func createsWEPWiFiContent(_ key: String) throws {
         let content = try QRContent.wifi(
@@ -134,7 +135,7 @@ struct QRContentWiFiTests {
     @Test(arguments: [
         "A",
         String(repeating: "A", count: 32),
-        String(repeating: "і", count: 16)
+        String(repeating: "і", count: 16),
     ])
     func acceptsWiFiSSIDBoundaryLengths(_ ssid: String) throws {
         let content = try QRContent.wifi(
@@ -152,7 +153,7 @@ struct QRContentWiFiTests {
         String(repeating: "A", count: 33),
         String(repeating: "і", count: 17),
         "Home\nNetwork",
-        "Home\u{0000}Network"
+        "Home\u{0000}Network",
     ])
     func rejectsInvalidWiFiSSIDs(_ ssid: String) {
         #expect(throws: QRContentError.invalidWiFiSSID) {
@@ -169,7 +170,7 @@ struct QRContentWiFiTests {
         "ABCDEF",
         "123456789G",
         "ABCé",
-        String(repeating: "A", count: 16)
+        String(repeating: "A", count: 16),
     ])
     func rejectsInvalidWEPKeys(_ key: String) {
         #expect(throws: QRContentError.invalidWiFiCredential) {
@@ -182,7 +183,7 @@ struct QRContentWiFiTests {
 
     @Test(arguments: [
         String(repeating: "a", count: 8),
-        String(repeating: "a", count: 63)
+        String(repeating: "a", count: 63),
     ])
     func acceptsWPAPasswordBoundaryLengths(
         _ password: String
@@ -218,7 +219,7 @@ struct QRContentWiFiTests {
         String(repeating: "g", count: 64),
         String(repeating: "a", count: 65),
         "пароль123",
-        "secret\n123"
+        "secret\n123",
     ])
     func rejectsInvalidWPACredentials(_ password: String) {
         #expect(throws: QRContentError.invalidWiFiCredential) {
@@ -232,7 +233,7 @@ struct QRContentWiFiTests {
     @Test(arguments: [
         "a",
         "Привіт🔐",
-        String(repeating: "g", count: 64)
+        String(repeating: "g", count: 64),
     ])
     func acceptsSAEPasswordVariations(
         _ password: String
@@ -251,7 +252,7 @@ struct QRContentWiFiTests {
     @Test(arguments: [
         "",
         "secret\n123",
-        "secret\u{0000}123"
+        "secret\u{0000}123",
     ])
     func rejectsInvalidSAEPasswords(_ password: String) {
         #expect(throws: QRContentError.invalidWiFiCredential) {

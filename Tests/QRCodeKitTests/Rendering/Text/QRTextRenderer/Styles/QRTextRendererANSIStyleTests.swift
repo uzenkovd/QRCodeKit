@@ -6,6 +6,7 @@
 //
 
 import Testing
+
 @testable import QRCodeKit
 
 @Suite
@@ -34,7 +35,7 @@ struct QRTextRendererANSIStyleTests {
             (upper: .dark, lower: .light),
             (upper: .dark, lower: .dark),
             (upper: .light, lower: nil),
-            (upper: .dark, lower: nil)
+            (upper: .dark, lower: nil),
         ])
 
         // Uniform cells are spaces and mixed cells are lower half

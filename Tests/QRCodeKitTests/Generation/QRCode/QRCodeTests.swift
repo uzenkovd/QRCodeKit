@@ -6,6 +6,7 @@
 //
 
 import Testing
+
 @testable import QRCodeKit
 
 @Suite
@@ -348,8 +349,8 @@ private extension QRCodeTests {
     ) -> Character {
         switch module {
         case let .function(_, color),
-             let .information(_, color),
-             let .data(color):
+            let .information(_, color),
+            let .data(color):
             color == .dark ? "1" : "0"
 
         case .darkModule:

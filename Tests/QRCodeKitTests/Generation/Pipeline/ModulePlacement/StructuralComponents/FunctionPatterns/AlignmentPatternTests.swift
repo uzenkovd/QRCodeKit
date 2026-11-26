@@ -6,6 +6,7 @@
 //
 
 import Testing
+
 @testable import QRCodeKit
 
 @Suite
@@ -76,11 +77,11 @@ private extension AlignmentPatternTests {
     static let patternSize = 5
 
     static let expectedPattern: [[QRModuleColor]] = [
-        [.dark, .dark,  .dark,  .dark,  .dark],
+        [.dark, .dark, .dark, .dark, .dark],
         [.dark, .light, .light, .light, .dark],
-        [.dark, .light, .dark,  .light, .dark],
+        [.dark, .light, .dark, .light, .dark],
         [.dark, .light, .light, .light, .dark],
-        [.dark, .dark,  .dark,  .dark,  .dark]
+        [.dark, .dark, .dark, .dark, .dark],
     ]
 
     static func expectedCenters(
@@ -101,8 +102,8 @@ private extension AlignmentPatternTests {
             coordinates.enumerated().compactMap { columnIndex, column in
                 switch (rowIndex, columnIndex) {
                 case (0, 0),
-                     (0, lastIndex),
-                     (lastIndex, 0):
+                    (0, lastIndex),
+                    (lastIndex, 0):
                     return nil
 
                 default:
@@ -148,8 +149,7 @@ private extension AlignmentPatternTests {
         let radius = patternSize / 2
 
         return centers.contains { center in
-            abs(row - center.row) <= radius &&
-            abs(column - center.column) <= radius
+            abs(row - center.row) <= radius && abs(column - center.column) <= radius
         }
     }
 }

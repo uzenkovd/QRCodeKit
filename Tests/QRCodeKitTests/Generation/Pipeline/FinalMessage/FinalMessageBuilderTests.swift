@@ -6,6 +6,7 @@
 //
 
 import Testing
+
 @testable import QRCodeKit
 
 @Suite
@@ -73,7 +74,7 @@ struct FinalMessageBuilderTests {
                 Block(
                     dataCodewords: group1Block2DataCodewords,
                     errorCorrectionCodewords: group1Block2ECCodewords
-                )
+                ),
             ]
         )
 
@@ -86,7 +87,7 @@ struct FinalMessageBuilderTests {
                 Block(
                     dataCodewords: group2Block2DataCodewords,
                     errorCorrectionCodewords: group2Block2ECCodewords
-                )
+                ),
             ]
         )
 
@@ -143,7 +144,7 @@ struct FinalMessageBuilderTests {
                 Block(
                     dataCodewords: [2, 4, 6],
                     errorCorrectionCodewords: [8, 10]
-                )
+                ),
             ]
         )
 
@@ -171,7 +172,7 @@ struct FinalMessageBuilderTests {
                 Block(
                     dataCodewords: [2, 6],
                     errorCorrectionCodewords: [12, 16]
-                )
+                ),
             ]
         )
 
@@ -184,7 +185,7 @@ struct FinalMessageBuilderTests {
                 Block(
                     dataCodewords: [4, 8, 10],
                     errorCorrectionCodewords: [14, 18]
-                )
+                ),
             ]
         )
 

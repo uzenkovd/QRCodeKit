@@ -6,6 +6,7 @@
 //
 
 import Testing
+
 @testable import QRCodeKit
 
 @Suite
@@ -89,7 +90,7 @@ struct QRContentGeoTests {
 
     @Test(arguments: [
         -90.0,
-        90.0
+        90.0,
     ])
     func acceptsLatitudeBoundaryValues(_ latitude: Double) throws {
         let content = try QRContent.geo(
@@ -102,7 +103,7 @@ struct QRContentGeoTests {
 
     @Test(arguments: [
         -180.0,
-        180.0
+        180.0,
     ])
     func acceptsLongitudeBoundaryValues(_ longitude: Double) throws {
         let content = try QRContent.geo(
@@ -150,7 +151,7 @@ struct QRContentGeoTests {
         90.0001,
         Double.nan,
         Double.infinity,
-        -Double.infinity
+        -Double.infinity,
     ])
     func rejectsInvalidLatitudes(_ latitude: Double) {
         #expect(throws: QRContentError.invalidGeolocation) {
@@ -166,7 +167,7 @@ struct QRContentGeoTests {
         180.0001,
         Double.nan,
         Double.infinity,
-        -Double.infinity
+        -Double.infinity,
     ])
     func rejectsInvalidLongitudes(_ longitude: Double) {
         #expect(throws: QRContentError.invalidGeolocation) {
@@ -180,7 +181,7 @@ struct QRContentGeoTests {
     @Test(arguments: [
         Double.nan,
         Double.infinity,
-        -Double.infinity
+        -Double.infinity,
     ])
     func rejectsInvalidAltitudes(_ altitude: Double) {
         #expect(throws: QRContentError.invalidGeolocation) {
@@ -197,7 +198,7 @@ struct QRContentGeoTests {
         -1.0,
         Double.nan,
         Double.infinity,
-        -Double.infinity
+        -Double.infinity,
     ])
     func rejectsInvalidUncertainty(_ uncertainty: Double) {
         #expect(throws: QRContentError.invalidGeolocation) {

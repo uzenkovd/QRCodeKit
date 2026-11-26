@@ -55,9 +55,11 @@ private extension QRContent {
 
         let normalized = value == 0 ? 0.0 : value
 
-        guard let formatted = formatter.string(
-            from: NSNumber(value: normalized)
-        ) else {
+        guard
+            let formatted = formatter.string(
+                from: NSNumber(value: normalized)
+            )
+        else {
             preconditionFailure("Failed to format geolocation number")
         }
 

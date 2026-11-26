@@ -6,6 +6,7 @@
 //
 
 import Testing
+
 @testable import QRCodeKit
 
 @Suite
@@ -23,14 +24,14 @@ struct DataPlacerTests {
             (19, 8), (19, 7),
 
             (0, 5), (0, 4),
-            (1, 5), (1, 4)
+            (1, 5), (1, 4),
         ]
 
         let expectedBits = [
             true, false, false, true,
             false, true, true, false,
             true, true, false, false,
-            false, true, false, true
+            false, true, false, true,
         ]
 
         var matrix = Self.makeTraversalMatrix(
