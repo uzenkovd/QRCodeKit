@@ -6,6 +6,7 @@
 //
 
 import Testing
+
 @testable import QRCodeKit
 
 @Suite
@@ -67,7 +68,7 @@ struct TimingPatternTests {
 
     @Test(arguments: [
         QRVersion.v7,
-        .max
+        .max,
     ])
     func preserveOverlappingAlignmentPatterns(
         version: QRVersion
@@ -145,12 +146,10 @@ private extension TimingPatternTests {
         let range = startCoordinate...endCoordinate
 
         let isHorizontal =
-            row == timingCoordinate &&
-            range.contains(column)
+            row == timingCoordinate && range.contains(column)
 
         let isVertical =
-            column == timingCoordinate &&
-            range.contains(row)
+            column == timingCoordinate && range.contains(row)
 
         return isHorizontal || isVertical
     }

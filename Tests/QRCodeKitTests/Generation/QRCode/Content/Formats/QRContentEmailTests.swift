@@ -6,6 +6,7 @@
 //
 
 import Testing
+
 @testable import QRCodeKit
 
 @Suite
@@ -142,10 +143,12 @@ struct QRContentEmailTests {
 
     @Test
     func validatesEmailLocalPartLength() throws {
-        let validAddress = String(repeating: "a", count: 64)
+        let validAddress =
+            String(repeating: "a", count: 64)
             + "@example.com"
 
-        let invalidAddress = String(repeating: "a", count: 65)
+        let invalidAddress =
+            String(repeating: "a", count: 65)
             + "@example.com"
 
         let content = try QRContent.email(validAddress)
@@ -190,7 +193,7 @@ struct QRContentEmailTests {
         "hello@-example.com",
         "hello@example..com",
         "hello@ex_ample.com",
-        "привіт@example.com"
+        "привіт@example.com",
     ])
     func rejectsInvalidEmailAddresses(_ address: String) {
         #expect(throws: QRContentError.invalidEmailAddress) {
@@ -202,7 +205,7 @@ struct QRContentEmailTests {
         "Hello\nBcc:other@example.com",
         "Hello\rWorld",
         "Hello\u{2028}World",
-        "Hello\u{0000}World"
+        "Hello\u{0000}World",
     ])
     func rejectsInvalidEmailSubject(_ subject: String) {
         #expect(throws: QRContentError.invalidEmailSubject) {
@@ -217,7 +220,8 @@ struct QRContentEmailTests {
     func validatesEmailAddressTotalLength() throws {
         let localPart = String(repeating: "a", count: 64)
 
-        let domain = String(repeating: "b", count: 63)
+        let domain =
+            String(repeating: "b", count: 63)
             + "."
             + String(repeating: "c", count: 63)
             + "."

@@ -6,6 +6,7 @@
 //
 
 import Testing
+
 @testable import QRCodeKit
 
 @Suite
@@ -26,11 +27,13 @@ struct PolynomialTests {
     func initializationFromUInt8StoresCoefficients() {
         let polynomial = Polynomial([5, 3, 1])
 
-        #expect(polynomial.coefficients == [
-            GF256(5),
-            GF256(3),
-            GF256.one
-        ])
+        #expect(
+            polynomial.coefficients == [
+                GF256(5),
+                GF256(3),
+                GF256.one,
+            ]
+        )
     }
 
     @Test
@@ -38,7 +41,7 @@ struct PolynomialTests {
         let coefficients = [
             GF256(17),
             GF256.zero,
-            GF256(255)
+            GF256(255),
         ]
 
         let polynomial = Polynomial(coefficients)
@@ -49,7 +52,7 @@ struct PolynomialTests {
     @Test(arguments: [
         ([0, 42], [42]),
         ([0, 0, 5, 3, 2], [5, 3, 2]),
-        ([0, 0, 0, 255, 1], [255, 1])
+        ([0, 0, 0, 255, 1], [255, 1]),
     ])
     func leadingZeroCoefficientsAreRemoved(
         coefficients: [UInt8],
@@ -63,7 +66,7 @@ struct PolynomialTests {
     @Test(arguments: [
         ([7, 0, 3], [7, 0, 3]),
         ([4, 2, 0], [4, 2, 0]),
-        ([0, 0, 6, 0, 1, 0], [6, 0, 1, 0])
+        ([0, 0, 6, 0, 1, 0], [6, 0, 1, 0]),
     ])
     func nonLeadingZeroCoefficientsArePreserved(
         coefficients: [UInt8],
@@ -77,7 +80,7 @@ struct PolynomialTests {
     @Test(arguments: [
         [0],
         [0, 0],
-        [0, 0, 0]
+        [0, 0, 0],
     ])
     func allZeroCoefficientsNormalizeToZeroPolynomial(
         coefficients: [UInt8]
@@ -95,7 +98,7 @@ struct PolynomialTests {
         [1],
         [0, 8, 0],
         [2, 0, 0],
-        [0, 47, 84, 5]
+        [0, 47, 84, 5],
     ])
     func nonZeroPolynomialsAreNotZero(
         coefficients: [UInt8]
@@ -107,7 +110,7 @@ struct PolynomialTests {
         ([5], 1),
         ([6, 7], 2),
         ([2, 3, 0], 3),
-        ([0, 9, 5, 0, 2], 4)
+        ([0, 9, 5, 0, 2], 4),
     ])
     func countForKnownCoefficients(
         coefficients: [UInt8],
@@ -124,7 +127,7 @@ struct PolynomialTests {
         ([5, 3, 2], 2),
         ([8, 0, 0], 2),
         ([0, 0, 5, 3, 2], 2),
-        ([67, 0, 15, 7, 0, 2], 5)
+        ([67, 0, 15, 7, 0, 2], 5),
     ])
     func degreeForKnownCoefficients(
         coefficients: [UInt8],
@@ -163,10 +166,10 @@ struct PolynomialTests {
 
     @Test(arguments: [
         ([5, 3, 2], [7, 4, 1], [2, 7, 3]),  // Equal degrees
-        ([5, 3, 2], [7, 4], [5, 4, 6]),     // Lhs has higher degree
-        ([7, 4], [5, 3, 2], [5, 4, 6]),     // Rhs has higher degree
-        ([5, 3, 2], [5, 7, 4], [4, 6]),     // Leading coefficient cancellation
-        ([5, 3, 2], [5, 3, 4], [6])         // Multiple leading coefficient cancellations
+        ([5, 3, 2], [7, 4], [5, 4, 6]),  // Lhs has higher degree
+        ([7, 4], [5, 3, 2], [5, 4, 6]),  // Rhs has higher degree
+        ([5, 3, 2], [5, 7, 4], [4, 6]),  // Leading coefficient cancellation
+        ([5, 3, 2], [5, 3, 4], [6]),  // Multiple leading coefficient cancellations
     ])
     func additionForKnownPolynomials(
         lhs: [UInt8],
@@ -205,9 +208,9 @@ struct PolynomialTests {
     }
 
     @Test(arguments: [
-        ([12, 25, 7], [5, 9, 3], [9, 16, 4]),   // Equal degrees
-        ([18, 6, 11], [7, 4], [18, 1, 15]),     // Different degrees
-        ([21, 8, 3], [21, 13, 7], [5, 4])       // Leading coefficient cancellation
+        ([12, 25, 7], [5, 9, 3], [9, 16, 4]),  // Equal degrees
+        ([18, 6, 11], [7, 4], [18, 1, 15]),  // Different degrees
+        ([21, 8, 3], [21, 13, 7], [5, 4]),  // Leading coefficient cancellation
     ])
     func subtractionForKnownPolynomials(
         lhs: [UInt8],
@@ -247,12 +250,12 @@ struct PolynomialTests {
     }
 
     @Test(arguments: [
-        ([5, 3, 2], [7, 4], [27, 29, 2, 8]),        // Different degrees
-        ([7, 4], [5, 3, 2], [27, 29, 2, 8]),        // Reversed operands
-        ([5, 3, 2], [7, 4, 1], [27, 29, 7, 11, 2]), // Equal degrees
-        ([1, 0, 1], [1, 1], [1, 1, 1, 1]),          // Internal zero coefficient
-        ([5], [7, 4, 1], [27, 20, 5]),              // Constant polynomial
-        ([1, 0, 0], [7, 4], [7, 4, 0, 0])           // Trailing zero coefficients
+        ([5, 3, 2], [7, 4], [27, 29, 2, 8]),  // Different degrees
+        ([7, 4], [5, 3, 2], [27, 29, 2, 8]),  // Reversed operands
+        ([5, 3, 2], [7, 4, 1], [27, 29, 7, 11, 2]),  // Equal degrees
+        ([1, 0, 1], [1, 1], [1, 1, 1, 1]),  // Internal zero coefficient
+        ([5], [7, 4, 1], [27, 20, 5]),  // Constant polynomial
+        ([1, 0, 0], [7, 4], [7, 4, 0, 0]),  // Trailing zero coefficients
     ])
     func multiplicationForKnownPolynomials(
         lhs: [UInt8],
@@ -388,13 +391,13 @@ struct PolynomialTests {
     }
 
     @Test(arguments: [
-        ([27, 29, 2, 8], [7, 4], [5, 3, 2], [0]),   // Exact multi-step division
-        ([27, 29, 2, 9], [7, 4], [5, 3, 2], [1]),   // Non-zero remainder
-        ([1, 1, 1, 1], [1, 1], [1, 0, 1], [0]),     // Internal zero in quotient
-        ([15, 8, 6], [3, 2, 1], [5], [2, 3]),       // Equal degrees, single division step
-        ([15, 10, 5], [5], [3, 2, 1], [0]),         // Constant divisor, empty remainder
-        ([20, 2, 0, 4], [5, 2, 1], [4, 2], [6]),    // Internal zero in dividend, remainder normalization
-        ([6, 12, 7, 2], [3, 0, 1], [2, 4], [5, 6])  // Internal zero in divisor
+        ([27, 29, 2, 8], [7, 4], [5, 3, 2], [0]),  // Exact multi-step division
+        ([27, 29, 2, 9], [7, 4], [5, 3, 2], [1]),  // Non-zero remainder
+        ([1, 1, 1, 1], [1, 1], [1, 0, 1], [0]),  // Internal zero in quotient
+        ([15, 8, 6], [3, 2, 1], [5], [2, 3]),  // Equal degrees, single division step
+        ([15, 10, 5], [5], [3, 2, 1], [0]),  // Constant divisor, empty remainder
+        ([20, 2, 0, 4], [5, 2, 1], [4, 2], [6]),  // Zero in dividend, remainder normalization
+        ([6, 12, 7, 2], [3, 0, 1], [2, 4], [5, 6]),  // Internal zero in divisor
     ])
     func longDivisionForKnownPolynomials(
         dividend: [UInt8],
@@ -413,8 +416,7 @@ struct PolynomialTests {
         #expect(division.remainder == Polynomial(expectedRemainder))
 
         #expect(
-            division.remainder.isZero ||
-                division.remainder.degree < divisor.degree
+            division.remainder.isZero || division.remainder.degree < divisor.degree
         )
 
         #expect(dividend == divisor * division.quotient + division.remainder)

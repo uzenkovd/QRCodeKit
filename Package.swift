@@ -8,11 +8,13 @@ let package = Package(
     products: [
         .library(
             name: "QRCodeKit",
-            targets: ["QRCodeKit"]),
+            targets: ["QRCodeKit"]
+        )
     ],
     targets: [
         .target(
-            name: "QRCodeKit"),
+            name: "QRCodeKit"
+        ),
         .testTarget(
             name: "QRCodeKitTests",
             dependencies: ["QRCodeKit"]

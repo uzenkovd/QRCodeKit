@@ -36,11 +36,13 @@ enum MaskPenaltyScorer {
         }
         let lines = rows + columns
 
-        let consecutiveModules = lines
+        let consecutiveModules =
+            lines
             .map(consecutiveModulesPenalty(in:))
             .reduce(0, +)
         let sameColorBlocks = sameColorBlocksPenalty(in: rows)
-        let finderLikePatterns = lines
+        let finderLikePatterns =
+            lines
             .map(finderLikePatternsPenalty(in:))
             .reduce(0, +)
             - finderPatternsPenalty
@@ -105,7 +107,8 @@ extension MaskPenaltyScorer {
 
                 if topLeft == topRight
                     && topLeft == bottomLeft
-                    && topLeft == bottomRight {
+                    && topLeft == bottomRight
+                {
                     penalty += 3
                 }
             }
@@ -120,7 +123,7 @@ extension MaskPenaltyScorer {
 extension MaskPenaltyScorer {
     private static let lightAreaWidth = 4
     private static let finderLikePattern: [QRModuleColor] = [
-        .dark, .light, .dark, .dark, .dark, .light, .dark
+        .dark, .light, .dark, .dark, .dark, .light, .dark,
     ]
 
     /// The rule 3 penalty that the three finder patterns score in every
@@ -154,7 +157,8 @@ extension MaskPenaltyScorer {
             let trailingArea = end..<(end + lightAreaWidth)
 
             if isLightArea(leadingArea, in: line)
-                || isLightArea(trailingArea, in: line) {
+                || isLightArea(trailingArea, in: line)
+            {
                 penalty += 40
             }
         }

@@ -6,6 +6,7 @@
 //
 
 import Testing
+
 @testable import QRCodeKit
 
 @Suite
@@ -15,10 +16,12 @@ struct QRStructureRendererRulersTests {
         let ruler = QRStructureRenderer.columnRuler(size: 12, indent: 0)
 
         // Every column takes 2 characters, so column 10 starts at 20.
-        #expect(ruler == [
-            String(repeating: " ", count: 2 * 10) + "1",
-            "0 1 2 3 4 5 6 7 8 9 0 1"
-        ])
+        #expect(
+            ruler == [
+                String(repeating: " ", count: 2 * 10) + "1",
+                "0 1 2 3 4 5 6 7 8 9 0 1",
+            ]
+        )
     }
 
     @Test
@@ -35,16 +38,18 @@ struct QRStructureRendererRulersTests {
     func indentsEveryLine() {
         let ruler = QRStructureRenderer.columnRuler(size: 12, indent: 3)
 
-        #expect(ruler == [
-            String(repeating: " ", count: 3 + 2 * 10) + "1",
-            "   0 1 2 3 4 5 6 7 8 9 0 1"
-        ])
+        #expect(
+            ruler == [
+                String(repeating: " ", count: 3 + 2 * 10) + "1",
+                "   0 1 2 3 4 5 6 7 8 9 0 1",
+            ]
+        )
     }
 
     @Test(arguments: [
         (5, 21, " 5"),
         (5, 177, "  5"),
-        (176, 177, "176")
+        (176, 177, "176"),
     ])
     func alignsRowNumbers(
         row: Int,

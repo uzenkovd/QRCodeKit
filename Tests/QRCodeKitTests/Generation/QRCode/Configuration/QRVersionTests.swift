@@ -6,6 +6,7 @@
 //
 
 import Testing
+
 @testable import QRCodeKit
 
 @Suite
@@ -27,13 +28,15 @@ struct QRVersionTests {
 
     // MARK: - Size
 
-    @Test(arguments: [
-        (.v1, 21),
-        (.v2, 25),
-        (.v7, 45),
-        (.v10, 57),
-        (.v40, 177)
-    ] as [(QRVersion, Int)])
+    @Test(
+        arguments: [
+            (.v1, 21),
+            (.v2, 25),
+            (.v7, 45),
+            (.v10, 57),
+            (.v40, 177),
+        ] as [(QRVersion, Int)]
+    )
     func matchesSpecificationSize(
         version: QRVersion,
         size: Int

@@ -6,6 +6,7 @@
 //
 
 import Testing
+
 @testable import QRCodeKit
 
 @Suite
@@ -27,7 +28,7 @@ struct QRTextRendererPlainStyleTests {
             (upper: .dark, lower: .light),
             (upper: .dark, lower: .dark),
             (upper: .light, lower: nil),
-            (upper: .dark, lower: nil)
+            (upper: .dark, lower: nil),
         ])
 
         #expect(line == "█▀▄ ▀ ")

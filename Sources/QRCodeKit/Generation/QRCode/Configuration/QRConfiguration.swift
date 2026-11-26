@@ -31,7 +31,8 @@ extension QRConfiguration {
     func canFit(
         characterCount: Int
     ) -> Bool {
-        let requiredBitCount = EncodingMode.indicatorBitCount
+        let requiredBitCount =
+            EncodingMode.indicatorBitCount
             + characterCountIndicatorBitCount
             + encodingMode.encoder.bitCount(forCharacterCount: characterCount)
 

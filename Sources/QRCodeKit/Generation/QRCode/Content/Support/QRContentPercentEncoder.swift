@@ -13,9 +13,11 @@ enum QRContentPercentEncoder {
             charactersIn: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~"
         )
 
-        guard let encoded = value.addingPercentEncoding(
-            withAllowedCharacters: allowedCharacters
-        ) else {
+        guard
+            let encoded = value.addingPercentEncoding(
+                withAllowedCharacters: allowedCharacters
+            )
+        else {
             preconditionFailure("Failed to percent-encode QR content")
         }
 

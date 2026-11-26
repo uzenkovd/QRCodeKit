@@ -6,6 +6,7 @@
 //
 
 import Testing
+
 @testable import QRCodeKit
 
 @Suite
@@ -33,7 +34,7 @@ struct NumericEncoderTests {
 
     @Test(arguments: [
         ("", 0),
-        ("0123456789", 10)
+        ("0123456789", 10),
     ])
     func characterCountIsDigitCount(
         message: String,
@@ -66,12 +67,12 @@ struct NumericEncoderTests {
 
     @Test(arguments: [
         ("", ""),
-        ("7", "0111"),                    // final group of one digit
-        ("42", "0101010"),                // final group of two digits
-        ("123", "0001111011"),            // full group
+        ("7", "0111"),  // final group of one digit
+        ("42", "0101010"),  // final group of two digits
+        ("123", "0001111011"),  // full group
         ("3141", "0100111010" + "0001"),  // full group and one digit
-        ("001", "0000000001"),            // leading zeros
-        ("999", "1111100111")             // largest group value
+        ("001", "0000000001"),  // leading zeros
+        ("999", "1111100111"),  // largest group value
     ])
     func encodeGroupsOfDigits(
         message: String,

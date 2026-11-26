@@ -6,6 +6,7 @@
 //
 
 import Testing
+
 @testable import QRCodeKit
 
 @Suite
@@ -65,13 +66,13 @@ private extension FinderPatternTests {
     static let patternSize = 7
 
     static let expectedPattern: [[QRModuleColor]] = [
-        [.dark, .dark,  .dark,  .dark,  .dark,  .dark,  .dark],
+        [.dark, .dark, .dark, .dark, .dark, .dark, .dark],
         [.dark, .light, .light, .light, .light, .light, .dark],
-        [.dark, .light, .dark,  .dark,  .dark,  .light, .dark],
-        [.dark, .light, .dark,  .dark,  .dark,  .light, .dark],
-        [.dark, .light, .dark,  .dark,  .dark,  .light, .dark],
+        [.dark, .light, .dark, .dark, .dark, .light, .dark],
+        [.dark, .light, .dark, .dark, .dark, .light, .dark],
+        [.dark, .light, .dark, .dark, .dark, .light, .dark],
         [.dark, .light, .light, .light, .light, .light, .dark],
-        [.dark, .dark,  .dark,  .dark,  .dark,  .dark,  .dark]
+        [.dark, .dark, .dark, .dark, .dark, .dark, .dark],
     ]
 
     static func expectFinderPattern(
@@ -100,16 +101,13 @@ private extension FinderPatternTests {
         matrixSize: Int
     ) -> Bool {
         let isTopLeft =
-            row < patternSize &&
-            column < patternSize
+            row < patternSize && column < patternSize
 
         let isTopRight =
-            row < patternSize &&
-            column >= matrixSize - patternSize
+            row < patternSize && column >= matrixSize - patternSize
 
         let isBottomLeft =
-            row >= matrixSize - patternSize &&
-            column < patternSize
+            row >= matrixSize - patternSize && column < patternSize
 
         return isTopLeft || isTopRight || isBottomLeft
     }

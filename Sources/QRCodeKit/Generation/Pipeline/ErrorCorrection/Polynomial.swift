@@ -50,7 +50,8 @@ struct Polynomial: AdditiveArithmetic {
             $0 == .zero
         }
 
-        self.coefficients = normalizedCoefficients.isEmpty
+        self.coefficients =
+            normalizedCoefficients.isEmpty
             ? [.zero]
             : Array(normalizedCoefficients)
     }
@@ -62,7 +63,8 @@ extension Polynomial {
     static func + (lhs: Polynomial, rhs: Polynomial) -> Polynomial {
         // P(x) + Q(x): rₖ = pₖ + qₖ
 
-        let (longer, shorter) = lhs.count >= rhs.count
+        let (longer, shorter) =
+            lhs.count >= rhs.count
             ? (lhs, rhs)
             : (rhs, lhs)
 
@@ -143,10 +145,11 @@ extension Polynomial {
         }
 
         return Polynomial(
-            coefficients + Array(
-                repeating: .zero,
-                count: exponent
-            )
+            coefficients
+                + Array(
+                    repeating: .zero,
+                    count: exponent
+                )
         )
     }
 }
@@ -201,7 +204,8 @@ extension Polynomial {
         )
 
         let quotient = Polynomial(quotientCoefficients)
-        let remainder = remainderCoefficients.isEmpty
+        let remainder =
+            remainderCoefficients.isEmpty
             ? .zero
             : Polynomial(remainderCoefficients)
 

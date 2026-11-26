@@ -6,6 +6,7 @@
 //
 
 import Testing
+
 @testable import QRCodeKit
 
 @Suite
@@ -27,12 +28,14 @@ struct DataEncoderTests {
 
     // MARK: - Segment
 
-    @Test(arguments: [
-        (.numeric, "1", "0001" + "0000000001" + "0001"),
-        (.alphanumeric, "A", "0010" + "000000001" + "001010"),
-        (.byte, "a", "0100" + "00000001" + "01100001"),
-        (.kanji, "漢", "1000" + "00000001" + "0011100111111")
-    ] as [(EncodingMode, String, String)])
+    @Test(
+        arguments: [
+            (.numeric, "1", "0001" + "0000000001" + "0001"),
+            (.alphanumeric, "A", "0010" + "000000001" + "001010"),
+            (.byte, "a", "0100" + "00000001" + "01100001"),
+            (.kanji, "漢", "1000" + "00000001" + "0011100111111"),
+        ] as [(EncodingMode, String, String)]
+    )
     func encodeSegmentOfEachMode(
         mode: EncodingMode,
         message: String,
@@ -43,10 +46,12 @@ struct DataEncoderTests {
         #expect(codewords.bitString.hasPrefix(expectedSegment))
     }
 
-    @Test(arguments: [
-        (.v9, "0100" + "00000001"),
-        (.v10, "0100" + "0000000000000001")
-    ] as [(QRVersion, String)])
+    @Test(
+        arguments: [
+            (.v9, "0100" + "00000001"),
+            (.v10, "0100" + "0000000000000001"),
+        ] as [(QRVersion, String)]
+    )
     func characterCountIndicatorWidensWithVersion(
         version: QRVersion,
         expectedIndicators: String

@@ -20,13 +20,14 @@ struct QRContentVCardTests {
 
         let content = try QRContent.vCard(contact)
 
-        let expected = [
-            "BEGIN:VCARD",
-            "VERSION:3.0",
-            "N:;;;;",
-            "FN:John",
-            "END:VCARD"
-        ].joined(separator: "\r\n") + "\r\n"
+        let expected =
+            [
+                "BEGIN:VCARD",
+                "VERSION:3.0",
+                "N:;;;;",
+                "FN:John",
+                "END:VCARD",
+            ].joined(separator: "\r\n") + "\r\n"
 
         #expect(content.payload == expected)
     }
@@ -41,13 +42,14 @@ struct QRContentVCardTests {
 
         let content = try QRContent.vCard(contact)
 
-        let expected = [
-            "BEGIN:VCARD",
-            "VERSION:3.0",
-            "N:Ivanenko;Ivan;;;",
-            "FN:Ivan Ivanenko",
-            "END:VCARD"
-        ].joined(separator: "\r\n") + "\r\n"
+        let expected =
+            [
+                "BEGIN:VCARD",
+                "VERSION:3.0",
+                "N:Ivanenko;Ivan;;;",
+                "FN:Ivan Ivanenko",
+                "END:VCARD",
+            ].joined(separator: "\r\n") + "\r\n"
 
         #expect(content.payload == expected)
     }
@@ -64,11 +66,11 @@ struct QRContentVCardTests {
             familyName: "Ivanenko",
             phoneNumbers: [
                 "+380501234567",
-                "050 123 45 67"
+                "050 123 45 67",
             ],
             emailAddresses: [
                 "ivan@example.com",
-                "ivan.work@example.com"
+                "ivan.work@example.com",
             ],
             organization: "Example Company",
             title: "iOS Developer",
@@ -77,20 +79,21 @@ struct QRContentVCardTests {
 
         let content = try QRContent.vCard(contact)
 
-        let expected = [
-            "BEGIN:VCARD",
-            "VERSION:3.0",
-            "N:Ivanenko;Ivan;;;",
-            "FN:Ivan Ivanenko",
-            "ORG:Example Company",
-            "TITLE:iOS Developer",
-            "TEL:+380501234567",
-            "TEL:050 123 45 67",
-            "EMAIL:ivan@example.com",
-            "EMAIL:ivan.work@example.com",
-            "URL:https://example.com/contact?x=1,y=2",
-            "END:VCARD"
-        ].joined(separator: "\r\n") + "\r\n"
+        let expected =
+            [
+                "BEGIN:VCARD",
+                "VERSION:3.0",
+                "N:Ivanenko;Ivan;;;",
+                "FN:Ivan Ivanenko",
+                "ORG:Example Company",
+                "TITLE:iOS Developer",
+                "TEL:+380501234567",
+                "TEL:050 123 45 67",
+                "EMAIL:ivan@example.com",
+                "EMAIL:ivan.work@example.com",
+                "URL:https://example.com/contact?x=1,y=2",
+                "END:VCARD",
+            ].joined(separator: "\r\n") + "\r\n"
 
         #expect(content.payload == expected)
     }
@@ -106,14 +109,15 @@ struct QRContentVCardTests {
 
         let content = try QRContent.vCard(contact)
 
-        let expected = [
-            "BEGIN:VCARD",
-            "VERSION:3.0",
-            "N:Іваненко;Іван;;;",
-            "FN:Іван Іваненко",
-            "ORG:Українська компанія",
-            "END:VCARD"
-        ].joined(separator: "\r\n") + "\r\n"
+        let expected =
+            [
+                "BEGIN:VCARD",
+                "VERSION:3.0",
+                "N:Іваненко;Іван;;;",
+                "FN:Іван Іваненко",
+                "ORG:Українська компанія",
+                "END:VCARD",
+            ].joined(separator: "\r\n") + "\r\n"
 
         #expect(content.payload == expected)
     }
@@ -130,15 +134,16 @@ struct QRContentVCardTests {
 
         let content = try QRContent.vCard(contact)
 
-        let expected = [
-            "BEGIN:VCARD",
-            "VERSION:3.0",
-            #"N:Lee\;Smith;Alex\, Jr.;;;"#,
-            #"FN:Alex\, Lee\; Team\\Lead"#,
-            #"ORG:Example\, Inc.\; R&D"#,
-            #"TITLE:Lead\\Engineer\nPlatform"#,
-            "END:VCARD"
-        ].joined(separator: "\r\n") + "\r\n"
+        let expected =
+            [
+                "BEGIN:VCARD",
+                "VERSION:3.0",
+                #"N:Lee\;Smith;Alex\, Jr.;;;"#,
+                #"FN:Alex\, Lee\; Team\\Lead"#,
+                #"ORG:Example\, Inc.\; R&D"#,
+                #"TITLE:Lead\\Engineer\nPlatform"#,
+                "END:VCARD",
+            ].joined(separator: "\r\n") + "\r\n"
 
         #expect(content.payload == expected)
     }
@@ -151,13 +156,14 @@ struct QRContentVCardTests {
 
         let content = try QRContent.vCard(contact)
 
-        let expected = [
-            "BEGIN:VCARD",
-            "VERSION:3.0",
-            "N:;;;;",
-            #"FN:First\nSecond\nThird\nFourth"#,
-            "END:VCARD"
-        ].joined(separator: "\r\n") + "\r\n"
+        let expected =
+            [
+                "BEGIN:VCARD",
+                "VERSION:3.0",
+                "N:;;;;",
+                #"FN:First\nSecond\nThird\nFourth"#,
+                "END:VCARD",
+            ].joined(separator: "\r\n") + "\r\n"
 
         #expect(content.payload == expected)
     }
@@ -172,13 +178,14 @@ struct QRContentVCardTests {
 
         let content = try QRContent.vCard(contact)
 
-        let expected = [
-            "BEGIN:VCARD",
-            "VERSION:3.0",
-            "N:;;;;",
-            "FN:" + String(repeating: "a", count: 72) + "\r\n a",
-            "END:VCARD"
-        ].joined(separator: "\r\n") + "\r\n"
+        let expected =
+            [
+                "BEGIN:VCARD",
+                "VERSION:3.0",
+                "N:;;;;",
+                "FN:" + String(repeating: "a", count: 72) + "\r\n a",
+                "END:VCARD",
+            ].joined(separator: "\r\n") + "\r\n"
 
         #expect(content.payload == expected)
     }
@@ -193,13 +200,14 @@ struct QRContentVCardTests {
 
         let content = try QRContent.vCard(contact)
 
-        let expected = [
-            "BEGIN:VCARD",
-            "VERSION:3.0",
-            "N:;;;;",
-            "FN:" + String(repeating: "і", count: 36) + "\r\n і",
-            "END:VCARD"
-        ].joined(separator: "\r\n") + "\r\n"
+        let expected =
+            [
+                "BEGIN:VCARD",
+                "VERSION:3.0",
+                "N:;;;;",
+                "FN:" + String(repeating: "і", count: 36) + "\r\n і",
+                "END:VCARD",
+            ].joined(separator: "\r\n") + "\r\n"
 
         #expect(content.payload == expected)
 
@@ -212,7 +220,7 @@ struct QRContentVCardTests {
         "",
         " ",
         "\n",
-        "John\u{0000}"
+        "John\u{0000}",
     ])
     func rejectsInvalidVCardFormattedNames(_ name: String) {
         let contact = VCardContact(
@@ -226,7 +234,7 @@ struct QRContentVCardTests {
 
     @Test(arguments: [
         "Ivan\u{0000}",
-        "Ivan\u{2028}"
+        "Ivan\u{2028}",
     ])
     func rejectsInvalidVCardNameComponents(_ name: String) {
         let contact = VCardContact(
@@ -255,7 +263,7 @@ struct QRContentVCardTests {
         VCardContact(
             formattedName: "John",
             emailAddresses: ["john@example.com\r\nFN:Injected"]
-        )
+        ),
     ])
     func rejectsInvalidVCardContactDetails(
         _ contact: VCardContact
@@ -281,7 +289,7 @@ struct QRContentVCardTests {
         VCardContact(
             formattedName: "John",
             title: "Developer\u{2028}"
-        )
+        ),
     ])
     func rejectsInvalidVCardOptionalTextFields(
         _ contact: VCardContact

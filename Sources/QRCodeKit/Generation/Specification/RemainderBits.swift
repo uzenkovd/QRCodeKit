@@ -7,9 +7,11 @@
 
 enum RemainderBits {
     static func bitCount(for version: QRVersion) -> Int {
-        guard let entry = table.first(where: {
-            $0.versions.contains(version)
-        }) else {
+        guard
+            let entry = table.first(where: {
+                $0.versions.contains(version)
+            })
+        else {
             preconditionFailure(
                 "Remainder bit count is missing for \(version)"
             )
@@ -40,6 +42,6 @@ private extension RemainderBits {
         Entry(.v14 ... .v20, 3),
         Entry(.v21 ... .v27, 4),
         Entry(.v28 ... .v34, 3),
-        Entry(.v35 ... .v40, 0)
+        Entry(.v35 ... .v40, 0),
     ]
 }

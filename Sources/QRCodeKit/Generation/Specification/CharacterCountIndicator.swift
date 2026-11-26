@@ -10,19 +10,21 @@ enum CharacterCountIndicator {
         for version: QRVersion,
         mode: EncodingMode
     ) -> Int {
-        guard let bitCounts = table.first(
-            where: { $0.versions.contains(version) }
-        )?.bitCounts else {
+        guard
+            let bitCounts = table.first(
+                where: { $0.versions.contains(version) }
+            )?.bitCounts
+        else {
             preconditionFailure(
                 "Character count indicator bit count is missing for \(version)"
             )
         }
 
         switch mode {
-        case .numeric:      return bitCounts.numeric
+        case .numeric: return bitCounts.numeric
         case .alphanumeric: return bitCounts.alphanumeric
-        case .kanji:        return bitCounts.kanji
-        case .byte:         return bitCounts.byte
+        case .kanji: return bitCounts.kanji
+        case .byte: return bitCounts.byte
         }
     }
 }

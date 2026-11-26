@@ -6,6 +6,7 @@
 //
 
 import Testing
+
 @testable import QRCodeKit
 
 @Suite
@@ -44,7 +45,7 @@ struct GroupTests {
             Block(
                 dataCodewords: [9, 10, 11, 12],
                 errorCorrectionCodewords: [19, 20, 21]
-            )
+            ),
         ]
 
         let group = Group(blocks: blocks)
@@ -55,7 +56,7 @@ struct GroupTests {
                 == [
                     1, 2, 3, 4,
                     5, 6, 7, 8,
-                    9, 10, 11, 12
+                    9, 10, 11, 12,
                 ]
         )
         #expect(
@@ -63,7 +64,7 @@ struct GroupTests {
                 == [
                     13, 14, 15,
                     16, 17, 18,
-                    19, 20, 21
+                    19, 20, 21,
                 ]
         )
         #expect(group.blockCount == 3)

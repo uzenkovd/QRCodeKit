@@ -6,17 +6,20 @@
 //
 
 import Testing
+
 @testable import QRCodeKit
 
 @Suite
 struct QRConfigurationTests {
     // MARK: - characterCountIndicatorBitCount
 
-    @Test(arguments: [
-        (.v9, .numeric, 10),
-        (.v10, .byte, 16),
-        (.v40, .alphanumeric, 13)
-    ] as [(QRVersion, EncodingMode, Int)])
+    @Test(
+        arguments: [
+            (.v9, .numeric, 10),
+            (.v10, .byte, 16),
+            (.v40, .alphanumeric, 13),
+        ] as [(QRVersion, EncodingMode, Int)]
+    )
     func characterCountIndicatorBitCountDependsOnVersionAndMode(
         version: QRVersion,
         mode: EncodingMode,
@@ -29,10 +32,12 @@ struct QRConfigurationTests {
 
     // MARK: - dataBitCapacity
 
-    @Test(arguments: [
-        (.v1, .Q, 13),
-        (.v40, .L, 2956)
-    ] as [(QRVersion, ErrorCorrectionLevel, Int)])
+    @Test(
+        arguments: [
+            (.v1, .Q, 13),
+            (.v40, .L, 2956),
+        ] as [(QRVersion, ErrorCorrectionLevel, Int)]
+    )
     func dataBitCapacityCountsBitsOfDataCodewords(
         version: QRVersion,
         level: ErrorCorrectionLevel,

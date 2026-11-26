@@ -26,8 +26,7 @@ enum BCHEncoder {
         remainderBitCount: Int
     ) -> UInt32 {
         precondition(
-            remainderBitCount > 0 &&
-            remainderBitCount < UInt32.bitWidth,
+            remainderBitCount > 0 && remainderBitCount < UInt32.bitWidth,
             "BCH remainder bit count is out of range"
         )
         precondition(

@@ -25,11 +25,13 @@ enum AlignmentPattern {
 
         for rowIndex in coordinates.indices {
             for columnIndex in coordinates.indices {
-                guard !isFinderPatternPosition(
-                    rowIndex: rowIndex,
-                    columnIndex: columnIndex,
-                    lastIndex: lastIndex
-                ) else {
+                guard
+                    !isFinderPatternPosition(
+                        rowIndex: rowIndex,
+                        columnIndex: columnIndex,
+                        lastIndex: lastIndex
+                    )
+                else {
                     continue
                 }
 
@@ -53,9 +55,8 @@ private extension AlignmentPattern {
         columnIndex: Int,
         lastIndex: Int
     ) -> Bool {
-        rowIndex == 0 && columnIndex == 0 ||
-        rowIndex == 0 && columnIndex == lastIndex ||
-        rowIndex == lastIndex && columnIndex == 0
+        rowIndex == 0 && columnIndex == 0 || rowIndex == 0 && columnIndex == lastIndex
+            || rowIndex == lastIndex && columnIndex == 0
     }
 
     static func place(

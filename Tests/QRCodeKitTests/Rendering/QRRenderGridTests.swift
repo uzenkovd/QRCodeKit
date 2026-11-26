@@ -6,6 +6,7 @@
 //
 
 import Testing
+
 @testable import QRCodeKit
 
 @Suite
@@ -91,7 +92,7 @@ struct QRRenderGridTests {
             (.information(type: .format, color: .dark), .dark),
             (.information(type: .version, color: .light), .light),
             (.information(type: .version, color: .dark), .dark),
-            (.darkModule, .dark)
+            (.darkModule, .dark),
         ]
     )
     func resolvesModuleColor(

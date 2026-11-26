@@ -53,7 +53,7 @@ private extension KanjiEncoder {
     /// each with the offset subtracted from its codes.
     static let codeRanges: [(codes: ClosedRange<UInt16>, offset: UInt16)] = [
         (0x8140...0x9FFC, 0x8140),
-        (0xE040...0xEBBF, 0xC140)
+        (0xE040...0xEBBF, 0xC140),
     ]
 
     /// Returns the 13-bit values of the message's characters, or `nil`

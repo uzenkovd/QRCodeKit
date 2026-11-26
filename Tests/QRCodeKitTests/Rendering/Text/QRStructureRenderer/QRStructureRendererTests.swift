@@ -6,6 +6,7 @@
 //
 
 import Testing
+
 @testable import QRCodeKit
 
 @Suite
@@ -52,9 +53,11 @@ struct QRStructureRendererTests {
         let modules = Self.modules(in: result, size: matrix.size)
 
         #expect(modules.count == matrix.size)
-        #expect(modules.allSatisfy { row in
-            row.count == matrix.size && row.allSatisfy { $0 == "?" }
-        })
+        #expect(
+            modules.allSatisfy { row in
+                row.count == matrix.size && row.allSatisfy { $0 == "?" }
+            }
+        )
         #expect(!result.hasSuffix("\n"))
     }
 
@@ -122,7 +125,8 @@ private extension QRStructureRendererTests {
     ) -> [[Substring]] {
         let labelWidth = String(size - 1).count
 
-        return rendered
+        return
+            rendered
             .split(separator: "\n", omittingEmptySubsequences: false)
             .dropFirst(labelWidth + 1)
             .dropLast()

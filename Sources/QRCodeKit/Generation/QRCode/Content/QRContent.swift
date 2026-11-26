@@ -8,10 +8,6 @@
 public struct QRContent: Hashable, Sendable {
     public let payload: String
 
-    init(payload: String) {
-        self.payload = payload
-    }
-
     public static func text(
         _ text: String
     ) -> QRContent {

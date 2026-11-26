@@ -6,6 +6,7 @@
 //
 
 import Testing
+
 @testable import QRCodeKit
 
 @Suite
@@ -14,16 +15,18 @@ struct SymbolFinalizerTests {
 
     /// The penalties of the Annex I example under every mask. They pin
     /// down each candidate symbol and show why mask 2 is selected.
-    @Test(arguments: [
-        (.pattern0, MaskPenalty(155, 102, 80, 0)),
-        (.pattern1, MaskPenalty(180, 153, 40, 0)),
-        (.pattern2, MaskPenalty(206, 111, 0, 0)),
-        (.pattern3, MaskPenalty(187, 105, 40, 0)),
-        (.pattern4, MaskPenalty(196, 174, 40, 0)),
-        (.pattern5, MaskPenalty(220, 177, 80, 0)),
-        (.pattern6, MaskPenalty(191, 108, 80, 0)),
-        (.pattern7, MaskPenalty(176, 150, 0, 0))
-    ] as [(QRMask, MaskPenalty)])
+    @Test(
+        arguments: [
+            (.pattern0, MaskPenalty(155, 102, 80, 0)),
+            (.pattern1, MaskPenalty(180, 153, 40, 0)),
+            (.pattern2, MaskPenalty(206, 111, 0, 0)),
+            (.pattern3, MaskPenalty(187, 105, 40, 0)),
+            (.pattern4, MaskPenalty(196, 174, 40, 0)),
+            (.pattern5, MaskPenalty(220, 177, 80, 0)),
+            (.pattern6, MaskPenalty(191, 108, 80, 0)),
+            (.pattern7, MaskPenalty(176, 150, 0, 0)),
+        ] as [(QRMask, MaskPenalty)]
+    )
     func buildsSymbolWithRequestedMask(
         mask: QRMask,
         expectedPenalty: MaskPenalty

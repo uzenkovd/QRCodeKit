@@ -6,6 +6,7 @@
 //
 
 import Testing
+
 @testable import QRCodeKit
 
 @Suite
@@ -24,7 +25,7 @@ struct BCHEncoderTests {
     @Test(arguments: [
         (1, 0x0537),
         (8, 0x23D6),
-        (31, 0x7FFF)
+        (31, 0x7FFF),
     ])
     func encodeWithFormatInformationGenerator(
         data: UInt32,
@@ -42,7 +43,7 @@ struct BCHEncoderTests {
     @Test(arguments: [
         (7, 0x07C94),
         (8, 0x085BC),
-        (40, 0x28C69)
+        (40, 0x28C69),
     ])
     func encodeWithVersionInformationGenerator(
         data: UInt32,

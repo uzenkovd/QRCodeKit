@@ -6,6 +6,7 @@
 //
 
 import Testing
+
 @testable import QRCodeKit
 
 @Suite
@@ -19,7 +20,7 @@ struct QRContentPhoneTests {
 
     @Test(arguments: [
         "+123",
-        "+123456789012345"
+        "+123456789012345",
     ])
     func acceptsPhoneNumberBoundaryLengths(_ number: String) throws {
         let content = try QRContent.phone(number)
@@ -40,7 +41,7 @@ struct QRContentPhoneTests {
         "++380501234567",
         "+38050abc4567",
         "+٣٨٠",
-        "+3\u{0301}12"
+        "+3\u{0301}12",
     ])
     func rejectsInvalidPhoneNumbers(_ number: String) {
         #expect(throws: QRContentError.invalidPhoneNumber) {

@@ -46,7 +46,7 @@ private extension QRConfigurationResolver {
         .numeric,
         .alphanumeric,
         .kanji,
-        .byte
+        .byte,
     ]
 
     /// Returns the first automatic encoding mode that can encode the message,

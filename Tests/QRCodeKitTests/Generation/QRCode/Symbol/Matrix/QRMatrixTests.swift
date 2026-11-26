@@ -6,6 +6,7 @@
 //
 
 import Testing
+
 @testable import QRCodeKit
 
 @Suite
@@ -28,14 +29,16 @@ struct QRMatrixTests {
 
     // MARK: - Module Access
 
-    @Test(arguments: [
-        (0, 0),
-        (0, 20),
-        (7, 13),
-        (13, 7),
-        (20, 0),
-        (20, 20)
-    ] as [(Int, Int)])
+    @Test(
+        arguments: [
+            (0, 0),
+            (0, 20),
+            (7, 13),
+            (13, 7),
+            (20, 0),
+            (20, 20),
+        ] as [(Int, Int)]
+    )
     func storesModuleOnlyAtItsCoordinates(
         row: Int,
         column: Int
@@ -50,12 +53,14 @@ struct QRMatrixTests {
 
     // MARK: - Completeness
 
-    @Test(arguments: [
-        .function(pattern: .timing, color: .dark),
-        .darkModule,
-        .information(type: .format, color: .light),
-        .data(color: .light)
-    ] as [QRModule])
+    @Test(
+        arguments: [
+            .function(pattern: .timing, color: .dark),
+            .darkModule,
+            .information(type: .format, color: .light),
+            .data(color: .light),
+        ] as [QRModule]
+    )
     func isCompleteWithEveryModuleFilledIn(
         module: QRModule
     ) {
@@ -65,11 +70,13 @@ struct QRMatrixTests {
         #expect(matrix.isComplete)
     }
 
-    @Test(arguments: [
-        .unset,
-        .reserved(.format),
-        .reserved(.version)
-    ] as [QRModule])
+    @Test(
+        arguments: [
+            .unset,
+            .reserved(.format),
+            .reserved(.version),
+        ] as [QRModule]
+    )
     func isNotCompleteWithModuleNotFilledIn(
         module: QRModule
     ) {
