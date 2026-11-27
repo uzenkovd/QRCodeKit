@@ -76,7 +76,7 @@ struct FormatInformationAreaTests {
 
     @Test(arguments: placementTestCases)
     func placeFormatInformationAtCorrectPositions(
-        errorCorrectionLevel: ErrorCorrectionLevel,
+        errorCorrectionLevel: QRErrorCorrectionLevel,
         mask: QRMask,
         expectedInformation: UInt32
     ) {
@@ -126,7 +126,7 @@ struct FormatInformationAreaTests {
 
 private extension FormatInformationAreaTests {
     typealias PlacementTestCase = (
-        errorCorrectionLevel: ErrorCorrectionLevel,
+        errorCorrectionLevel: QRErrorCorrectionLevel,
         mask: QRMask,
         expectedInformation: UInt32
     )

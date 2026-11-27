@@ -12,8 +12,8 @@
 enum AnnexIExample {
     static let message = "01234567"
     static let version: QRVersion = .v1
-    static let encodingMode: EncodingMode = .numeric
-    static let errorCorrectionLevel: ErrorCorrectionLevel = .M
+    static let encodingMode: QREncodingMode = .numeric
+    static let errorCorrectionLevel: QRErrorCorrectionLevel = .M
     static let mask: QRMask = .pattern2
 
     /// The final message from the example: 16 data codewords

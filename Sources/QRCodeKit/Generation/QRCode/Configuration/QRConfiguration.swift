@@ -9,8 +9,8 @@
 /// resolved from the message and the requested ``QROptions``.
 struct QRConfiguration: Equatable {
     let version: QRVersion
-    let encodingMode: EncodingMode
-    let errorCorrectionLevel: ErrorCorrectionLevel
+    let encodingMode: QREncodingMode
+    let errorCorrectionLevel: QRErrorCorrectionLevel
 }
 
 // MARK: - Capacity
@@ -32,7 +32,7 @@ extension QRConfiguration {
         characterCount: Int
     ) -> Bool {
         let requiredBitCount =
-            EncodingMode.indicatorBitCount
+            QREncodingMode.indicatorBitCount
             + characterCountIndicatorBitCount
             + encodingMode.encoder.bitCount(forCharacterCount: characterCount)
 

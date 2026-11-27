@@ -45,7 +45,7 @@ private extension DataEncoder {
         let characterCount = mode.encoder.characterCount(for: message)
         let characterCountIndicatorBitCount = configuration.characterCountIndicatorBitCount
 
-        buffer.append(mode.indicator, bitCount: EncodingMode.indicatorBitCount)
+        buffer.append(mode.indicator, bitCount: QREncodingMode.indicatorBitCount)
         buffer.append(UInt32(characterCount), bitCount: characterCountIndicatorBitCount)
         buffer.append(contentsOf: mode.encoder.encode(message))
     }

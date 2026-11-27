@@ -34,10 +34,10 @@ struct DataEncoderTests {
             (.alphanumeric, "A", "0010" + "000000001" + "001010"),
             (.byte, "a", "0100" + "00000001" + "01100001"),
             (.kanji, "漢", "1000" + "00000001" + "0011100111111"),
-        ] as [(EncodingMode, String, String)]
+        ] as [(QREncodingMode, String, String)]
     )
     func encodeSegmentOfEachMode(
-        mode: EncodingMode,
+        mode: QREncodingMode,
         message: String,
         expectedSegment: String
     ) {

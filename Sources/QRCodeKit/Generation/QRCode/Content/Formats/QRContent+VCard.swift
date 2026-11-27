@@ -7,40 +7,40 @@
 
 import Foundation
 
-public struct VCardContact: Hashable, Sendable {
-    public let formattedName: String
-    public let givenName: String
-    public let familyName: String
-
-    public let phoneNumbers: [String]
-    public let emailAddresses: [String]
-
-    public let organization: String?
-    public let title: String?
-    public let website: URL?
-
-    public init(
-        formattedName: String,
-        givenName: String = "",
-        familyName: String = "",
-        phoneNumbers: [String] = [],
-        emailAddresses: [String] = [],
-        organization: String? = nil,
-        title: String? = nil,
-        website: URL? = nil
-    ) {
-        self.formattedName = formattedName
-        self.givenName = givenName
-        self.familyName = familyName
-        self.phoneNumbers = phoneNumbers
-        self.emailAddresses = emailAddresses
-        self.organization = organization
-        self.title = title
-        self.website = website
-    }
-}
-
 public extension QRContent {
+    struct VCardContact: Hashable, Sendable {
+        public let formattedName: String
+        public let givenName: String
+        public let familyName: String
+
+        public let phoneNumbers: [String]
+        public let emailAddresses: [String]
+
+        public let organization: String?
+        public let title: String?
+        public let website: URL?
+
+        public init(
+            formattedName: String,
+            givenName: String = "",
+            familyName: String = "",
+            phoneNumbers: [String] = [],
+            emailAddresses: [String] = [],
+            organization: String? = nil,
+            title: String? = nil,
+            website: URL? = nil
+        ) {
+            self.formattedName = formattedName
+            self.givenName = givenName
+            self.familyName = familyName
+            self.phoneNumbers = phoneNumbers
+            self.emailAddresses = emailAddresses
+            self.organization = organization
+            self.title = title
+            self.website = website
+        }
+    }
+
     static func vCard(
         _ contact: VCardContact
     ) throws -> QRContent {

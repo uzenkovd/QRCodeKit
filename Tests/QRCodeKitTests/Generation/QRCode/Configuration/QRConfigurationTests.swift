@@ -18,11 +18,11 @@ struct QRConfigurationTests {
             (.v9, .numeric, 10),
             (.v10, .byte, 16),
             (.v40, .alphanumeric, 13),
-        ] as [(QRVersion, EncodingMode, Int)]
+        ] as [(QRVersion, QREncodingMode, Int)]
     )
     func characterCountIndicatorBitCountDependsOnVersionAndMode(
         version: QRVersion,
-        mode: EncodingMode,
+        mode: QREncodingMode,
         expectedBitCount: Int
     ) {
         let configuration = QRConfiguration(version, .M, mode)
@@ -36,11 +36,11 @@ struct QRConfigurationTests {
         arguments: [
             (.v1, .Q, 13),
             (.v40, .L, 2956),
-        ] as [(QRVersion, ErrorCorrectionLevel, Int)]
+        ] as [(QRVersion, QRErrorCorrectionLevel, Int)]
     )
     func dataBitCapacityCountsBitsOfDataCodewords(
         version: QRVersion,
-        level: ErrorCorrectionLevel,
+        level: QRErrorCorrectionLevel,
         dataCodewordCount: Int
     ) {
         let configuration = QRConfiguration(version, level, .byte)
@@ -50,12 +50,12 @@ struct QRConfigurationTests {
 
     // MARK: - canFit(characterCount:)
 
-    @Test(arguments: QRVersion.allCases, ErrorCorrectionLevel.allCases)
+    @Test(arguments: QRVersion.allCases, QRErrorCorrectionLevel.allCases)
     func canFitMatchesCharacterCapacityTable(
         version: QRVersion,
-        level: ErrorCorrectionLevel
+        level: QRErrorCorrectionLevel
     ) {
-        for mode in EncodingMode.allCases {
+        for mode in QREncodingMode.allCases {
             let configuration = QRConfiguration(version, level, mode)
             let capacity = CharacterCapacityTable.capacity(for: version, level: level, mode: mode)
 
@@ -64,12 +64,12 @@ struct QRConfigurationTests {
         }
     }
 
-    @Test(arguments: QRVersion.allCases, ErrorCorrectionLevel.allCases)
+    @Test(arguments: QRVersion.allCases, QRErrorCorrectionLevel.allCases)
     func characterCountIndicatorHoldsCharacterCapacity(
         version: QRVersion,
-        level: ErrorCorrectionLevel
+        level: QRErrorCorrectionLevel
     ) {
-        for mode in EncodingMode.allCases {
+        for mode in QREncodingMode.allCases {
             let configuration = QRConfiguration(version, level, mode)
             let capacity = CharacterCapacityTable.capacity(for: version, level: level, mode: mode)
             let maximumIndicatorValue = (1 << configuration.characterCountIndicatorBitCount) - 1

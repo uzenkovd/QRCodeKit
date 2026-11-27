@@ -142,7 +142,7 @@ struct ErrorCorrectionBlocksTests {
     @Test
     func totalCodewordCountIsEqualForAllLevelsOfEachVersion() {
         for version in QRVersion.allCases {
-            let totals = ErrorCorrectionLevel.allCases.map { level in
+            let totals = QRErrorCorrectionLevel.allCases.map { level in
                 ErrorCorrectionBlocks
                     .layout(for: version, level: level)
                     .totalCodewordCount

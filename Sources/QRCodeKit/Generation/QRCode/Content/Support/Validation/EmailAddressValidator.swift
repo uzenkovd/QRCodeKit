@@ -1,11 +1,11 @@
 //
-//  QREmailAddressValidator.swift
+//  EmailAddressValidator.swift
 //  QRCodeKit
 //
 //  Created by Dmytro Uzenkov on 10.10.2026.
 //
 
-enum QREmailAddressValidator {
+enum EmailAddressValidator {
     static func isValid(_ address: String) -> Bool {
         let parts = address.split(
             separator: "@",
@@ -26,7 +26,7 @@ enum QREmailAddressValidator {
 
 // MARK: - Private Helpers
 
-private extension QREmailAddressValidator {
+private extension EmailAddressValidator {
     static func isValidLocalPart(_ localPart: Substring) -> Bool {
         guard (1...64).contains(localPart.utf8.count) else {
             return false

@@ -1,11 +1,11 @@
 //
-//  QRPhoneNumberValidator.swift
+//  PhoneNumberValidator.swift
 //  QRCodeKit
 //
 //  Created by Dmytro Uzenkov on 10.10.2026.
 //
 
-enum QRPhoneNumberValidator {
+enum PhoneNumberValidator {
     static func isValidInternational(_ number: String) -> Bool {
         let bytes = number.utf8
         let digits = bytes.dropFirst()

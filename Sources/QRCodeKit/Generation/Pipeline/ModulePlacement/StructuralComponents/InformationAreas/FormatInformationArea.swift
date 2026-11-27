@@ -28,7 +28,7 @@ enum FormatInformationArea {
 
     static func place(
         in matrix: inout QRMatrix,
-        errorCorrectionLevel: ErrorCorrectionLevel,
+        errorCorrectionLevel: QRErrorCorrectionLevel,
         mask: QRMask
     ) {
         let information = encodedValue(
@@ -67,7 +67,7 @@ private extension FormatInformationArea {
     static let formatMask: UInt32 = 0x5412
 
     static func encodedValue(
-        for level: ErrorCorrectionLevel,
+        for level: QRErrorCorrectionLevel,
         mask: QRMask
     ) -> UInt32 {
         let levelIndicator = level.formatIndicator

@@ -81,14 +81,14 @@ struct ErrorCorrectionLayout {
 enum ErrorCorrectionBlocks {
     static func totalDataCodewordCount(
         for version: QRVersion,
-        level: ErrorCorrectionLevel
+        level: QRErrorCorrectionLevel
     ) -> Int {
         layout(for: version, level: level).totalDataCodewordCount
     }
 
     static func layout(
         for version: QRVersion,
-        level: ErrorCorrectionLevel
+        level: QRErrorCorrectionLevel
     ) -> ErrorCorrectionLayout {
         guard let layout = table[version]?[level] else {
             preconditionFailure(
@@ -104,7 +104,7 @@ private extension ErrorCorrectionBlocks {
     typealias Layout = ErrorCorrectionLayout
     typealias Group = GroupInfo
 
-    static let table: [QRVersion: [ErrorCorrectionLevel: Layout]] = [
+    static let table: [QRVersion: [QRErrorCorrectionLevel: Layout]] = [
         .v1: [
             .L: Layout(7, Group(1, 19)),
             .M: Layout(10, Group(1, 16)),

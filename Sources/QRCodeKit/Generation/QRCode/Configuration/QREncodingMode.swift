@@ -1,12 +1,12 @@
 //
-//  EncodingMode.swift
+//  QREncodingMode.swift
 //  QRCodeKit
 //
 //  Created by Dmytro Uzenkov on 11.08.2026.
 //
 
 /// A method of representing a set of characters as bits in a QR code.
-public enum EncodingMode: CaseIterable, Hashable, Sendable {
+public enum QREncodingMode: CaseIterable, Hashable, Sendable {
     /// Digits 0–9.
     case numeric
 
@@ -22,7 +22,7 @@ public enum EncodingMode: CaseIterable, Hashable, Sendable {
 
 // MARK: - Encoding
 
-extension EncodingMode {
+extension QREncodingMode {
     /// The number of bits in a mode indicator.
     static let indicatorBitCount = 4
 

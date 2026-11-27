@@ -9,7 +9,7 @@ public extension QRContent {
     static func phone(
         _ number: String
     ) throws -> QRContent {
-        guard QRPhoneNumberValidator.isValidInternational(number) else {
+        guard PhoneNumberValidator.isValidInternational(number) else {
             throw QRContentError.invalidPhoneNumber
         }
 
