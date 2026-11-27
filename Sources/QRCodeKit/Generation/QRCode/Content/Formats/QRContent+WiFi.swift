@@ -7,14 +7,14 @@
 
 import Foundation
 
-public enum WiFiSecurity: Hashable, Sendable {
-    case open
-    case wep(key: String)
-    case wpa(password: String)
-    case wpa3(password: String)
-}
-
 public extension QRContent {
+    enum WiFiSecurity: Hashable, Sendable {
+        case open
+        case wep(key: String)
+        case wpa(password: String)
+        case wpa3(password: String)
+    }
+
     static func wifi(
         ssid: String,
         security: WiFiSecurity,

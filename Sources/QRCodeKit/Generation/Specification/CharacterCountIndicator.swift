@@ -8,7 +8,7 @@
 enum CharacterCountIndicator {
     static func bitCount(
         for version: QRVersion,
-        mode: EncodingMode
+        mode: QREncodingMode
     ) -> Int {
         guard
             let bitCounts = table.first(

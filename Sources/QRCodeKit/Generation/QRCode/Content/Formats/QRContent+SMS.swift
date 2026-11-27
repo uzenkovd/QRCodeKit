@@ -10,14 +10,14 @@ public extension QRContent {
         _ number: String,
         body: String? = nil
     ) throws -> QRContent {
-        guard QRPhoneNumberValidator.isValidInternational(number) else {
+        guard PhoneNumberValidator.isValidInternational(number) else {
             throw QRContentError.invalidPhoneNumber
         }
 
         var payload = "sms:\(number)"
 
         if let body {
-            payload += "?body=\(QRContentPercentEncoder.encode(body))"
+            payload += "?body=\(PercentEncoder.encode(body))"
         }
 
         return QRContent(payload: payload)

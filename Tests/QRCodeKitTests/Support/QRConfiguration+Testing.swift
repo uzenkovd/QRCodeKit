@@ -12,8 +12,8 @@ extension QRConfiguration {
     /// standard's notation, such as 1-Q: version, then level, then mode.
     init(
         _ version: QRVersion,
-        _ errorCorrectionLevel: ErrorCorrectionLevel,
-        _ encodingMode: EncodingMode
+        _ errorCorrectionLevel: QRErrorCorrectionLevel,
+        _ encodingMode: QREncodingMode
     ) {
         self.init(
             version: version,

@@ -1,5 +1,5 @@
 //
-//  QRConfigurationResolverTests.swift
+//  ConfigurationResolverTests.swift
 //  QRCodeKit
 //
 //  Created by Dmytro Uzenkov on 13.09.2026.
@@ -10,7 +10,7 @@ import Testing
 @testable import QRCodeKit
 
 @Suite
-struct QRConfigurationResolverTests {
+struct ConfigurationResolverTests {
     // MARK: - Encoding Mode
 
     @Test(
@@ -19,13 +19,13 @@ struct QRConfigurationResolverTests {
             ("HELLO WORLD", .alphanumeric),
             ("Café", .byte),
             ("日本語", .kanji),
-        ] as [(String, EncodingMode)]
+        ] as [(String, QREncodingMode)]
     )
     func usesAutomaticEncodingModeWhenNoneIsRequested(
         message: String,
-        expectedMode: EncodingMode
+        expectedMode: QREncodingMode
     ) throws {
-        let configuration = try QRConfigurationResolver.resolve(for: message, options: QROptions())
+        let configuration = try ConfigurationResolver.resolve(for: message, options: QROptions())
 
         #expect(configuration.encodingMode == expectedMode)
     }
@@ -34,7 +34,7 @@ struct QRConfigurationResolverTests {
     func usesRequestedEncodingMode() throws {
         let options = QROptions(encodingMode: .byte)
 
-        let configuration = try QRConfigurationResolver.resolve(for: "12345", options: options)
+        let configuration = try ConfigurationResolver.resolve(for: "12345", options: options)
 
         #expect(configuration.encodingMode == .byte)
     }
@@ -42,7 +42,7 @@ struct QRConfigurationResolverTests {
     @Test
     func throwsUnsupportedMessageWhenNoModeCanEncodeMessage() {
         #expect(throws: QRCodeError.unsupportedMessage) {
-            try QRConfigurationResolver.resolve(for: "🙂", options: QROptions())
+            try ConfigurationResolver.resolve(for: "🙂", options: QROptions())
         }
     }
 
@@ -51,7 +51,7 @@ struct QRConfigurationResolverTests {
         let options = QROptions(encodingMode: .numeric)
 
         #expect(throws: QRCodeError.wrongEncodingModeForMessage) {
-            try QRConfigurationResolver.resolve(for: "ABC", options: options)
+            try ConfigurationResolver.resolve(for: "ABC", options: options)
         }
     }
 
@@ -64,7 +64,7 @@ struct QRConfigurationResolverTests {
         let options = QROptions(encodingMode: .byte)
 
         #expect(throws: QRCodeError.messageDoesNotFitEncodingMode) {
-            try QRConfigurationResolver.resolve(for: message, options: options)
+            try ConfigurationResolver.resolve(for: message, options: options)
         }
     }
 
@@ -74,7 +74,7 @@ struct QRConfigurationResolverTests {
         let message = String(repeating: "A", count: capacity + 1)
 
         #expect(throws: QRCodeError.messageIsTooLong) {
-            try QRConfigurationResolver.resolve(for: message, options: QROptions())
+            try ConfigurationResolver.resolve(for: message, options: QROptions())
         }
     }
 
@@ -85,7 +85,7 @@ struct QRConfigurationResolverTests {
         let options = QROptions(encodingMode: .alphanumeric)
 
         #expect(throws: QRCodeError.messageIsTooLong) {
-            try QRConfigurationResolver.resolve(for: message, options: options)
+            try ConfigurationResolver.resolve(for: message, options: options)
         }
     }
 
@@ -96,7 +96,7 @@ struct QRConfigurationResolverTests {
         let message = String(repeating: "A", count: 10)
         let options = QROptions(version: .v2, errorCorrectionLevel: .M)
 
-        let configuration = try QRConfigurationResolver.resolve(for: message, options: options)
+        let configuration = try ConfigurationResolver.resolve(for: message, options: options)
 
         #expect(configuration.version == .v2)
         #expect(configuration.errorCorrectionLevel == .M)
@@ -109,7 +109,7 @@ struct QRConfigurationResolverTests {
         let options = QROptions(version: .v1, errorCorrectionLevel: .M)
 
         #expect(throws: QRCodeError.messageDoesNotFitQRConfiguration) {
-            try QRConfigurationResolver.resolve(for: message, options: options)
+            try ConfigurationResolver.resolve(for: message, options: options)
         }
     }
 
@@ -119,7 +119,7 @@ struct QRConfigurationResolverTests {
         let message = String(repeating: "A", count: capacity + 1)
         let options = QROptions(errorCorrectionLevel: .M)
 
-        let configuration = try QRConfigurationResolver.resolve(for: message, options: options)
+        let configuration = try ConfigurationResolver.resolve(for: message, options: options)
 
         #expect(configuration.version == .v2)
         #expect(configuration.errorCorrectionLevel == .M)
@@ -132,7 +132,7 @@ struct QRConfigurationResolverTests {
         let options = QROptions(errorCorrectionLevel: .Q)
 
         #expect(throws: QRCodeError.messageDoesNotFitErrorCorrectionLevel) {
-            try QRConfigurationResolver.resolve(for: message, options: options)
+            try ConfigurationResolver.resolve(for: message, options: options)
         }
     }
 
@@ -142,7 +142,7 @@ struct QRConfigurationResolverTests {
         let message = String(repeating: "A", count: capacity + 1)
         let options = QROptions(version: .v1)
 
-        let configuration = try QRConfigurationResolver.resolve(for: message, options: options)
+        let configuration = try ConfigurationResolver.resolve(for: message, options: options)
 
         #expect(configuration.version == .v1)
         #expect(configuration.errorCorrectionLevel == .Q)
@@ -155,7 +155,7 @@ struct QRConfigurationResolverTests {
         let options = QROptions(version: .v1)
 
         #expect(throws: QRCodeError.messageDoesNotFitVersion) {
-            try QRConfigurationResolver.resolve(for: message, options: options)
+            try ConfigurationResolver.resolve(for: message, options: options)
         }
     }
 
@@ -166,7 +166,7 @@ struct QRConfigurationResolverTests {
         let capacity = CharacterCapacityTable.capacity(for: .v1, level: .H, mode: .alphanumeric)
         let message = String(repeating: "A", count: capacity)
 
-        let configuration = try QRConfigurationResolver.resolve(for: message, options: QROptions())
+        let configuration = try ConfigurationResolver.resolve(for: message, options: QROptions())
 
         #expect(configuration.version == .v1)
         #expect(configuration.errorCorrectionLevel == .H)
@@ -177,7 +177,7 @@ struct QRConfigurationResolverTests {
         let capacity = CharacterCapacityTable.capacity(for: .v1, level: .M, mode: .alphanumeric)
         let message = String(repeating: "A", count: capacity + 1)
 
-        let configuration = try QRConfigurationResolver.resolve(for: message, options: QROptions())
+        let configuration = try ConfigurationResolver.resolve(for: message, options: QROptions())
 
         #expect(configuration.version == .v2)
         #expect(configuration.errorCorrectionLevel == .Q)
@@ -188,7 +188,7 @@ struct QRConfigurationResolverTests {
         let capacity = CharacterCapacityTable.capacity(for: .v40, level: .M, mode: .alphanumeric)
         let message = String(repeating: "A", count: capacity + 1)
 
-        let configuration = try QRConfigurationResolver.resolve(for: message, options: QROptions())
+        let configuration = try ConfigurationResolver.resolve(for: message, options: QROptions())
 
         #expect(configuration.version == .v36)
         #expect(configuration.errorCorrectionLevel == .L)

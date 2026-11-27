@@ -32,7 +32,7 @@ public struct QRCode: Equatable, Sendable {
             throw QRCodeError.emptyMessage
         }
 
-        let configuration = try QRConfigurationResolver.resolve(
+        let configuration = try ConfigurationResolver.resolve(
             for: content.payload,
             options: options
         )
@@ -81,11 +81,11 @@ public extension QRCode {
         configuration.version
     }
 
-    var encodingMode: EncodingMode {
+    var encodingMode: QREncodingMode {
         configuration.encodingMode
     }
 
-    var errorCorrectionLevel: ErrorCorrectionLevel {
+    var errorCorrectionLevel: QRErrorCorrectionLevel {
         configuration.errorCorrectionLevel
     }
 

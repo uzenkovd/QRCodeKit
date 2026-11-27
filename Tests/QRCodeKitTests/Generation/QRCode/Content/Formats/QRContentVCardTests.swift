@@ -14,7 +14,7 @@ import Testing
 struct QRContentVCardTests {
     @Test
     func createsMinimalVCardContent() throws {
-        let contact = VCardContact(
+        let contact = QRContent.VCardContact(
             formattedName: "John"
         )
 
@@ -34,7 +34,7 @@ struct QRContentVCardTests {
 
     @Test
     func createsVCardWithStructuredName() throws {
-        let contact = VCardContact(
+        let contact = QRContent.VCardContact(
             formattedName: "Ivan Ivanenko",
             givenName: "Ivan",
             familyName: "Ivanenko"
@@ -60,7 +60,7 @@ struct QRContentVCardTests {
             URL(string: "https://example.com/contact?x=1,y=2")
         )
 
-        let contact = VCardContact(
+        let contact = QRContent.VCardContact(
             formattedName: "Ivan Ivanenko",
             givenName: "Ivan",
             familyName: "Ivanenko",
@@ -100,7 +100,7 @@ struct QRContentVCardTests {
 
     @Test
     func preservesUnicodeVCardFields() throws {
-        let contact = VCardContact(
+        let contact = QRContent.VCardContact(
             formattedName: "Іван Іваненко",
             givenName: "Іван",
             familyName: "Іваненко",
@@ -124,7 +124,7 @@ struct QRContentVCardTests {
 
     @Test
     func escapesVCardTextSpecialCharacters() throws {
-        let contact = VCardContact(
+        let contact = QRContent.VCardContact(
             formattedName: "Alex, Lee; Team\\Lead",
             givenName: "Alex, Jr.",
             familyName: "Lee;Smith",
@@ -150,7 +150,7 @@ struct QRContentVCardTests {
 
     @Test
     func normalizesVCardTextLineBreaks() throws {
-        let contact = VCardContact(
+        let contact = QRContent.VCardContact(
             formattedName: "First\r\nSecond\rThird\nFourth"
         )
 
@@ -172,7 +172,7 @@ struct QRContentVCardTests {
     func foldsLongVCardLines() throws {
         let name = String(repeating: "a", count: 73)
 
-        let contact = VCardContact(
+        let contact = QRContent.VCardContact(
             formattedName: name
         )
 
@@ -194,7 +194,7 @@ struct QRContentVCardTests {
     func foldsUnicodeVCardLinesWithoutSplittingUTF8() throws {
         let name = String(repeating: "і", count: 37)
 
-        let contact = VCardContact(
+        let contact = QRContent.VCardContact(
             formattedName: name
         )
 
@@ -223,7 +223,7 @@ struct QRContentVCardTests {
         "John\u{0000}",
     ])
     func rejectsInvalidVCardFormattedNames(_ name: String) {
-        let contact = VCardContact(
+        let contact = QRContent.VCardContact(
             formattedName: name
         )
 
@@ -237,7 +237,7 @@ struct QRContentVCardTests {
         "Ivan\u{2028}",
     ])
     func rejectsInvalidVCardNameComponents(_ name: String) {
-        let contact = VCardContact(
+        let contact = QRContent.VCardContact(
             formattedName: "Ivan Ivanenko",
             givenName: name
         )
@@ -247,52 +247,32 @@ struct QRContentVCardTests {
         }
     }
 
-    @Test(arguments: [
-        VCardContact(
-            formattedName: "John",
-            phoneNumbers: [""]
-        ),
-        VCardContact(
-            formattedName: "John",
-            phoneNumbers: ["123\n456"]
-        ),
-        VCardContact(
-            formattedName: "John",
-            emailAddresses: [""]
-        ),
-        VCardContact(
-            formattedName: "John",
-            emailAddresses: ["john@example.com\r\nFN:Injected"]
-        ),
-    ])
+    @Test(
+        arguments: [
+            .init(formattedName: "John", phoneNumbers: [""]),
+            .init(formattedName: "John", phoneNumbers: ["123\n456"]),
+            .init(formattedName: "John", emailAddresses: [""]),
+            .init(formattedName: "John", emailAddresses: ["john@example.com\r\nFN:Injected"]),
+        ] as [QRContent.VCardContact]
+    )
     func rejectsInvalidVCardContactDetails(
-        _ contact: VCardContact
+        _ contact: QRContent.VCardContact
     ) {
         #expect(throws: QRContentError.invalidVCardField) {
             try QRContent.vCard(contact)
         }
     }
 
-    @Test(arguments: [
-        VCardContact(
-            formattedName: "John",
-            organization: ""
-        ),
-        VCardContact(
-            formattedName: "John",
-            organization: "Example\u{0000}"
-        ),
-        VCardContact(
-            formattedName: "John",
-            title: " "
-        ),
-        VCardContact(
-            formattedName: "John",
-            title: "Developer\u{2028}"
-        ),
-    ])
+    @Test(
+        arguments: [
+            .init(formattedName: "John", organization: ""),
+            .init(formattedName: "John", organization: "Example\u{0000}"),
+            .init(formattedName: "John", title: " "),
+            .init(formattedName: "John", title: "Developer\u{2028}"),
+        ] as [QRContent.VCardContact]
+    )
     func rejectsInvalidVCardOptionalTextFields(
-        _ contact: VCardContact
+        _ contact: QRContent.VCardContact
     ) {
         #expect(throws: QRContentError.invalidVCardField) {
             try QRContent.vCard(contact)
@@ -305,7 +285,7 @@ struct QRContentVCardTests {
             URL(string: "/contact")
         )
 
-        let contact = VCardContact(
+        let contact = QRContent.VCardContact(
             formattedName: "John",
             website: website
         )

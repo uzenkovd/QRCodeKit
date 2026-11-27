@@ -13,7 +13,7 @@ public extension QRContent {
         subject: String? = nil,
         body: String? = nil
     ) throws -> QRContent {
-        guard QREmailAddressValidator.isValid(address) else {
+        guard EmailAddressValidator.isValid(address) else {
             throw QRContentError.invalidEmailAddress
         }
 
@@ -22,7 +22,7 @@ public extension QRContent {
             omittingEmptySubsequences: false
         )
 
-        let localPart = QRContentPercentEncoder.encode(
+        let localPart = PercentEncoder.encode(
             String(parts[0])
         )
         let domain = parts[1]
@@ -41,7 +41,7 @@ public extension QRContent {
             }
 
             queryItems.append(
-                "subject=\(QRContentPercentEncoder.encode(subject))"
+                "subject=\(PercentEncoder.encode(subject))"
             )
         }
 
@@ -53,7 +53,7 @@ public extension QRContent {
                 .replacingOccurrences(of: "\n", with: "\r\n")
 
             queryItems.append(
-                "body=\(QRContentPercentEncoder.encode(normalizedBody))"
+                "body=\(PercentEncoder.encode(normalizedBody))"
             )
         }
 

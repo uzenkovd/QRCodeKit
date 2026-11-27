@@ -1,5 +1,5 @@
 //
-//  QRContentPercentEncoder.swift
+//  PercentEncoder.swift
 //  QRCodeKit
 //
 //  Created by Dmytro Uzenkov on 10.10.2026.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum QRContentPercentEncoder {
+enum PercentEncoder {
     static func encode(_ value: String) -> String {
         let allowedCharacters = CharacterSet(
             charactersIn: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~"

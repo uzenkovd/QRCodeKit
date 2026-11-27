@@ -13,8 +13,8 @@ import QRCodeKit
 enum CharacterCapacityTable {
     static func capacity(
         for version: QRVersion,
-        level: ErrorCorrectionLevel,
-        mode: EncodingMode
+        level: QRErrorCorrectionLevel,
+        mode: QREncodingMode
     ) -> Int {
         guard let capacities = table[version]?[level] else {
             preconditionFailure("Character capacity is missing for \(version) and \(level)")
@@ -49,7 +49,7 @@ private extension CharacterCapacityTable {
         }
     }
 
-    static let table: [QRVersion: [ErrorCorrectionLevel: CharacterCapacity]] = [
+    static let table: [QRVersion: [QRErrorCorrectionLevel: CharacterCapacity]] = [
         .v1: [
             .L: CharacterCapacity(41, 25, 17, 10),
             .M: CharacterCapacity(34, 20, 14, 8),

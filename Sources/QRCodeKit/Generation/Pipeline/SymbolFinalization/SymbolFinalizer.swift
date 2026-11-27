@@ -13,7 +13,7 @@ enum SymbolFinalizer {
     static func finalize(
         _ matrix: QRMatrix,
         version: QRVersion,
-        errorCorrectionLevel: ErrorCorrectionLevel,
+        errorCorrectionLevel: QRErrorCorrectionLevel,
         requestedMask: QRMask?
     ) -> QRSymbol {
         var matrix = matrix
@@ -43,7 +43,7 @@ private extension SymbolFinalizer {
     static func makeSymbol(
         from matrix: QRMatrix,
         mask: QRMask,
-        errorCorrectionLevel: ErrorCorrectionLevel
+        errorCorrectionLevel: QRErrorCorrectionLevel
     ) -> QRSymbol {
         var matrix = matrix
 
@@ -65,7 +65,7 @@ private extension SymbolFinalizer {
     /// Ties go to the lower mask number.
     static func makeSymbolWithLowestPenalty(
         from matrix: QRMatrix,
-        errorCorrectionLevel: ErrorCorrectionLevel
+        errorCorrectionLevel: QRErrorCorrectionLevel
     ) -> QRSymbol {
         let candidates = QRMask.allCases.map { mask in
             let symbol = makeSymbol(
